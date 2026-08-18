@@ -8,19 +8,19 @@
     "net10.0": []
   },
   "packageFolders": {
-    "C:\\Users\\angel\\.nuget\\packages\\": {}
+    "C:\\Users\\user\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\angel\\OneDrive\\Documentos\\GitHub\\InmobiliariaSAD\\mvc\\mvc.csproj",
+      "projectUniqueName": "C:\\Users\\user\\Documents\\NetBeansProjects\\InmobiliariaSAD\\mvc\\mvc.csproj",
       "projectName": "mvc",
-      "projectPath": "C:\\Users\\angel\\OneDrive\\Documentos\\GitHub\\InmobiliariaSAD\\mvc\\mvc.csproj",
-      "packagesPath": "C:\\Users\\angel\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\angel\\OneDrive\\Documentos\\GitHub\\InmobiliariaSAD\\mvc\\obj\\",
+      "projectPath": "C:\\Users\\user\\Documents\\NetBeansProjects\\InmobiliariaSAD\\mvc\\mvc.csproj",
+      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\user\\Documents\\NetBeansProjects\\InmobiliariaSAD\\mvc\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\angel\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
