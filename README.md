@@ -20,3 +20,15 @@ inmobiliaria.
 A continuación se presenta el esquema del modelo de datos correspondiente a la aplicación:
 
 ![Diagrama del Proyecto](./img/DEG.png)
+
+## Comandos
+
+Instalar el conector sql desde la terminal: dotnet add package MySqlConnector
+En (appsettings.json) agregar:
+
+"ConnectionStrings": {
+  "DefaultConnection": "Server=localhost;Database=InmobiliariaDb;User=root;Password=;"
+}
+
+Para inicializar: - dotnet run  
+
