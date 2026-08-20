@@ -63,15 +63,38 @@ namespace Inmobiliaria_.Net_Core.Models
 			return res;
         }
 
+        public int Modificacion(Propietario p)
+        {
+            int res = -1;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"UPDATE Propietario 
+                    SET Nombre=@nombre, Apellido=@apellido, Dni=@dni, Telefono=@telefono, Email=@email, Clave=@clave
+                    WHERE IdPropietario = @id";
+
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@nombre", p.Nombre);
+                    command.Parameters.AddWithValue("@apellido", p.Apellido);
+                    command.Parameters.AddWithValue("@dni", p.Dni);
+                    command.Parameters.AddWithValue("@telefono", p.Telefono);
+                    command.Parameters.AddWithValue("@email", p.Email);
+                    command.Parameters.AddWithValue("@clave", p.Clave);
+                    command.Parameters.AddWithValue("@id", p.IdPropietario);
+
+                    connection.Open();
+                    res = command.ExecuteNonQuery();
+                }
+            }
+            return res;
+        }
+
         public IList<Propietario> BuscarPorNombre(string Nombre)
         {
             throw new NotImplementedException();
         }
 
-        public int Modificacion(Propietario p)
-        {
-            throw new NotImplementedException();
-        }
 
         public Propietario? ObtenerPorEmail(string Email)
         {
