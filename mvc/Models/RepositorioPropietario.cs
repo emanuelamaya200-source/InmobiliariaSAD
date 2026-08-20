@@ -3,9 +3,10 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
+using MySql.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 
 namespace Inmobiliaria_.Net_Core.Models
 
@@ -20,13 +21,13 @@ namespace Inmobiliaria_.Net_Core.Models
        public int Alta(Propietario p)
         {
             int res = -1;
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 string sql = @"INSERT INTO Propietarios 
                     (Nombre, Apellido, Dni, Telefono, Email, Clave)
                     VALUES (@nombre, @apellido, @dni, @telefono, @email, @clave);
-                    SELECT SCOPE_IDENTITY();";//devuelve el id insertado (LAST_INSERT_ID para mysql)
-                using (SqlCommand command = new SqlCommand(sql, connection))
+                    SELECT LAST_INSERT_ID();";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
                     command.Parameters.AddWithValue("@nombre", p.Nombre);
