@@ -23,7 +23,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = @"INSERT INTO Propietarios 
+                string sql = @"INSERT INTO Propietario 
                     (Nombre, Apellido, Dni, Telefono, Email, Clave)
                     VALUES (@nombre, @apellido, @dni, @telefono, @email, @clave);
                     SELECT LAST_INSERT_ID();";
@@ -50,7 +50,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
 			using (MySqlConnection connection = new MySqlConnection(connectionString))
 			{
-				string sql = "DELETE FROM Propietarios WHERE IdPropietario = @id";
+				string sql = "DELETE FROM Propietario WHERE IdPropietario = @id";
 				using (MySqlCommand command = new MySqlCommand(sql, connection))
 				{
 					command.CommandType = CommandType.Text;
