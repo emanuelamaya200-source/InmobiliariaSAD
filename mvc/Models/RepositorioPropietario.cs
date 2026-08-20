@@ -47,7 +47,20 @@ namespace Inmobiliaria_.Net_Core.Models
 
         public int Baja(int id)
         {
-            throw new NotImplementedException();
+            int res = -1;
+			using (MySqlConnection connection = new MySqlConnection(connectionString))
+			{
+				string sql = "DELETE FROM Propietarios WHERE IdPropietario = @id";
+				using (MySqlCommand command = new MySqlCommand(sql, connection))
+				{
+					command.CommandType = CommandType.Text;
+					command.Parameters.AddWithValue("@id", id);
+					connection.Open();
+					res = command.ExecuteNonQuery();
+					connection.Close();
+				}
+			}
+			return res;
         }
 
         public IList<Propietario> BuscarPorNombre(string Nombre)
