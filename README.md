@@ -21,14 +21,32 @@ A continuación se presenta el esquema del modelo de datos correspondiente a la 
 
 ![Diagrama del Proyecto](./img/DEG.png)
 
+---
+
+## 🛠️ Requisitos Previos
+
+* [.NET SDK](https://dotnet.microsoft.com/download) (versión 8.0 o superior)
+* Servidor MySQL / MariaDB (por ejemplo, mediante [XAMPP](https://www.apachefriends.org/) o MySQL Workbench)
+
+---
+
 ## Comandos
 
-Instalar el conector sql desde la terminal: dotnet add package MySqlConnector
-En (appsettings.json) agregar:
+Configurar la Base de Datos:
 
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Database=InmobiliariaDb;User=root;Password=;"
-}
+Iniciar el servidor MySQL (por ejemplo, desde el panel de control de XAMPP).
+
+Abrir el gestor de base de datos preferido (phpMyAdmin, MySQL Workbench, DBeaver etc.).
+
+Ejecutar el script SQL incluido en el proyecto:
+
+* Archivo: DB.sql
+(Ejecutando este archivo ya se crea la base de datos)
+
+Verificar en el archivo `appsettings.json` que el usuario y la contraseña coincidan con los de tu entorno local:
+
+"ConnectionString":  "Server=localhost;Database=InmobiliariaSAD;User=root;Password=;"
+
 
 Para inicializar: - dotnet run  
 

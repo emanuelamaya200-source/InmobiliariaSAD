@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS `InmobiliariaSAD` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `InmobiliariaSAD`;
+
 CREATE TABLE IF NOT EXISTS `propietario` (
     `IdPropietario` INT NOT NULL AUTO_INCREMENT,
     `Nombre` VARCHAR(50) NOT NULL,
