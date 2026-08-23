@@ -1,0 +1,35 @@
+@model IEnumerable<Inmobiliaria_.Net_Core.Models.Inquilino>
+
+<h2>Listado de Inquilinos</h2>
+
+<p>
+    <a asp-action="Editar" class="btn btn-primary">Alta Inquilino</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre Completo</th>
+            <th>DNI</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@item.IdInquilino</td>
+            <td>@item.Nombre @item.Apellido</td>
+            <td>@item.Dni</td>
+            <td>@item.Telefono</td>
+            <td>@item.Email</td>
+            <td>
+                <a asp-action="Editar" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-warning">Modificar</a>
+                <a asp-action="Eliminar" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-danger">Borrar</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

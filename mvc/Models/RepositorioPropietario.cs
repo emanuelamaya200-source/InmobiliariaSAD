@@ -90,6 +90,93 @@ namespace Inmobiliaria_.Net_Core.Models
             return res;
         }
 
+        public Propietario? ObtenerPorId(int id)
+        {
+            Propietario? p = null;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = "SELECT IdPropietario, Nombre, Apellido, Dni, Telefono, Email, Clave FROM Propietario WHERE IdPropietario = @id";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            p = new Propietario
+                            {
+                                IdPropietario = reader.GetInt32(nameof(Propietario.IdPropietario)),
+                                Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                                Apellido = reader.GetString(nameof(Propietario.Apellido)),
+                                Dni = reader.GetString(nameof(Propietario.Dni)),
+                                Telefono = reader.IsDBNull(reader.GetOrdinal(nameof(Propietario.Telefono))) ? "" : reader.GetString(nameof(Propietario.Telefono)),
+                                Email = reader.GetString(nameof(Propietario.Email)),
+                                Clave = reader.GetString(nameof(Propietario.Clave))
+                            };
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            return p;
+        }
+
+        public int ObtenerCantidad()
+        {
+            int res = 0;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = "SELECT COUNT(*) FROM Propietario";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    connection.Open();
+                    res = Convert.ToInt32(command.ExecuteScalar());
+                    connection.Close();
+                }
+            }
+            return res;
+        }
+
+        public IList<Propietario> ObtenerLista(int pagina, int tamanioPagina)
+        {
+            var lista = new List<Propietario>();
+            int offset = (pagina - 1) * tamanioPagina;
+            if (offset < 0) offset = 0;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"SELECT IdPropietario, Nombre, Apellido, Dni, Telefono, Email, Clave 
+                       FROM Propietario 
+                       ORDER BY IdPropietario 
+                       LIMIT @limit OFFSET @offset";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@limit", tamanioPagina);
+                    command.Parameters.AddWithValue("@offset", offset);
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Propietario
+                            {
+                                IdPropietario = reader.GetInt32(nameof(Propietario.IdPropietario)),
+                                Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                                Apellido = reader.GetString(nameof(Propietario.Apellido)),
+                                Dni = reader.GetString(nameof(Propietario.Dni)),
+                                Telefono = reader.IsDBNull(reader.GetOrdinal(nameof(Propietario.Telefono))) ? "" : reader.GetString(nameof(Propietario.Telefono)),
+                                Email = reader.GetString(nameof(Propietario.Email)),
+                                Clave = reader.GetString(nameof(Propietario.Clave))
+                            });
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            return lista;
+        }
+
         public IList<Propietario> BuscarPorNombre(string Nombre)
         {
             throw new NotImplementedException();

@@ -4,5 +4,7 @@ namespace Inmobiliaria_.Net_Core.Models
     {
         Propietario? ObtenerPorEmail(string Email);
         IList<Propietario> BuscarPorNombre(string Nombre);
+        
     }
+
 }

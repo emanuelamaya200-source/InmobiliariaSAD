@@ -47,19 +47,19 @@ namespace Inmobiliaria_.Net_Core.Models
         public int Baja(int id)
         {
             int res = -1;
-			using (MySqlConnection connection = new MySqlConnection(connectionString))
-			{
-				string sql = "DELETE FROM Inquilino WHERE IdInquilino = @id";
-				using (MySqlCommand command = new MySqlCommand(sql, connection))
-				{
-					command.CommandType = CommandType.Text;
-					command.Parameters.AddWithValue("@id", id);
-					connection.Open();
-					res = command.ExecuteNonQuery();
-					connection.Close();
-				}
-			}
-			return res;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = "DELETE FROM Inquilino WHERE IdInquilino = @id";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    res = command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            return res;
         }
 
         public int Modificacion(Inquilino i)
@@ -87,7 +87,90 @@ namespace Inmobiliaria_.Net_Core.Models
             }
             return res;
         }
+        public Inquilino? ObtenerPorId(int id)
+        {
+            Inquilino? i = null;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = "SELECT IdInquilino, Nombre, Apellido, Dni, Telefono, Email FROM Inquilino WHERE IdInquilino = @id";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            i = new Inquilino
+                            {
+                                IdInquilino = reader.GetInt32(nameof(Inquilino.IdInquilino)),
+                                Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                                Apellido = reader.GetString(nameof(Inquilino.Apellido)),
+                                Dni = reader.GetString(nameof(Inquilino.Dni)),
+                                Telefono = reader.IsDBNull(reader.GetOrdinal(nameof(Inquilino.Telefono))) ? "" : reader.GetString(nameof(Inquilino.Telefono)),
+                                Email = reader.GetString(nameof(Inquilino.Email))
+                            };
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            return i;
+        }
 
+        public int ObtenerCantidad()
+        {
+            int res = 0;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = "SELECT COUNT(*) FROM Inquilino";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    connection.Open();
+                    res = Convert.ToInt32(command.ExecuteScalar());
+                    connection.Close();
+                }
+            }
+            return res;
+        }
+
+        public IList<Inquilino> ObtenerLista(int pagina, int tamanioPagina)
+        {
+            var lista = new List<Inquilino>();
+            int offset = (pagina - 1) * tamanioPagina;
+            if (offset < 0) offset = 0;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"SELECT IdInquilino, Nombre, Apellido, Dni, Telefono, Email 
+                       FROM Inquilino 
+                       ORDER BY IdInquilino 
+                       LIMIT @limit OFFSET @offset";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@limit", tamanioPagina);
+                    command.Parameters.AddWithValue("@offset", offset);
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Inquilino
+                            {
+                                IdInquilino = reader.GetInt32(nameof(Inquilino.IdInquilino)),
+                                Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                                Apellido = reader.GetString(nameof(Inquilino.Apellido)),
+                                Dni = reader.GetString(nameof(Inquilino.Dni)),
+                                Telefono = reader.IsDBNull(reader.GetOrdinal(nameof(Inquilino.Telefono))) ? "" : reader.GetString(nameof(Inquilino.Telefono)),
+                                Email = reader.GetString(nameof(Inquilino.Email))
+                            });
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            return lista;
+        }
 
     }
 }

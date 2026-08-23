@@ -1,17 +1,20 @@
-CREATE TABLE Propietario (
-    id INT PRIMARY KEY,
-    nombre VARCHAR(50),
-    apellido VARCHAR(50),
-    dni VARCHAR(30) NOT NULL,
-    telefono VARCHAR(30),
-    email VARCHAR not NULL,
-)
+CREATE TABLE IF NOT EXISTS `propietario` (
+    `IdPropietario` INT NOT NULL AUTO_INCREMENT,
+    `Nombre` VARCHAR(50) NOT NULL,
+    `Apellido` VARCHAR(50) NOT NULL,
+    `Dni` VARCHAR(30) NOT NULL,
+    `Telefono` VARCHAR(30) NULL,
+    `Email` VARCHAR(100) NOT NULL,
+    `Clave` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`IdPropietario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE Inquilino (
-    id INT PRIMARY KEY,
-    nombre VARCHAR(50),
-    apellido VARCHAR(50),
-    dni VARCHAR(30) NOT NULL,
-    telefono VARCHAR(30),
-    email VARCHAR not NULL,
-)
+CREATE TABLE IF NOT EXISTS `inquilino` (
+    `IdInquilino` INT NOT NULL AUTO_INCREMENT,
+    `Nombre` VARCHAR(50) NOT NULL,
+    `Apellido` VARCHAR(50) NOT NULL,
+    `Dni` VARCHAR(30) NOT NULL,
+    `Telefono` VARCHAR(30) NULL,
+    `Email` VARCHAR(100) NOT NULL,
+    PRIMARY KEY (`IdInquilino`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
