@@ -35,6 +35,7 @@ A continuación se presenta el esquema del modelo de datos correspondiente a la 
 Configurar la Base de Datos:
 
 Iniciar el servidor MySQL (por ejemplo, desde el panel de control de XAMPP).
+o instalando el driver de mySql (corre en segundo plano hasta detenerlo)
 
 Abrir el gestor de base de datos preferido (phpMyAdmin, MySQL Workbench, DBeaver etc.).
 
