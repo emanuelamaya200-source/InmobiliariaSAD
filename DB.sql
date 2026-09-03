@@ -47,6 +47,21 @@ CREATE TABLE `inmueble` (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `reserva` (
+    `idReserva` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `idInmueble` INT NOT NULL ,
+    `idInquilino` INT NOT NULL,
+    `FechaDeEntrada` DATETIME NOT NULL,
+    `FechaDeSalida` DATETIME NOT NULL,
+    
+    CONSTRAINT `FK_Reservas_Inmuebles`
+        FOREIGN KEY (`idInmueble`) REFERENCES `inmueble`(`idInmueble`),
+        
+    CONSTRAINT `FK_Reservas_Inquilinos`
+        FOREIGN KEY (`idInquilino`) REFERENCES `inquilino`(`idInquilino`)
+);
+
+
 
 INSERT INTO `propietario` (`Nombre`, `Apellido`, `Dni`, `Telefono`, `Email`, `Clave`) VALUES
 ('Carlos', 'Gómez', '28456123', '2664123456', 'carlos.gomez@gmail.com', '123456'),
@@ -80,3 +95,4 @@ INSERT INTO `tipoInmueble` (`Descripcion`) VALUES
 ('Local Comercial'),
 ('Cochera'),
 ('Terreno');
+
