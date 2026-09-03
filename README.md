@@ -19,7 +19,7 @@ inmobiliaria.
 
 A continuación se presenta el esquema del modelo de datos correspondiente a la aplicación:
 
-![Diagrama del Proyecto](./img/DEG.png)
+![Diagrama del Proyecto](./img/inmobiliariasad.png)
 
 ---
 
