@@ -19,6 +19,16 @@ namespace mvc.Controllers
             return View(lista);
         }
 
+        public IActionResult Detalles(int id)
+        {
+            var tipo = repositorio.ObtenerPorId(id);
+            if (tipo == null)
+            {
+                return NotFound();
+            }
+            return View(tipo);
+        }
+
         // GET: Inquilinos/Editar/5
         public IActionResult Editar(int id)
         {

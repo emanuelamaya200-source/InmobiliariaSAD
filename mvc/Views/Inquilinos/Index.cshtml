@@ -26,6 +26,9 @@
             <td>@item.Telefono</td>
             <td>@item.Email</td>
             <td>
+                 <a asp-action="Detalles" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-info" title="Detalles">
+                    <i class="bi bi-info-circle"> </i> Detalles
+                </a>
                 <a asp-action="Editar" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-warning">
                     <i class="bi bi-pencil-square"> </i> Modificar
                 </a>
