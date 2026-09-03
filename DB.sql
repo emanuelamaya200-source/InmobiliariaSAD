@@ -22,10 +22,29 @@ CREATE TABLE IF NOT EXISTS `inquilino` (
     PRIMARY KEY (`IdInquilino`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
 CREATE TABLE IF NOT EXISTS `tipoInmueble` (
     `IdTipoInmueble` INT NOT NULL AUTO_INCREMENT,
     `Descripcion` VARCHAR(50) NOT NULL,
     PRIMARY KEY (`IdTipoInmueble`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `inmueble` (
+    `IdInmueble` INT NOT NULL AUTO_INCREMENT,
+    `Direccion` VARCHAR(150) NOT NULL,
+    `Cupo` INT NOT NULL DEFAULT 1,
+    `PrecioPorDia` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `PorcentajeReserva` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+    `Latitud` DECIMAL(10,8) NULL,
+    `Longitud` DECIMAL(11,8) NULL,
+    `PropietarioId` INT NOT NULL,
+    `Portada` VARCHAR(255) NULL,
+    PRIMARY KEY (`IdInmueble`),
+    CONSTRAINT `FK_Inmueble_Propietario` 
+        FOREIGN KEY (`PropietarioId`) 
+        REFERENCES `propietario` (`IdPropietario`) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

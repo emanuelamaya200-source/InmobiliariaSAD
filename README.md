@@ -48,6 +48,15 @@ Verificar en el archivo `appsettings.json` que el usuario y la contraseña coinc
 
 "ConnectionString":  "Server=localhost;Database=InmobiliariaSAD;User=root;Password=;"
 
+---
 
-Para inicializar: - dotnet run  
+# Correr el programa
+*Abrir la terminal en la raíz del repositorio y acceder a la carpeta del proyecto:*
+`cd ./mvc` 
+
+*Para inicializar:*
+`dotnet run`
+
+*Si es la primera vez* que se inicia el proyecto , ponga este comando para decirle al navegador que confie en este proyecto: 
+`dotnet dev-certs https --trust`
 
