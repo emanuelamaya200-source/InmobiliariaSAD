@@ -15,6 +15,6 @@ namespace Inmobiliaria_.Net_Core.Models
         public string Telefono { get; set; }="";
         [Required, EmailAddress]
         public string Email { get; set; }= "";
-        // public List<Reservas> MisReservas { get; set;} = new List<Reservas>();
+        // public List<Reserva> MisReservas { get; set;} = new List<Reserva>();
     }
 }
