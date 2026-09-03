@@ -1,0 +1,36 @@
+@model Inmobiliaria_.Net_Core.Models.Propietario
+
+<h2>Detalle de Propietario</h2>
+
+<div class="card p-3 col-md-6 shadow-sm mt-3">
+    <dl class="row mb-3">
+        <dt class="col-sm-4 text-muted">Código:</dt>
+        <dd class="col-sm-8 fw-bold">#@Model.IdPropietario</dd>
+
+        <dt class="col-sm-4 text-muted">Nombre</dt>
+        <dd class="col-sm-8">@Model.Nombre:</dd>
+
+        <dt class="col-sm-4 text-muted">Apellido:</dt>
+        <dd class="col-sm-8">@Model.Apellido</dd>
+
+        <dt class="col-sm-4 text-muted">DNI:</dt>
+        <dd class="col-sm-8">@Model.Dni</dd>
+
+        <dt class="col-sm-4 text-muted">Telefono:</dt>
+        <dd class="col-sm-8">@Model.Telefono</dd>
+
+        <dt class="col-sm-4 text-muted">Email:</dt>
+        <dd class="col-sm-8">@Model.Email</dd>
+
+    </dl>
+
+    <div>
+        <a asp-action="Editar" asp-route-id="@Model.IdPropietario" class="btn btn-warning">
+            <i class="bi bi-pencil-square"></i> Modificar
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al listado
+        </a>
+    </div>
+</div>
+
