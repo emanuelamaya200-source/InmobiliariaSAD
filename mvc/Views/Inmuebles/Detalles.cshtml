@@ -1,0 +1,44 @@
+@model Inmobiliaria_.Net_Core.Models.Inmueble
+
+<h2>Detalle de Inmueble</h2>
+
+<div class="card p-3 col-md-6 shadow-sm mt-3">
+    <dl class="row mb-3">
+        <dt class="col-sm-4 text-muted">Código:</dt>
+        <dd class="col-sm-8 fw-bold">#@Model.Id</dd>
+
+        <dt class="col-sm-4 text-muted">Descripción:</dt>
+        <dd class="col-sm-8">@Model.Direccion</dd>
+
+        <dt class="col-sm-4 text-muted">Tipo de Inmueble:</dt>
+        <dd class="col-sm-8">@Model.Tipo.Descripcion</dd>
+
+        <dt class="col-sm-4 text-muted">Cupo:</dt>
+        <dd class="col-sm-8">@Model.Cupo</dd>
+
+        <dt class="col-sm-4 text-muted">Precio por dia:</dt>
+        <dd class="col-sm-8">@Model.PrecioPorDia</dd>
+
+        <dt class="col-sm-4 text-muted">Porcentaje de reserva:</dt>
+        <dd class="col-sm-8">@Model.PorcentajeReserva</dd>
+
+        <dt class="col-sm-4 text-muted">Latitud:</dt>
+        <dd class="col-sm-8">@Model.Latitud</dd>
+
+        <dt class="col-sm-4 text-muted">Longitud:</dt>
+        <dd class="col-sm-8">@Model.Longitud</dd>
+
+        <dt class="col-sm-4 text-muted">Nombre del propietario:</dt>
+        <dd class="col-sm-8">@Model.Duenio</dd>
+    </dl>
+
+    <div>
+        <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="bi bi-pencil-square"></i> Modificar
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al listado
+        </a>
+    </div>
+</div>
+

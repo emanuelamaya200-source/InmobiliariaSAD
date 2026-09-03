@@ -36,6 +36,16 @@ namespace Inmobiliaria_.Net_Core.Controllers
             return View(lista);
         }
 
+         public IActionResult Detalles(int id)
+        {
+            var tipo = repositorio.ObtenerPorId(id);
+            if (tipo == null)
+            {
+                return NotFound();
+            }
+            return View(tipo);
+        }
+
         // GET: Inmuebles/Editar/5 (o Inmuebles/Editar para Alta)
         public ActionResult Editar(int id)
         {
