@@ -20,8 +20,8 @@ namespace Inmobiliaria_.Net_Core.Models
 			using (var connection = new MySqlConnection(connectionString))
 			{
 				string sql = @"INSERT INTO Inmueble
-					(Direccion, Cupo, PrecioPorDia, PorcentajeReserva, Latitud, Longitud, PropietarioId)
-					VALUES (@direccion, @cupo, @precioPorDia, @porcentajeReserva, @latitud, @longitud, @propietarioId);
+					(Direccion, Cupo, PrecioPorDia, PorcentajeReserva, Latitud, Longitud, PropietarioId, IdTipoInmueble)
+					VALUES (@direccion, @cupo, @precioPorDia, @porcentajeReserva, @latitud, @longitud, @propietarioId, @IdTipoInmueble);
 					SELECT LAST_INSERT_ID();";//devuelve el id insertado (LAST_INSERT_ID para mysql)
 				using (var command = new MySqlCommand(sql, connection))
 				{
@@ -33,6 +33,7 @@ namespace Inmobiliaria_.Net_Core.Models
 					command.Parameters.AddWithValue("@latitud", entidad.Latitud);
 					command.Parameters.AddWithValue("@longitud", entidad.Longitud);
 					command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
+					command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
 					connection.Open();
 					res = Convert.ToInt32(command.ExecuteScalar());
 					entidad.Id = res;
@@ -66,7 +67,7 @@ namespace Inmobiliaria_.Net_Core.Models
 				string sql = @"
 					UPDATE Inmueble SET
 						Direccion=@direccion, Cupo=@cupo, PrecioPorDia=@precioPorDia, PorcentajeReserva=@porcentajeReserva, 
-						Latitud=@latitud, Longitud=@longitud, PropietarioId=@propietarioId
+						Latitud=@latitud, Longitud=@longitud, PropietarioId=@propietarioId, IdTipoInmueble=@IdTipoInmueble
 					WHERE IdInmueble = @id";
 				using (MySqlCommand command = new MySqlCommand(sql, connection))
 				{
@@ -77,6 +78,7 @@ namespace Inmobiliaria_.Net_Core.Models
 					command.Parameters.AddWithValue("@latitud", entidad.Latitud);
 					command.Parameters.AddWithValue("@longitud", entidad.Longitud);
 					command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
+					command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
 					command.Parameters.AddWithValue("@id", entidad.Id);
 					command.CommandType = CommandType.Text;
 					connection.Open();
@@ -93,9 +95,10 @@ namespace Inmobiliaria_.Net_Core.Models
 			{
 				string sql = $@"SELECT i.IdInmueble AS {nameof(Inmueble.Id)}, i.{nameof(Inmueble.Direccion)}, i.{nameof(Inmueble.Cupo)},
 					i.{nameof(Inmueble.PrecioPorDia)}, i.{nameof(Inmueble.PorcentajeReserva)},
-					i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)}, i.{nameof(Inmueble.Portada)},
-					p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}, p.{nameof(Propietario.Dni)}
-					FROM Inmueble i INNER JOIN Propietario p ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.IdPropietario)}
+					i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)},i.{nameof(Inmueble.IdTipoInmueble)}, i.{nameof(Inmueble.Portada)},
+					p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}, p.{nameof(Propietario.Dni)}, t.{nameof(tipoInmueble.Descripcion)} 
+					FROM Inmueble i INNER JOIN Propietario p ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.IdPropietario)} 
+					INNER JOIN TipoInmueble t ON i.{nameof(Inmueble.IdTipoInmueble)} = t.IdTipoInmueble
 					ORDER BY i.IdInmueble
 					LIMIT {(paginaNro - 1) * tamPagina}, {tamPagina}
 				";
@@ -117,12 +120,18 @@ namespace Inmobiliaria_.Net_Core.Models
 							Latitud = reader.GetDecimal(nameof(Inmueble.Latitud)),
 							Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
 							PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+							IdTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
 							Duenio = new Propietario
 							{
 								IdPropietario = reader.GetInt32(nameof(Inmueble.PropietarioId)),
 								Nombre = reader.GetString(nameof(Propietario.Nombre)),
 								Apellido = reader.GetString(nameof(Propietario.Apellido)),
 								//Dni = reader.GetString(nameof(Propietario.Dni)),
+							},
+							Tipo = new tipoInmueble
+							{
+								idTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
+								Descripcion = reader.GetString(nameof(tipoInmueble.Descripcion))
 							}
 						};
 						res.Add(entidad);
@@ -160,9 +169,10 @@ public Inmueble? ObtenerPorId(int id)
 				string sql = @$"
 					SELECT i.IdInmueble AS {nameof(Inmueble.Id)}, i.{nameof(Inmueble.Direccion)}, i.{nameof(Inmueble.Cupo)},
 					i.{nameof(Inmueble.PrecioPorDia)}, i.{nameof(Inmueble.PorcentajeReserva)},
-					i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)}, i.{nameof(Inmueble.Portada)},
-					p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}
+					i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)},i.{nameof(Inmueble.IdTipoInmueble)}, i.{nameof(Inmueble.Portada)},
+					p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}, t.{nameof(tipoInmueble.Descripcion)} 
 					FROM Inmueble i JOIN Propietario p ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.IdPropietario)}
+					INNER JOIN TipoInmueble t ON i.{nameof(Inmueble.IdTipoInmueble)} = t.IdTipoInmueble
 					WHERE i.IdInmueble = @id";
 				using (MySqlCommand command = new MySqlCommand(sql, connection))
 				{
@@ -183,12 +193,18 @@ public Inmueble? ObtenerPorId(int id)
 							Latitud = reader.GetDecimal(nameof(Inmueble.Latitud)),
 							Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
 							PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+							IdTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
 							Duenio = new Propietario
 							{
 								IdPropietario = reader.GetInt32(nameof(Inmueble.PropietarioId)),
 								Nombre = reader.GetString(nameof(Propietario.Nombre)),
 								Apellido = reader.GetString(nameof(Propietario.Apellido)),
 								//Dni = reader.GetString(nameof(Propietario.Dni)),
+							},
+							Tipo = new tipoInmueble
+							{
+								idTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
+								Descripcion = reader.GetString(nameof(tipoInmueble.Descripcion))
 							}
 						};
 					}
@@ -206,9 +222,9 @@ public Inmueble? ObtenerPorId(int id)
 				string sql = @$"
 					SELECT i.IdInmueble AS {nameof(Inmueble.Id)}, i.{nameof(Inmueble.Direccion)}, i.{nameof(Inmueble.Cupo)},
 					i.{nameof(Inmueble.PrecioPorDia)}, i.{nameof(Inmueble.PorcentajeReserva)},
-					i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)},
+					i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)},i.{nameof(Inmueble.IdTipoInmueble)},
 					p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}
-					FROM Inmueble i JOIN Propietario p ON i.IdInmueble = p.IdPropietario
+					FROM Inmueble i JOIN Propietario p ON i.PropietarioId = p.IdPropietario
 					WHERE i.IdInmueble = @idPropietario";
 				using (MySqlCommand command = new MySqlCommand(sql, connection))
 				{
@@ -228,6 +244,7 @@ public Inmueble? ObtenerPorId(int id)
 							Latitud = reader.GetDecimal(nameof(Inmueble.Latitud)),
 							Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
 							PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+							IdTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
 							Duenio = new Propietario
 							{
 								IdPropietario = reader.GetInt32(nameof(Inmueble.PropietarioId)),

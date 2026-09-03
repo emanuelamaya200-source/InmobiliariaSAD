@@ -16,10 +16,13 @@ namespace Inmobiliaria_.Net_Core.Controllers
         private readonly IRepositorioInmueble repositorio;
         private readonly IRepositorioPropietario repoPropietario;
 
-        public InmueblesController(IRepositorioInmueble repositorio, IRepositorioPropietario repoPropietrio)
+        private readonly IRepositorioTipoInmueble repoTipoInmueble;
+
+        public InmueblesController(IRepositorioInmueble repositorio, IRepositorioPropietario repoPropietrio, IRepositorioTipoInmueble repoTipoInmueble)
         {
             this.repositorio = repositorio;
             this.repoPropietario = repoPropietrio;
+            this.repoTipoInmueble =  repoTipoInmueble;
         }
 
         // GET: Inmuebles
@@ -37,6 +40,8 @@ namespace Inmobiliaria_.Net_Core.Controllers
         public ActionResult Editar(int id)
         {
             ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
+            ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
+
             if (TempData.ContainsKey("Mensaje"))
                 ViewBag.Mensaje = TempData["Mensaje"];
             if (TempData.ContainsKey("Error"))
@@ -93,12 +98,14 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 else
                 {
                     ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
+                    ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
                     return View("Editar", entidad);
                 }
             }
             catch (Exception ex)
             {
                 ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
+                ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
                 ViewBag.Error = ex.Message;
                 ViewBag.StackTrate = ex.StackTrace;
                 return View("Editar", entidad);

@@ -11,6 +11,7 @@
         <tr>
             <th>ID</th>
             <th>Dirección</th>
+            <th>Tipo de Inmueble</th>
             <th>Cupo</th>
             <th>Precio por Día</th>
             <th>Porcentaje de Reserva</th>
@@ -24,12 +25,13 @@
         <tr>
             <td>@item.Id</td>
             <td>@item.Direccion</td>
+            <td>@item.Tipo.Descripcion</td>
             <td>@item.Cupo</td>
             <td>@item.PrecioPorDia</td>
             <td>@item.PorcentajeReserva</td>
             <td>@item.Latitud</td>
             <td>@item.Longitud</td>
-            <td>@item.PropietarioId</td>
+            <td>@item.Duenio</td>
             <td>
                 <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
                     <i class="bi bi-pencil-square"> </i> Modificar

@@ -38,11 +38,15 @@ CREATE TABLE `inmueble` (
     `Latitud` DECIMAL(10,8) NULL,
     `Longitud` DECIMAL(11,8) NULL,
     `PropietarioId` INT NOT NULL,
+    `IdTipoInmueble` INT NOT NULL,
     `Portada` VARCHAR(255) NULL,
     PRIMARY KEY (`IdInmueble`),
     CONSTRAINT `FK_Inmueble_Propietario` 
         FOREIGN KEY (`PropietarioId`) 
-        REFERENCES `propietario` (`IdPropietario`) 
+        REFERENCES `propietario` (`IdPropietario`),
+    CONSTRAINT `FK_Inmueble_tipoInmueble` 
+        FOREIGN KEY (`IdTipoInmueble`) 
+        REFERENCES `tipoInmueble` (`IdTipoInmueble`)  
         ON DELETE CASCADE 
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

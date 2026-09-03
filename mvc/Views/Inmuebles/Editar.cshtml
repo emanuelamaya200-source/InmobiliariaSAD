@@ -3,7 +3,8 @@
 
 @{
     ViewData["Title"] = Model.Id == 0 ? "Alta de Inmueble" : "Modificar Inmueble";
-    var propietarios = (IList<Propietario>?)ViewBag.Propietarios ?? new List<Propietario>();
+    IList<Propietario>? propietarios = (IList<Propietario>?)ViewBag.Propietarios ?? new List<Propietario>();
+    IList<tipoInmueble>? tiposInmuebles = (IList<tipoInmueble>?)ViewBag.tipoInmueble ?? new List<tipoInmueble>();    
 }
 
 <h2>@(Model.Id == 0 ? "Alta de Inmueble" : "Modificar Inmueble")</h2>
@@ -26,6 +27,20 @@
                 <label asp-for="Direccion" class="control-label"></label>
                 <input asp-for="Direccion" class="form-control" required />
                 <span asp-validation-for="Direccion" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label">Tipo Inmueble</label>
+                <select class="form-select" asp-for="IdTipoInmueble" required>
+                    <option value="">-- Seleccione el Tipo de Inmueble  --</option>
+                    @foreach (tipoInmueble t in tiposInmuebles)
+                    {
+                        <option value="@t.idTipoInmueble" selected="@(t.idTipoInmueble == Model.IdTipoInmueble)">
+                            @t.Descripcion
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="PropietarioId" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-2">

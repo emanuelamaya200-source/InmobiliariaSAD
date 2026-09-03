@@ -24,6 +24,12 @@
             @Html.DisplayFor(model => model.Direccion)
         </dd>
         <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Tipo)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Tipo.Descripcion)
+        </dd>
+        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Cupo)
         </dt>
         <dd class = "col-sm-10">
@@ -54,10 +60,10 @@
             @Html.DisplayFor(model => model.Longitud)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PropietarioId)
+            @Html.DisplayNameFor(model => model.Duenio)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PropietarioId)
+            @Html.DisplayFor(model => model.Duenio.Nombre)
         </dd>
     </dl>
     

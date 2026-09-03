@@ -28,8 +28,11 @@ namespace Inmobiliaria_.Net_Core.Models
 		[Display(Name = "Dueño")]
 		public int PropietarioId { get; set; }
 		[ForeignKey(nameof(PropietarioId))]
+		public int IdTipoInmueble { get; set; }
+		[ForeignKey(nameof(IdTipoInmueble))]
     [BindNever]
 		public Propietario? Duenio { get; set; }
+		public tipoInmueble? Tipo { get; set;}
 		public string? Portada { get; set; }
 		[NotMapped]//Para EF
 		public IFormFile? PortadaFile { get; set; }
