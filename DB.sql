@@ -22,6 +22,12 @@ CREATE TABLE IF NOT EXISTS `inquilino` (
     PRIMARY KEY (`IdInquilino`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `tipoInmueble` (
+    `IdTipoInmueble` INT NOT NULL AUTO_INCREMENT,
+    `Descripcion` VARCHAR(50) NOT NULL,
+    PRIMARY KEY (`IdTipoInmueble`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 INSERT INTO `propietario` (`Nombre`, `Apellido`, `Dni`, `Telefono`, `Email`, `Clave`) VALUES
 ('Carlos', 'Gómez', '28456123', '2664123456', 'carlos.gomez@gmail.com', '123456'),
@@ -48,3 +54,10 @@ INSERT INTO `inquilino` (`Nombre`, `Apellido`, `Dni`, `Telefono`, `Email`) VALUE
 ('Micaela', 'Flores', '35741852', '2664321654', 'micaela.flores@hotmail.com'),
 ('Ignacio', 'Peralta', '33698521', '2664654987', 'ignacio.peralta@gmail.com'),
 ('Daniela', 'Molina', '39852147', '2664789123', 'daniela.molina@gmail.com');
+
+INSERT INTO `tipoInmueble` (`Descripcion`) VALUES 
+('Casa'),
+('Departamento'),
+('Local Comercial'),
+('Cochera'),
+('Terreno');

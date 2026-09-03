@@ -1,0 +1,50 @@
+@model IEnumerable<Inmobiliaria_.Net_Core.Models.tipoInmueble>
+
+<div class="container mt-4" style="max-width: 850px;">
+    <h2>Listado de Tipos de Inmuebles</h2>
+
+    <p>
+        <a asp-action="Editar" class="btn btn-primary">Nuevo Tipo Inmueble</a>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.idTipoInmueble)</th>
+                <th>@Html.DisplayNameFor(model => model.Descripcion)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model != null && Model.Any())
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.idTipoInmueble</td>
+                        <td>@item.Descripcion</td>
+                        <td>
+                            <a asp-action="Detalles" asp-route-id="@item.idTipoInmueble" class="btn btn-sm btn-info"
+                               title="Detalles">
+                                <i class="bi bi-info-circle"> </i> Detalles
+                            </a>
+                            <a asp-action="Editar" asp-route-id="@item.idTipoInmueble" class="btn btn-sm btn-warning"
+                               title="Modificar">
+                                <i class="bi bi-pencil-square"> </i> Modificar
+                            </a>
+                            <a asp-action="Eliminar" asp-route-id="@item.idTipoInmueble" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash-fill"> </i> Borrar
+                            </a>
+                        </td>
+                    </tr>
+
+                }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center text-muted py-3">No hay tipos cargados</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

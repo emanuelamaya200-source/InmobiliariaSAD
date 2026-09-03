@@ -1,0 +1,17 @@
+@model Inmobiliaria_.Net_Core.Models.tipoInmueble
+
+<h2>@(Model == null || Model.idTipoInmueble == 0 ? "Alta de Tipo Inmueble" : "Modificar Tipo Inmueble")</h2>
+
+<form asp-action="Guardar" method="post">
+    <input type="hidden" asp-for="idTipoInmueble" />
+
+    <div class="form-group mb-2">
+        <label asp-for="Descripcion" class="control-label"></label>
+        <input asp-for="Descripcion" class="form-control" />
+        <span asp-validation-for="Descripcion" class="text-danger"></span>
+    </div>
+   
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</form>
