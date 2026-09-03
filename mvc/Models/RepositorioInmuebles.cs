@@ -266,5 +266,22 @@ public Inmueble? ObtenerPorId(int id)
 			return res;
 		}
 
-	}
+        public decimal CalcularPrecioEstadia(int id, DateTime inicioFecha, DateTime finFecha)
+        {
+            var inmueble = ObtenerPorId(id);
+            if (inmueble is null)
+            {
+                throw new Exception("Inmueble No Encontrado");
+            }
+
+            int cantidadDeDias = (finFecha.Date - inicioFecha.Date).Days;
+            if (cantidadDeDias <= 0)
+            {
+                throw new ArgumentException("La fecha de fin debe ser posterior a la fecha de inicio.");
+            }
+
+            return cantidadDeDias * inmueble.PrecioPorDia;
+        }
+
+    }
 }
