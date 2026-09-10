@@ -1,4 +1,8 @@
 using Inmobiliaria_.Net_Core.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +12,11 @@ builder.Services.AddScoped<IRepositorioPropietario, RepositorioPropietario>();
 builder.Services.AddScoped<IRepositorioInquilino, RepositorioInquilino>();
 builder.Services.AddScoped<IRepositorioTipoInmueble, RepositorioTipoInmueble>();
 builder.Services.AddScoped<IRepositorioInmueble, RepositorioInmueble>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+{
+   options.LoginPath = "/Home/Login"; 
+});
 
 
 var app = builder.Build();
@@ -34,3 +43,4 @@ app.MapControllerRoute(
 
 
 app.Run();
+
