@@ -1,0 +1,27 @@
+@model Inmobiliaria_.Net_Core.Models.Reserva
+
+<h2>Detalle de Reserva</h2>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Id Reserva</dt>
+        <dd class="col-sm-10">#@Model.IdReserva</dd>
+
+        <dt class="col-sm-2">Id Inmueble</dt>
+        <dd class="col-sm-10">@Model.IdInmueble</dd>
+
+        <dt class="col-sm-2">Id Inquilino</dt>
+        <dd class="col-sm-10">@Model.IdInquilino</dd>
+
+        <dt class="col-sm-2">Fecha Entrada</dt>
+        <dd class="col-sm-10">@Model.FechaDeEntrada.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-2">Fecha Salida</dt>
+        <dd class="col-sm-10">@Model.FechaDeSalida.ToString("dd/MM/yyyy")</dd>
+    </dl>
+
+    <div>
+        <a asp-action="Editar" asp-route-id="@Model.IdReserva" class="btn btn-warning">Modificar</a>
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    </div>
+</div>

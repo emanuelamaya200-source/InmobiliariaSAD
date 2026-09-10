@@ -1,0 +1,56 @@
+@model IEnumerable<Inmobiliaria_.Net_Core.Models.Reserva>
+
+@{
+    ViewData["Title"] = "Listado de Reservas";
+}
+
+<h2>Listado de Reservas</h2>
+
+<p>
+    <a asp-action="Editar" class="btn btn-primary">Alta Reserva</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.IdReserva)</th>
+            <th>@Html.DisplayNameFor(model => model.IdInmueble)</th>
+            <th>@Html.DisplayNameFor(model => model.IdInquilino)</th>
+            <th>Fecha de Entrada</th>
+            <th>Fecha de Salida</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model) 
+    {
+        <tr>
+            <td>@item.IdReserva</td>
+            <td>@item.IdInmueble</td>
+            <td>@item.IdInquilino</td>
+            <td>@item.FechaDeEntrada.ToString("dd/MM/yyyy")</td>
+            <td>@item.FechaDeSalida.ToString("dd/MM/yyyy")</td>
+            <td>
+                <a asp-action="Detalles" asp-route-id="@item.IdReserva" class="btn btn-sm btn-info" title="Detalles">
+                    <i class="bi bi-info-circle"> </i> Detalles
+                </a>
+                <a asp-action="Editar" asp-route-id="@item.IdReserva" class="btn btn-sm btn-warning" title="Modificar">
+                    <i class="bi bi-pencil-square"> </i> Modificar
+                </a>
+                <a asp-action="Eliminar" asp-route-id="@item.IdReserva" class="btn btn-sm btn-danger" title="Borrar">
+                    <i class="bi bi-trash-fill"> </i> Borrar
+                </a>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="6" class="text-center">No hay reservas registradas.</td>
+    </tr>
+}
+    </tbody>
+</table>
