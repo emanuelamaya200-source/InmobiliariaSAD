@@ -65,7 +65,19 @@ CREATE TABLE IF NOT EXISTS `reserva` (
         FOREIGN KEY (`idInquilino`) REFERENCES `inquilino`(`idInquilino`)
 );
 
+CREATE TABLE IF NOT EXISTS `usuario` (
+    `Id` INT NOT NULL AUTO_INCREMENT,
+    `Nombre` VARCHAR(50) NOT NULL,
+    `Apellido` VARCHAR(50) NOT NULL,
+    `Email` VARCHAR(100) NOT NULL,
+    `Clave` VARCHAR(100) NOT NULL,
+    `Rol` INT NOT NULL DEFAULT 2,
+    PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+    `Email` VARCHAR(100) NOT NULL,
+    PRIMARY KEY (`IdInquilino`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `propietario` (`Nombre`, `Apellido`, `Dni`, `Telefono`, `Email`, `Clave`) VALUES
 ('Carlos', 'Gómez', '28456123', '2664123456', 'carlos.gomez@gmail.com', '123456'),
