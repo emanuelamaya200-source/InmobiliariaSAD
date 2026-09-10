@@ -111,4 +111,3 @@ INSERT INTO `tipoInmueble` (`Descripcion`) VALUES
 ('Local Comercial'),
 ('Cochera'),
 ('Terreno');
-

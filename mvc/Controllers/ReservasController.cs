@@ -9,10 +9,14 @@ namespace mvc.Controllers
     public class ReservasController : Controller
     {
         private readonly IRepositorioReserva repositorio;
+        private readonly IRepositorioInquilino repoInquilino;
+        private readonly IRepositorioInmueble repoInmueble;
 
-        public ReservasController(IRepositorioReserva repositorio)
+        public ReservasController(IRepositorioReserva repositorio, IRepositorioInquilino repoInquilino, IRepositorioInmueble repoInmueble)
         {
             this.repositorio = repositorio;
+            this.repoInquilino = repoInquilino;
+            this.repoInmueble =  repoInmueble;
         }
 
         // GET: Reservas
@@ -47,6 +51,9 @@ namespace mvc.Controllers
         // GET: Reservas/Editar/5 (Crear si id <= 0, Modificar si id > 0)
         public IActionResult Editar(int id)
         {
+            ViewBag.Inquilinos = repoInquilino.ObtenerLista();
+            ViewBag.Inmuebles = repoInmueble.ObtenerLista();
+
             if (id > 0)
             {
                 var reserva = repositorio.ObtenerPorId(id);
