@@ -75,9 +75,6 @@ CREATE TABLE IF NOT EXISTS `usuario` (
     PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-    `Email` VARCHAR(100) NOT NULL,
-    PRIMARY KEY (`IdInquilino`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `propietario` (`Nombre`, `Apellido`, `Dni`, `Telefono`, `Email`, `Clave`) VALUES
 ('Carlos', 'Gómez', '28456123', '2664123456', 'carlos.gomez@gmail.com', '123456'),
