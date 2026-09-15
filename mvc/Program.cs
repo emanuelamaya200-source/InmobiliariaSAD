@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Inmobiliaria_.Net_Core.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
@@ -21,7 +22,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 });
 
 
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -31,10 +35,27 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseAuthentication();
+
+app.Use(async (context, next) =>
+{
+    var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, "Admin"),
+        new Claim(ClaimTypes.Role, "Administrador")
+    };
+    
+    var identity = new ClaimsIdentity(claims, "TestAuth");
+    context.User = new ClaimsPrincipal(identity);
+
+    await next();
+});
 
 app.UseAuthorization();
 

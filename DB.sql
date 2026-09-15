@@ -65,10 +65,11 @@ CREATE TABLE IF NOT EXISTS `reserva` (
         FOREIGN KEY (`idInquilino`) REFERENCES `inquilino`(`idInquilino`)
 );
 
-CREATE TABLE IF NOT EXISTS `usuario` (
+CREATE TABLE IF NOT EXISTS `usuarios` (
     `Id` INT NOT NULL AUTO_INCREMENT,
     `Nombre` VARCHAR(50) NOT NULL,
     `Apellido` VARCHAR(50) NOT NULL,
+    `Avatar` VARCHAR(100),
     `Email` VARCHAR(100) NOT NULL,
     `Clave` VARCHAR(100) NOT NULL,
     `Rol` INT NOT NULL DEFAULT 2,

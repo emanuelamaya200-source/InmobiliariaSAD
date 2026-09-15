@@ -92,8 +92,8 @@ namespace Inmobiliaria_.Net_Core.Models
 					SELECT Id, Nombre, Apellido, Avatar, Email, Clave, Rol
 					FROM Usuarios
 					ORDER BY Id
-					OFFSET {(paginaNro - 1) * tamPagina} ROW
-					FETCH NEXT {tamPagina} ROWS ONLY";
+					LIMIT {tamPagina} OFFSET {(paginaNro - 1) * tamPagina} 
+					";
 				using (MySqlCommand command = new MySqlCommand(sql, connection))
 				{
 					command.CommandType = CommandType.Text;

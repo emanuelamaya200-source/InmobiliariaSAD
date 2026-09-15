@@ -31,7 +31,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios
-        [Authorize(Policy = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Index(int pagina = 1)
         {
             var usuarios = repositorio.ObtenerLista(pagina);
@@ -39,7 +39,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios/Details/5
-        [Authorize(Policy = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Details(int id)
         {
             var e = repositorio.ObtenerPorId(id);
@@ -47,7 +47,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios/Create
-        [Authorize(Policy = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Create()
         {
             ViewBag.Roles = Usuario.ObtenerRoles();
@@ -57,7 +57,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         // POST: Usuarios/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Create(Usuario u)
         {
             if (!ModelState.IsValid)
@@ -114,7 +114,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios/Edit/5
-        [Authorize(Policy = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Edit(int id)
         {
             ViewData["Title"] = "Editar usuario";
@@ -151,7 +151,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios/Delete/5
-        [Authorize(Policy = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Delete(int id)
         {
             // TODO: Add delete logic here
@@ -161,7 +161,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         // POST: Usuarios/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Delete(int id, Usuario usuario)
         {
             try
