@@ -110,12 +110,12 @@ namespace Inmobiliaria_.Net_Core.Controllers
             // Identity.Name ahora es el Id: se busca por clave primaria, no por email.
             var u = repositorio.ObtenerPorId(UsuarioId());
             ViewBag.Roles = Usuario.ObtenerRoles();
-            return View(nameof(Edit), u);
+            return View(nameof(Editar), u);
         }
 
         // GET: Usuarios/Edit/5
         [Authorize(Roles = "Administrador")]
-        public ActionResult Edit(int id)
+        public ActionResult Editar(int id)
         {
             ViewData["Title"] = "Editar usuario";
             var u = repositorio.ObtenerPorId(id);
@@ -127,9 +127,9 @@ namespace Inmobiliaria_.Net_Core.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public ActionResult Edit(int id, Usuario u)
+        public ActionResult Editar(int id, Usuario u)
         {
-            var vista = nameof(Edit);
+            var vista = nameof(Editar);
             try
             {
                 if (!User.IsInRole("Administrador"))//no soy admin
