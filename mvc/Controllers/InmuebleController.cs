@@ -47,6 +47,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Inmuebles/Editar/5 (o Inmuebles/Editar para Alta)
+        [Authorize(Roles = "Administrador")]
         public ActionResult Editar(int id)
         {
             ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
@@ -149,6 +150,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Inmuebles/Eliminar/5
+        [Authorize(Roles = "Administrador")]
         public ActionResult Eliminar(int id)
         {
             var entidad = repositorio.ObtenerPorId(id);
@@ -162,6 +164,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         // POST: Inmuebles/Eliminar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Eliminar(int id, Inmueble entidad)
         {
             try
@@ -181,6 +184,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         // POST: Inmuebles/Borrar/5 (para formularios que postean a Borrar)
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Borrar(int id)
         {
             try

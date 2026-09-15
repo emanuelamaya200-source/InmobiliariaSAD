@@ -64,10 +64,13 @@
 					@Html.DisplayFor(modelItem => item.RolNombre)
 				</td>
 				<td>
+					@if (User.IsInRole("Administrador"))
+					{
 					<a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
 						<i class="bi bi-pencil-square"></i> Modificar </a>
 						<a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger ">
 							<i class="bi bi-trash-fill"></i> Borrar </a>
+							}
 						</td>
 					</tr>
 				}

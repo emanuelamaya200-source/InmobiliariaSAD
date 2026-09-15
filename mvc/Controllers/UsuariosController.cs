@@ -31,7 +31,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios
-        [Authorize(Roles = "Administrador")]
+        // [Authorize(Roles = "Administrador")]
         public ActionResult Index(int pagina = 1)
         {
             var usuarios = repositorio.ObtenerLista(pagina);

@@ -42,7 +42,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
-
+/*
 app.Use(async (context, next) =>
 {
     var claims = new List<Claim>
@@ -55,7 +55,7 @@ app.Use(async (context, next) =>
     context.User = new ClaimsPrincipal(identity);
 
     await next();
-});
+});*/
 
 app.UseAuthorization();
 

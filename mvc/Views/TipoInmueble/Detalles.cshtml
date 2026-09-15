@@ -12,9 +12,12 @@
     </dl>
 
     <div>
+         @if (User.IsInRole("Administrador"))
+					{
         <a asp-action="Editar" asp-route-id="@Model.idTipoInmueble" class="btn btn-warning">
             <i class="bi bi-pencil-square"></i> Modificar
         </a>
+        }
         <a asp-action="Index" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Volver al listado
         </a>

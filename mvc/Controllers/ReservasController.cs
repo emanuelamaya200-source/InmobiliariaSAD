@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Inmobiliaria_.Net_Core.Models;
-
+using Microsoft.AspNetCore.Authorization;
 namespace mvc.Controllers
 {
     public class ReservasController : Controller
@@ -49,6 +49,7 @@ namespace mvc.Controllers
         }
 
         // GET: Reservas/Editar/5 (Crear si id <= 0, Modificar si id > 0)
+        [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
             ViewBag.Inquilinos = repoInquilino.ObtenerLista();
@@ -70,6 +71,7 @@ namespace mvc.Controllers
         // POST: Reservas/Guardar
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult Guardar(Reserva reserva)
         {
             if (!ModelState.IsValid)
@@ -119,6 +121,7 @@ namespace mvc.Controllers
         }
 
         // GET: Reservas/Eliminar/5 
+        [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
         {
             var reserva = repositorio.ObtenerPorId(id);
@@ -130,6 +133,7 @@ namespace mvc.Controllers
         }
 
         // POST: Reservas/Eliminar
+        [Authorize(Roles = "Administrador")]
         [HttpPost, ActionName("Eliminar")]
         [ValidateAntiForgeryToken]
         public IActionResult EliminarConfirmado(int id)

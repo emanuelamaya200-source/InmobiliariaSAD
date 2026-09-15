@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Inmobiliaria_.Net_Core.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers
 {
@@ -30,6 +31,7 @@ namespace mvc.Controllers
         }
 
         // GET: Inquilinos/Editar/5
+        [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
             if (id > 0)
@@ -60,6 +62,7 @@ namespace mvc.Controllers
         }
 
         // GET: Inquilinos/Eliminar/5
+        [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
         {
             var inquilino = repositorio.ObtenerPorId(id);
@@ -72,6 +75,7 @@ namespace mvc.Controllers
         // POST: Inquilinos/Borrar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult Borrar(int id)
         {
             repositorio.Baja(id);

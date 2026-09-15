@@ -29,12 +29,15 @@
                  <a asp-action="Detalles" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-info" title="Detalles">
                     <i class="bi bi-info-circle"> </i> Detalles
                 </a>
+                @if (User.IsInRole("Administrador"))
+					{
                 <a asp-action="Editar" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-warning">
                     <i class="bi bi-pencil-square"> </i> Modificar
                 </a>
                 <a asp-action="Eliminar" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-danger">
                     <i class="bi bi-trash-fill"> </i> Borrar
                 </a>
+                }
             </td>
         </tr>
 }
