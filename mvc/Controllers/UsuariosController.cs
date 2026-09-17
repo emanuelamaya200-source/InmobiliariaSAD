@@ -276,7 +276,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         // GET: Usuarios/Login/
         public ActionResult LoginModal()
         {
-            return PartialView("_LoginModal", new LoginView());
+            return PartialView("_LoginModal", new Login());
         }
 
         [AllowAnonymous]
@@ -291,7 +291,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginView login)
+        public async Task<IActionResult> Login(Login login)
         {
             try
             {
@@ -305,7 +305,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                                 iterationCount: 1000,
                                 numBytesRequested: 256 / 8));
 
-                    var e = repositorio.ObtenerPorEmail(login.Usuario);
+                    var e = repositorio.ObtenerPorEmail(login.Email);
                     if (e == null || e.Clave != hashed)
                     {
                         ModelState.AddModelError("", "El email o la clave no son correctos");

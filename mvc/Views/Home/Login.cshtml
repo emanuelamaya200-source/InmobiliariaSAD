@@ -1,0 +1,25 @@
+@model Inmobiliaria_.Net_Core.Models.Login
+@{
+    ViewData["Title"] = "Iniciar Sesion";
+}
+<div class="container mt-5" style="max-width: 420px;">
+    <div class="card shadow-sm p-4">
+        <h3 class="text-center mb-3">Acceso</h3>
+        @if (ViewBag.Error != null){
+        <div class="alert alert-danger py-2">@ViewBag.Error</div>
+        }
+        <form method="post" asp-action="Login">
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label font-weight-bold" >Email</label>
+                <input asp-for="Email" class="form-control" placeholder="admin@inmobiliaria.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div>
+               <label asp-for="Clave" class="form-label font-weight-bold" >Contraseña</label>
+                <input asp-for="Clave" class="form-control" placeholder="••••••••" />
+                <span asp-validation-for="Clave" class="text-danger small"></span>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Ingresar</button>
+        </form>
+    </div>

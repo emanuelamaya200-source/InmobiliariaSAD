@@ -18,7 +18,7 @@ builder.Services.AddScoped<IRepositorioUsuario, RepositorioUsuario>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
-   options.LoginPath = "/Home/Login"; 
+   options.LoginPath = "/Login"; 
 });
 
 
@@ -42,20 +42,6 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
-/*
-app.Use(async (context, next) =>
-{
-    var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, "Admin"),
-        new Claim(ClaimTypes.Role, "Administrador")
-    };
-    
-    var identity = new ClaimsIdentity(claims, "TestAuth");
-    context.User = new ClaimsPrincipal(identity);
-
-    await next();
-});*/
 
 app.UseAuthorization();
 
