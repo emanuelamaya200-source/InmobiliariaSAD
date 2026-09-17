@@ -28,6 +28,11 @@ namespace Inmobiliaria_.Net_Core.Models
 
         [Required(ErrorMessage = "El campo es obligatorio")]
         [Display(Name = "Estado")]
-        public string Estado { get; set; }
+        public string Estado { get; set; } = "Activo";
+
+        public decimal MontoDiario { get; set; }
+        public DateTime? FechaFinEfectiva { get; set; }
+        public int? UsuarioCreacionId { get; set; }
+        public int? UsuarioFinalizacionId { get; set; }
     }
 }

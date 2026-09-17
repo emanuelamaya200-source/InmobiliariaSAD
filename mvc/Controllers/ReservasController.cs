@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Inmobiliaria_.Net_Core.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 namespace mvc.Controllers
 {
-    
+
     public class ReservasController : Controller
     {
         private readonly IRepositorioReserva repositorio;
@@ -19,11 +20,11 @@ namespace mvc.Controllers
             this.repositorio = repositorio;
             this.repoPago = repoPago;
             this.repoInquilino = repoInquilino;
-            this.repoInmueble =  repoInmueble;
+            this.repoInmueble = repoInmueble;
         }
 
         // GET: Reservas
-        public IActionResult Index(int? id)
+        public IActionResult Index(int? id, DateTime? inicio, DateTime? fin, int? cupo)
         {
             IList<Reserva> lista;
 
@@ -34,8 +35,12 @@ namespace mvc.Controllers
             }
             else
             {
-                lista = repositorio.ObtenerLista();
+                lista = repositorio.ObtenerPorRango(inicio, fin, cupo);
             }
+
+            ViewBag.Inicio = inicio?.ToString("yyyy-MM-dd");
+            ViewBag.Fin = fin?.ToString("yyyy-MM-dd");
+            ViewBag.Cupo = cupo;
 
             return View(lista);
         }
@@ -48,6 +53,7 @@ namespace mvc.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Pagos = repoPago.ObtenerListaPorReserva(id);
             return View(reserva);
         }
 
@@ -71,6 +77,20 @@ namespace mvc.Controllers
             return View(new Reserva());
         }
 
+        [Authorize(Roles = "Administrador")]
+        public IActionResult Renovar(int id)
+        {
+            var original = repositorio.ObtenerPorId(id);
+            if (original == null) return NotFound();
+            var entrada = original.FechaDeSalida;
+            original.IdReserva = 0;
+            original.FechaDeEntrada = entrada;
+            original.FechaDeSalida = entrada.AddDays(1);
+            ViewBag.Inquilinos = repoInquilino.ObtenerLista();
+            ViewBag.Inmuebles = repoInmueble.ObtenerLista();
+            return View("Editar", original);
+        }
+
         // POST: Reservas/Guardar
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -90,7 +110,7 @@ namespace mvc.Controllers
 
             // Validar solapamiento de fechas
             var reservasExistentes = repositorio.ObtenerLista();
-            bool haySolapamiento = reservasExistentes.Any(r => 
+            bool haySolapamiento = reservasExistentes.Any(r =>
                 r.IdInmueble == reserva.IdInmueble &&
                 r.IdReserva != reserva.IdReserva &&
                 r.FechaDeEntrada < reserva.FechaDeSalida &&
@@ -105,6 +125,9 @@ namespace mvc.Controllers
 
             try
             {
+                reserva.UsuarioCreacionId = UsuarioActualId();
+                var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
+                reserva.MontoDiario = inmueble?.PrecioPorDia ?? 0;
                 if (reserva.IdReserva > 0)
                 {
                     repositorio.Modificacion(reserva);
@@ -113,7 +136,6 @@ namespace mvc.Controllers
                 {
                     repositorio.Alta(reserva);
 
-                    var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
                     if (inmueble == null)
                         throw new InvalidOperationException("No se encontró el inmueble de la reserva.");
 
@@ -157,7 +179,7 @@ namespace mvc.Controllers
         {
             try
             {
-                repositorio.Baja(id);
+                repositorio.Cancelar(id, UsuarioActualId());
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -169,10 +191,15 @@ namespace mvc.Controllers
 
         // GET: Reservas/VerificarDisponibilidad
         [HttpGet]
-        public IActionResult VerificarDisponibilidad(DateTime inicioFecha, DateTime finFecha)
+        public IActionResult VerificarDisponibilidad(DateTime inicioFecha, DateTime finFecha, int cupo = 0)
         {
-            var disponibles = repositorio.VerificarDisponibilidad(inicioFecha, finFecha);
+            var disponibles = repositorio.VerificarDisponibilidad(inicioFecha, finFecha, cupo);
             return Json(disponibles);
+        }
+
+        private int UsuarioActualId()
+        {
+            return int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : 0;
         }
 
         // GET: Reservas/CalcularMulta

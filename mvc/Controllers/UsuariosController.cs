@@ -139,7 +139,26 @@ namespace Inmobiliaria_.Net_Core.Controllers
                     if (UsuarioId() != id)
                         return RedirectToAction(nameof(Index), "Home");
                 }
-                // TODO: Add update logic here
+                var actual = repositorio.ObtenerPorId(id);
+                if (actual == null) return NotFound();
+                actual.Nombre = u.Nombre;
+                actual.Apellido = u.Apellido;
+                actual.Email = u.Email;
+                actual.Rol = User.IsInRole("Administrador") ? u.Rol : actual.Rol;
+                if (!string.IsNullOrWhiteSpace(u.Clave))
+                {
+                    actual.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(password: u.Clave, salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"] ?? ""), prf: KeyDerivationPrf.HMACSHA1, iterationCount: 1000, numBytesRequested: 256 / 8));
+                }
+                if (u.AvatarFile != null)
+                {
+                    var path = Path.Combine(environment.WebRootPath, "Uploads");
+                    Directory.CreateDirectory(path);
+                    var fileName = "avatar_" + id + Path.GetExtension(u.AvatarFile.FileName);
+                    using var stream = new FileStream(Path.Combine(path, fileName), FileMode.Create);
+                    u.AvatarFile.CopyTo(stream);
+                    actual.Avatar = "/Uploads/" + fileName;
+                }
+                repositorio.Modificacion(actual);
 
                 return RedirectToAction(vista);
             }
@@ -172,7 +191,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 repositorio.Baja(id);
                 return RedirectToAction(nameof(Index));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Error al eliminar el usuario");
                 return RedirectToAction(nameof(Index));

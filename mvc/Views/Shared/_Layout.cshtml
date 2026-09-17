@@ -54,6 +54,10 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Pagos" asp-action="Index">Pagos</a>
                             </li>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Usuarios" asp-action="Perfil">Mi Perfil</a></li>
+                            }
                         </ul>
                         <div>
                             @if (User.Identity != null && User.Identity.IsAuthenticated)

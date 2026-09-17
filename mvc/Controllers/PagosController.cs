@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Inmobiliaria_.Net_Core.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace mvc.Controllers
 {
     public class PagosController : Controller
     {
         private readonly IRepositorioPago repositorio;
-    
+
         public PagosController(IRepositorioPago repositorio)
         {
             this.repositorio = repositorio;
@@ -50,12 +51,11 @@ namespace mvc.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Guardar(Pago pago)
         {
-            if (pago.IdPago <= 0)
-                return BadRequest("Los pagos se crean al registrar una reserva.");
-
             if (ModelState.IsValid)
             {
-                repositorio.Modificacion(pago);
+                pago.UsuarioCreacionId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var usuarioId) ? usuarioId : null;
+                if (pago.IdPago <= 0) repositorio.Alta(pago);
+                else repositorio.Modificacion(pago);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -85,6 +85,13 @@ namespace mvc.Controllers
                 return NotFound();
 
             return View("Editar", pago);
+        }
+
+        [Authorize(Roles = "Administrador")]
+        public IActionResult Nuevo(int idReserva)
+        {
+            if (idReserva <= 0) return BadRequest();
+            return View("Editar", new Pago { IdReserva = idReserva, Estado = "Activo", Fecha = DateOnly.FromDateTime(DateTime.Today) });
         }
 
         // POST: Pagos/Borrar/5

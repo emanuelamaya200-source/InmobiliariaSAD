@@ -1,4 +1,8 @@
 @model Inmobiliaria_.Net_Core.Models.Reserva
+@using Inmobiliaria_.Net_Core.Models
+@{
+    var pagos = (IEnumerable<Pago>?)ViewBag.Pagos ?? Enumerable.Empty<Pago>();
+}
 
 <h2>Detalle de Reserva</h2>
 
@@ -18,15 +22,49 @@
 
         <dt class="col-sm-4 text-muted">Fecha Salida</dt>
         <dd class="col-sm-8">@Model.FechaDeSalida.ToString("dd/MM/yyyy")</dd>
+        @if (User.IsInRole("Administrador"))
+        {
+            <dt class="col-sm-4 text-muted">Usuario creador</dt>
+            <dd class="col-sm-8">@Model.UsuarioCreacionId</dd>
+            <dt class="col-sm-4 text-muted">Usuario anulador/finalizador</dt>
+            <dd class="col-sm-8">@Model.UsuarioFinalizacionId</dd>
+        }
     </dl>
 
     <div>
-         @if (User.IsInRole("Administrador"))
-					{
-        <a asp-action="Editar" asp-route-id="@Model.IdReserva" class="btn btn-warning">Modificar</a>
+        @if (User.IsInRole("Administrador"))
+        {
+            <a asp-action="Editar" asp-route-id="@Model.IdReserva" class="btn btn-warning">Modificar</a>
         }
         <a asp-action="Index" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Volver al listado
-            </a>
+        </a>
     </div>
 </div>
+
+<h3 class="mt-4">Pagos de la reserva</h3>
+@if (User.IsInRole("Administrador"))
+{
+    <a asp-controller="Pagos" asp-action="Nuevo"
+       asp-route-idReserva="@Model.IdReserva" class="btn btn-success mb-2">Agregar pago</a>
+}
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Concepto</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pago in pagos)
+        {
+            <tr>
+                <td>@pago.Fecha</td>
+                <td>@pago.Monto.ToString("C")</td>
+                <td>@pago.Concepto</td>
+                <td>@pago.Estado</td>
+            </tr>
+        }
+    </tbody></table>

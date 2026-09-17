@@ -20,7 +20,7 @@ builder.Services.AddScoped<IRepositorioPago, RepositorioPago>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
-   options.LoginPath = "/Login"; 
+    options.LoginPath = "/Login";
 });
 
 

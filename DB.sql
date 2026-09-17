@@ -154,3 +154,21 @@ INSERT INTO `usuarios` (`Nombre`, `Apellido`, `Avatar`, `Email`, `Clave`, `Rol`)
 ('Diego', 'Fernandez', NULL, 'diego.fernandez@gmail.com', '123456', 2),
 ('Elena', 'Lopez', NULL, 'elena.lopez@gmail.com', '123456', 2),
 ('admin', 'admin', '0000', 'admin@inmobiliaria.com', 'admin1234', 1);
+
+ALTER TABLE `inmueble` 
+ADD COLUMN `Disponible` TINYINT(1) NOT NULL DEFAULT 1;
+
+ALTER TABLE `reserva` 
+ADD COLUMN `MontoDiario` DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER `Estado`,
+ADD COLUMN `FechaFinEfectiva` DATETIME NULL AFTER `FechaDeSalida`,
+ADD COLUMN `UsuarioCreacionId` INT NULL AFTER `MontoDiario`,
+ADD COLUMN `UsuarioFinalizacionId` INT NULL AFTER `UsuarioCreacionId`,
+ADD CONSTRAINT `FK_Reserva_UsuarioCrea` FOREIGN KEY (`UsuarioCreacionId`) REFERENCES `usuarios`(`Id`),
+ADD CONSTRAINT `FK_Reserva_UsuarioFin` FOREIGN KEY (`UsuarioFinalizacionId`) REFERENCES `usuarios`(`Id`);
+
+
+ALTER TABLE `pago` 
+ADD COLUMN `UsuarioCreacionId` INT NULL AFTER `Fecha`,
+ADD COLUMN `UsuarioAnulacionId` INT NULL AFTER `UsuarioCreacionId`,
+ADD CONSTRAINT `FK_Pago_UsuarioCrea` FOREIGN KEY (`UsuarioCreacionId`) REFERENCES `usuarios`(`Id`),
+ADD CONSTRAINT `FK_Pago_UsuarioAnula` FOREIGN KEY (`UsuarioAnulacionId`) REFERENCES `usuarios`(`Id`);

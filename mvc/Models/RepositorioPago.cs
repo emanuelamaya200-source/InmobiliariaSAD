@@ -13,19 +13,19 @@ namespace Inmobiliaria_.Net_Core.Models
 {
     public class RepositorioPago : RepositorioBase, IRepositorioPago
     {
-        public RepositorioPago (IConfiguration configuration): base(configuration)
+        public RepositorioPago(IConfiguration configuration) : base(configuration)
         {
-            
+
         }
 
-       public int Alta(Pago p)
+        public int Alta(Pago p)
         {
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 string sql = @"INSERT INTO Pago
-                    (IdReserva, Monto, Concepto, Estado, Fecha)
-                    VALUES (@idreserva, @monto, @concepto, @estado, @fecha);
+                    (IdReserva, Monto, Concepto, Estado, Fecha, UsuarioCreacionId)
+                    VALUES (@idreserva, @monto, @concepto, @estado, @fecha, @usuario);
                     SELECT LAST_INSERT_ID();";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
@@ -35,6 +35,7 @@ namespace Inmobiliaria_.Net_Core.Models
                     command.Parameters.AddWithValue("@concepto", p.Concepto);
                     command.Parameters.AddWithValue("@estado", p.Estado);
                     command.Parameters.AddWithValue("@fecha", p.Fecha.ToDateTime(TimeOnly.MinValue));
+                    command.Parameters.AddWithValue("@usuario", (object?)p.UsuarioCreacionId ?? DBNull.Value);
                     connection.Open();
                     res = Convert.ToInt32(command.ExecuteScalar());
                     p.IdPago = res;
@@ -101,7 +102,7 @@ namespace Inmobiliaria_.Net_Core.Models
             return res;
         }
 
-         public Pago? ObtenerPorId(int id)
+        public Pago? ObtenerPorId(int id)
         {
             Pago? p = null;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -166,6 +167,16 @@ namespace Inmobiliaria_.Net_Core.Models
             return p;
         }
 
+        public IList<Pago> ObtenerListaPorReserva(int idReserva)
+        {
+            var result = new List<Pago>();
+            using var connection = new MySqlConnection(connectionString);
+            using var command = new MySqlCommand("SELECT IdPago, IdReserva, Monto, Concepto, Estado, Fecha, UsuarioCreacionId, UsuarioAnulacionId FROM Pago WHERE IdReserva=@id ORDER BY Fecha DESC, IdPago DESC", connection);
+            command.Parameters.AddWithValue("@id", idReserva); connection.Open(); using var reader = command.ExecuteReader();
+            while (reader.Read()) result.Add(new Pago { IdPago = reader.GetInt32("IdPago"), IdReserva = reader.GetInt32("IdReserva"), Monto = reader.GetDecimal("Monto"), Concepto = reader.GetString("Concepto"), Estado = reader.GetString("Estado"), Fecha = DateOnly.FromDateTime(reader.GetDateTime("Fecha")), UsuarioCreacionId = reader["UsuarioCreacionId"] is DBNull ? null : reader.GetInt32("UsuarioCreacionId"), UsuarioAnulacionId = reader["UsuarioAnulacionId"] is DBNull ? null : reader.GetInt32("UsuarioAnulacionId") });
+            return result;
+        }
+
         public int ObtenerCantidad()
         {
             int res = 0;
@@ -228,4 +239,5 @@ namespace Inmobiliaria_.Net_Core.Models
             }
             return lista;
         }
-    }}
+    }
+}

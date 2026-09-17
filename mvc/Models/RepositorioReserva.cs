@@ -1,326 +1,88 @@
 using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
-using Microsoft.Extensions.Configuration;
 
 namespace Inmobiliaria_.Net_Core.Models
 {
     public class RepositorioReserva : RepositorioBase, IRepositorioReserva
     {
-        public RepositorioReserva(IConfiguration configuration) : base(configuration)
+        public RepositorioReserva(IConfiguration configuration) : base(configuration) { }
+
+        private static Reserva Map(MySqlDataReader reader) => new Reserva
         {
-        }
+            IdReserva = reader.GetInt32("IdReserva"),
+            IdInmueble = reader.GetInt32("IdInmueble"),
+            IdInquilino = reader.GetInt32("IdInquilino"),
+            FechaDeEntrada = reader.GetDateTime("FechaDeEntrada"),
+            FechaDeSalida = reader.GetDateTime("FechaDeSalida"),
+            Estado = reader.GetString("Estado"),
+            MontoDiario = reader.GetDecimal("MontoDiario"),
+            FechaFinEfectiva = reader["FechaFinEfectiva"] is DBNull ? null : reader.GetDateTime("FechaFinEfectiva"),
+            UsuarioCreacionId = reader["UsuarioCreacionId"] is DBNull ? null : reader.GetInt32("UsuarioCreacionId"),
+            UsuarioFinalizacionId = reader["UsuarioFinalizacionId"] is DBNull ? null : reader.GetInt32("UsuarioFinalizacionId")
+        };
 
         public int Alta(Reserva p)
         {
-            int res = -1;
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"INSERT INTO Reserva (IdInmueble, IdInquilino, FechaDeEntrada, FechaDeSalida, Estado) 
-                            VALUES (@IdInmueble, @IdInquilino, @FechaDeEntrada, @FechaDeSalida, @Estado);";
-
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@IdInmueble", p.IdInmueble);
-                    command.Parameters.AddWithValue("@IdInquilino", p.IdInquilino);
-                    command.Parameters.AddWithValue("@FechaDeEntrada", p.FechaDeEntrada);
-                    command.Parameters.AddWithValue("@FechaDeSalida", p.FechaDeSalida);
-                    command.Parameters.AddWithValue("@Estado", "Activo");
-
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                    res = (int)command.LastInsertedId;
-                    p.IdReserva = res;
-                }
-            }
-            return res;
+            const string sql = @"INSERT INTO reserva (IdInmueble, IdInquilino, FechaDeEntrada, FechaDeSalida, Estado, MontoDiario, UsuarioCreacionId)
+                VALUES (@inmueble, @inquilino, @entrada, @salida, 'Activo', @monto, @usuario);";
+            using var connection = new MySqlConnection(connectionString); using var command = new MySqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@inmueble", p.IdInmueble); command.Parameters.AddWithValue("@inquilino", p.IdInquilino); command.Parameters.AddWithValue("@entrada", p.FechaDeEntrada); command.Parameters.AddWithValue("@salida", p.FechaDeSalida); command.Parameters.AddWithValue("@monto", p.MontoDiario); command.Parameters.AddWithValue("@usuario", (object?)p.UsuarioCreacionId ?? DBNull.Value);
+            connection.Open(); command.ExecuteNonQuery(); p.IdReserva = (int)command.LastInsertedId; return p.IdReserva;
         }
 
-        public int Baja(int id)
-        {
-            int res = -1;
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"DELETE FROM Reserva WHERE IdReserva = @id";
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    res = command.ExecuteNonQuery();
-                }
-            }
-            return res;
-        }
+        public int Baja(int id) { using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand("UPDATE reserva SET Estado='Cancelado' WHERE IdReserva=@id", c); q.Parameters.AddWithValue("@id", id); c.Open(); return q.ExecuteNonQuery(); }
+
+        public int Cancelar(int id, int usuarioId) { using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand("UPDATE reserva SET Estado='Cancelado', UsuarioFinalizacionId=@usuario WHERE IdReserva=@id", c); q.Parameters.AddWithValue("@id", id); q.Parameters.AddWithValue("@usuario", usuarioId); c.Open(); return q.ExecuteNonQuery(); }
 
         public int Modificacion(Reserva p)
         {
-            int res = -1;
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"UPDATE Reserva 
-                            SET IdInmueble = @IdInmueble, 
-                                IdInquilino = @IdInquilino, 
-                                FechaDeEntrada = @FechaDeEntrada, 
-                                FechaDeSalida = @FechaDeSalida 
-                            WHERE IdReserva = @IdReserva";
-
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@IdInmueble", p.IdInmueble);
-                    command.Parameters.AddWithValue("@IdInquilino", p.IdInquilino);
-                    command.Parameters.AddWithValue("@FechaDeEntrada", p.FechaDeEntrada);
-                    command.Parameters.AddWithValue("@FechaDeSalida", p.FechaDeSalida);
-                    command.Parameters.AddWithValue("@IdReserva", p.IdReserva);
-
-                    connection.Open();
-                    res = command.ExecuteNonQuery();
-                }
-            }
-            return res;
+            const string sql = "UPDATE reserva SET IdInmueble=@inmueble, IdInquilino=@inquilino, FechaDeEntrada=@entrada, FechaDeSalida=@salida WHERE IdReserva=@id";
+            using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand(sql, c); q.Parameters.AddWithValue("@inmueble", p.IdInmueble); q.Parameters.AddWithValue("@inquilino", p.IdInquilino); q.Parameters.AddWithValue("@entrada", p.FechaDeEntrada); q.Parameters.AddWithValue("@salida", p.FechaDeSalida); q.Parameters.AddWithValue("@id", p.IdReserva); c.Open(); return q.ExecuteNonQuery();
         }
 
-        public IList<Reserva> ObtenerLista(int paginaNro = 1, int tamPagina = 10)
+        public IList<Reserva> ObtenerLista(int paginaNro = 1, int tamPagina = 100) => ObtenerPorRango(null, null, null);
+
+        public IList<Reserva> ObtenerPorRango(DateTime? inicio, DateTime? fin, int? cupo)
         {
-            IList<Reserva> res = new List<Reserva>();
-            int offset = (paginaNro - 1) * tamPagina;
-
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"SELECT IdReserva, IdInmueble, IdInquilino, FechaDeEntrada, FechaDeSalida 
-                               FROM Reserva 
-                               LIMIT @tamPagina OFFSET @offset";
-
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@tamPagina", tamPagina);
-                    command.Parameters.AddWithValue("@offset", offset);
-
-                    connection.Open();
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            res.Add(new Reserva
-                            {
-                                IdReserva = reader.GetInt32("IdReserva"),
-                                IdInmueble = reader.GetInt32("IdInmueble"),
-                                IdInquilino = reader.GetInt32("IdInquilino"),
-                                FechaDeEntrada = reader.GetDateTime("FechaDeEntrada"),
-                                FechaDeSalida = reader.GetDateTime("FechaDeSalida")
-                            });
-                        }
-                    }
-                }
-            }
-            return res;
+            var result = new List<Reserva>();
+            const string sql = @"SELECT r.IdReserva, r.IdInmueble, r.IdInquilino, r.FechaDeEntrada, r.FechaDeSalida, r.Estado, r.MontoDiario, r.FechaFinEfectiva, r.UsuarioCreacionId, r.UsuarioFinalizacionId
+                FROM reserva r INNER JOIN inmueble i ON i.IdInmueble=r.IdInmueble WHERE (@inicio IS NULL OR r.FechaDeEntrada < @fin) AND (@fin IS NULL OR COALESCE(r.FechaFinEfectiva,r.FechaDeSalida)>@inicio) AND (@cupo IS NULL OR i.Cupo>=@cupo) ORDER BY r.FechaDeEntrada";
+            using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand(sql, c); q.Parameters.AddWithValue("@inicio", (object?)inicio ?? DBNull.Value); q.Parameters.AddWithValue("@fin", (object?)fin ?? DBNull.Value); q.Parameters.AddWithValue("@cupo", (object?)cupo ?? DBNull.Value); c.Open(); using var reader = q.ExecuteReader(); while (reader.Read()) result.Add(Map(reader)); return result;
         }
 
-        public int ObtenerCantidad()
-        {
-            int res = 0;
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"SELECT COUNT(*) FROM Reserva";
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    connection.Open();
-                    res = Convert.ToInt32(command.ExecuteScalar());
-                }
-            }
-            return res;
-        }
+        public int ObtenerCantidad() { using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand("SELECT COUNT(*) FROM reserva", c); c.Open(); return Convert.ToInt32(q.ExecuteScalar()); }
 
         public Reserva? ObtenerPorId(int id)
         {
-            Reserva? res = null;
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"SELECT IdReserva, IdInmueble, IdInquilino, FechaDeEntrada, FechaDeSalida 
-                               FROM Reserva 
-                               WHERE IdReserva = @id";
-
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            res = new Reserva
-                            {
-                                IdReserva = reader.GetInt32("IdReserva"),
-                                IdInmueble = reader.GetInt32("IdInmueble"),
-                                IdInquilino = reader.GetInt32("IdInquilino"),
-                                FechaDeEntrada = reader.GetDateTime("FechaDeEntrada"),
-                                FechaDeSalida = reader.GetDateTime("FechaDeSalida")
-                            };
-                        }
-                    }
-                }
-            }
-            return res;
+            using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand("SELECT IdReserva, IdInmueble, IdInquilino, FechaDeEntrada, FechaDeSalida, Estado, MontoDiario, FechaFinEfectiva, UsuarioCreacionId, UsuarioFinalizacionId FROM reserva WHERE IdReserva=@id", c); q.Parameters.AddWithValue("@id", id); c.Open(); using var reader = q.ExecuteReader(); return reader.Read() ? Map(reader) : null;
         }
 
-        public IList<Inmueble> VerificarDisponibilidad(DateTime inicioFecha, DateTime finFecha)
+        public IList<Inmueble> VerificarDisponibilidad(DateTime inicioFecha, DateTime finFecha, int cupo = 0)
         {
-            IList<Inmueble> res = new List<Inmueble>();
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"SELECT i.Id, i.Direccion, i.Cupo, i.PrecioPorDia, i.PorcentajeReserva, i.PropietarioId, i.Habilitado
-                               FROM Inmuebles i
-                               WHERE i.Habilitado = 1 
-                               AND i.Id NOT IN (
-                                   SELECT r.IdInmueble 
-                                   FROM Reserva r 
-                                   WHERE r.FechaDeEntrada < @finFecha AND r.FechaDeSalida > @inicioFecha
-                               )";
-
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@inicioFecha", inicioFecha);
-                    command.Parameters.AddWithValue("@finFecha", finFecha);
-
-                    connection.Open();
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            res.Add(new Inmueble
-                            {
-                                Id = reader.GetInt32("Id"),
-                                Direccion = reader.GetString("Direccion"),
-                                Cupo = reader.GetInt32("Cupo"),
-                                PrecioPorDia = reader.GetDecimal("PrecioPorDia"),
-                                PorcentajeReserva = reader.GetDecimal("PorcentajeReserva"),
-                                PropietarioId = reader.GetInt32("PropietarioId"),
-                                Habilitado = reader.GetBoolean("Habilitado")
-                            });
-                        }
-                    }
-                }
-            }
-            return res;
+            var result = new List<Inmueble>();
+            const string sql = @"SELECT i.IdInmueble AS Id, i.Direccion, i.Cupo, i.PrecioPorDia, i.PorcentajeReserva, i.PropietarioId, i.Portada FROM inmueble i WHERE i.Disponible=1 AND i.Cupo>=@cupo AND NOT EXISTS (SELECT 1 FROM reserva r WHERE r.IdInmueble=i.IdInmueble AND r.Estado='Activo' AND r.FechaDeEntrada<@fin AND COALESCE(r.FechaFinEfectiva,r.FechaDeSalida)>@inicio)";
+            using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand(sql, c); q.Parameters.AddWithValue("@inicio", inicioFecha); q.Parameters.AddWithValue("@fin", finFecha); q.Parameters.AddWithValue("@cupo", cupo); c.Open(); using var reader = q.ExecuteReader(); while (reader.Read()) result.Add(new Inmueble { Id = reader.GetInt32("Id"), Direccion = reader.GetString("Direccion"), Cupo = reader.GetInt32("Cupo"), PrecioPorDia = reader.GetDecimal("PrecioPorDia"), PorcentajeReserva = reader.GetDecimal("PorcentajeReserva"), PropietarioId = reader.GetInt32("PropietarioId"), Portada = reader["Portada"] as string }); return result;
         }
 
-        public bool ExisteSolapamiento(int idInmueble, DateTime inicio, DateTime fin, int idReservaExcluir = 0)
+        public bool ExisteSolapamiento(int idInmueble, DateTime entrada, DateTime salida, int? idReservaExcluir = null)
         {
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"SELECT COUNT(*) FROM Reserva 
-                               WHERE IdInmueble = @IdInmueble 
-                               AND IdReserva != @IdReservaExcluir
-                               AND FechaDeEntrada < @Fin 
-                               AND FechaDeSalida > @Inicio";
-
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@IdInmueble", idInmueble);
-                    command.Parameters.AddWithValue("@IdReservaExcluir", idReservaExcluir);
-                    command.Parameters.AddWithValue("@Inicio", inicio);
-                    command.Parameters.AddWithValue("@Fin", fin);
-
-                    connection.Open();
-                    int count = Convert.ToInt32(command.ExecuteScalar());
-                    return count > 0;
-                }
-            }
+            const string sql = "SELECT COUNT(*) FROM reserva WHERE IdInmueble=@inmueble AND Estado='Activo' AND (@excluir IS NULL OR IdReserva<>@excluir) AND FechaDeEntrada<@salida AND COALESCE(FechaFinEfectiva,FechaDeSalida)>@entrada";
+            using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand(sql, c); q.Parameters.AddWithValue("@inmueble", idInmueble); q.Parameters.AddWithValue("@entrada", entrada); q.Parameters.AddWithValue("@salida", salida); q.Parameters.AddWithValue("@excluir", (object?)idReservaExcluir ?? DBNull.Value); c.Open(); return Convert.ToInt32(q.ExecuteScalar()) > 0;
         }
 
-        public decimal CalcularMulta(int idReserva, DateTime finFecha)
-        {
-            var reserva = ObtenerPorId(idReserva);
-            if (reserva == null)
-            {
-                throw new Exception("Reserva no encontrada");
-            }
-
-            int diasTotales = (reserva.FechaDeSalida - reserva.FechaDeEntrada).Days;
-            int diasTranscurridos = (finFecha - reserva.FechaDeEntrada).Days;
-            int diasRestantes = (reserva.FechaDeSalida - finFecha).Days;
-
-            if (diasRestantes <= 0)
-            {
-                return 0;
-            }
-
-            decimal porcentajeMulta = (diasTranscurridos < (diasTotales / 2.0)) ? 0.50m : 0.25m;
-
-            string sqlPrecio = "SELECT PrecioPorDia FROM Inmuebles WHERE Id = @IdInmueble";
-            decimal precioPorDia = 0;
-
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                using (var command = new MySqlCommand(sqlPrecio, connection))
-                {
-                    command.Parameters.AddWithValue("@IdInmueble", reserva.IdInmueble);
-                    connection.Open();
-                    precioPorDia = Convert.ToDecimal(command.ExecuteScalar());
-                }
-            }
-
-            return diasRestantes * precioPorDia * porcentajeMulta;
-        }
+        public decimal CalcularMulta(int idReserva, DateTime finFecha) => 0;
 
         public bool TerminarReservaAnticipada(int idReserva, DateTime nuevoFinFecha)
         {
-            int res = -1;
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"UPDATE Reserva 
-                               SET FechaDeSalida = @nuevoFinFecha 
-                               WHERE IdReserva = @idReserva";
-
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@nuevoFinFecha", nuevoFinFecha);
-                    command.Parameters.AddWithValue("@idReserva", idReserva);
-
-                    connection.Open();
-                    res = command.ExecuteNonQuery();
-                }
-            }
-            return res > 0;
+            using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand("UPDATE reserva SET FechaFinEfectiva=@fin, Estado='Finalizada' WHERE IdReserva=@id", c); q.Parameters.AddWithValue("@fin", nuevoFinFecha); q.Parameters.AddWithValue("@id", idReserva); c.Open(); return q.ExecuteNonQuery() > 0;
         }
 
         public Reserva RenovarReserva(int idReserva, DateTime nuevoFinFecha, decimal nuevoPrecio)
         {
-            var reservaOriginal = ObtenerPorId(idReserva);
-            if (reservaOriginal == null)
-            {
-                throw new Exception("Reserva original no encontrada");
-            }
-
-            if (ExisteSolapamiento(reservaOriginal.IdInmueble, reservaOriginal.FechaDeSalida, nuevoFinFecha))
-            {
-                throw new Exception("Las fechas seleccionadas ya están ocupadas.");
-            }
-
-            if (nuevoPrecio > 0)
-            {
-                using (var connection = new MySqlConnection(connectionString))
-                {
-                    string sqlUpdatePrecio = "UPDATE Inmuebles SET PrecioPorDia = @NuevoPrecio WHERE Id = @IdInmueble";
-                    using (var command = new MySqlCommand(sqlUpdatePrecio, connection))
-                    {
-                        command.Parameters.AddWithValue("@NuevoPrecio", nuevoPrecio);
-                        command.Parameters.AddWithValue("@IdInmueble", reservaOriginal.IdInmueble);
-                        connection.Open();
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-
-            Reserva nuevaReserva = new Reserva
-            {
-                IdInmueble = reservaOriginal.IdInmueble,
-                IdInquilino = reservaOriginal.IdInquilino,
-                FechaDeEntrada = reservaOriginal.FechaDeSalida,
-                FechaDeSalida = nuevoFinFecha
-            };
-
-            Alta(nuevaReserva);
-            return nuevaReserva;
+            var original = ObtenerPorId(idReserva) ?? throw new InvalidOperationException("Reserva original no encontrada.");
+            if (nuevoFinFecha <= original.FechaDeSalida || ExisteSolapamiento(original.IdInmueble, original.FechaDeSalida, nuevoFinFecha)) throw new InvalidOperationException("Las fechas seleccionadas no son válidas o están ocupadas.");
+            var nueva = new Reserva { IdInmueble = original.IdInmueble, IdInquilino = original.IdInquilino, FechaDeEntrada = original.FechaDeSalida, FechaDeSalida = nuevoFinFecha, MontoDiario = nuevoPrecio > 0 ? nuevoPrecio : original.MontoDiario, UsuarioCreacionId = original.UsuarioCreacionId }; Alta(nueva); return nueva;
         }
     }
 }

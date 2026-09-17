@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Inmobiliaria_.Net_Core.Models
 {
-     public class Pago
+    public class Pago
     {
         [Key]
         [Display(Name = "Identificacion de Pago")]
@@ -18,13 +18,15 @@ namespace Inmobiliaria_.Net_Core.Models
 
         [Required(ErrorMessage = "El campo es obligatorio")]
         [Display(Name = "Concepto")]
-        public string Concepto { get; set; } ="";
+        public string Concepto { get; set; } = "";
 
         [Required(ErrorMessage = "El campo es obligatorio")]
         [Display(Name = "Estado")]
-        public String Estado { get; set; } ="";
+        public String Estado { get; set; } = "";
 
         public DateOnly Fecha { get; set; }
+        public int? UsuarioCreacionId { get; set; }
+        public int? UsuarioAnulacionId { get; set; }
 
     }
 }

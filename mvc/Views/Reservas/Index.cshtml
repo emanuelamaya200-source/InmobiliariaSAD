@@ -11,6 +11,14 @@
     <a asp-action="Editar" class="btn btn-primary">Alta Reserva</a>
 </p>
 
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3"><input type="date" name="inicio" value="@ViewBag.Inicio" class="form-control" /></div>
+    <div class="col-md-3"><input type="date" name="fin" value="@ViewBag.Fin" class="form-control" /></div>
+    <div class="col-md-2"><input type="number" name="cupo" value="@ViewBag.Cupo" min="1" placeholder="Cupo mínimo" class="form-control" /></div>
+    <div class="col-auto"><button class="btn btn-outline-primary" type="submit">Buscar disponibilidad</button></div>
+    <div class="col-auto"><a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a></div>
+</form>
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -46,6 +54,7 @@
                 </a>
                 @if (User.IsInRole("Administrador"))
 					{
+                <a asp-action="Renovar" asp-route-id="@item.IdReserva" class="btn btn-sm btn-outline-success">Renovar</a>
                 <a asp-action="Editar" asp-route-id="@item.IdReserva" class="btn btn-sm btn-warning" title="Modificar">
                     <i class="bi bi-pencil-square"> </i> Modificar
                 </a>

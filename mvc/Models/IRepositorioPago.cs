@@ -5,5 +5,6 @@ namespace Inmobiliaria_.Net_Core.Models
         int Reactivar(int id);
         IList<Pago> ObtenerLista(int pagina, int tamanioPagina, bool incluirInactivos);
         Pago? ObtenerPorReserva(int idReserva);
+        IList<Pago> ObtenerListaPorReserva(int idReserva);
     }
 }
