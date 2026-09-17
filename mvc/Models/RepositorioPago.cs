@@ -24,8 +24,8 @@ namespace Inmobiliaria_.Net_Core.Models
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 string sql = @"INSERT INTO Pago
-                    (IdReserva, Monto, Concepto, Estado)
-                    VALUES (@idreserva, @monto, @concepto, @estado);
+                    (IdReserva, Monto, Concepto, Estado, Fecha)
+                    VALUES (@idreserva, @monto, @concepto, @estado, @fecha);
                     SELECT LAST_INSERT_ID();";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
@@ -34,6 +34,7 @@ namespace Inmobiliaria_.Net_Core.Models
                     command.Parameters.AddWithValue("@monto", p.Monto);
                     command.Parameters.AddWithValue("@concepto", p.Concepto);
                     command.Parameters.AddWithValue("@estado", p.Estado);
+                    command.Parameters.AddWithValue("@fecha", p.Fecha.ToDateTime(TimeOnly.MinValue));
                     connection.Open();
                     res = Convert.ToInt32(command.ExecuteScalar());
                     p.IdPago = res;
@@ -67,13 +68,14 @@ namespace Inmobiliaria_.Net_Core.Models
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 string sql = @"UPDATE Pago 
-                    SET Concepto=@concepto
+                    SET Monto=@monto, Concepto=@concepto
                     WHERE IdPago = @id";
 
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
                     command.Parameters.AddWithValue("@concepto", p.Concepto);
+                    command.Parameters.AddWithValue("@monto", p.Monto);
                     command.Parameters.AddWithValue("@id", p.IdPago);
 
                     connection.Open();
@@ -88,7 +90,7 @@ namespace Inmobiliaria_.Net_Core.Models
             Pago? p = null;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "SELECT IdPago, IdReserva, Monto, Concepto, Estado FROM Pago WHERE IdPago = @id";
+                string sql = "SELECT IdPago, IdReserva, Monto, Concepto, Estado, Fecha FROM Pago WHERE IdPago = @id";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
@@ -103,7 +105,8 @@ namespace Inmobiliaria_.Net_Core.Models
                                 IdReserva = reader.GetInt32(nameof(Pago.IdReserva)),
                                 Monto = reader.GetDecimal(nameof(Pago.Monto)),
                                 Concepto = reader.GetString(nameof(Pago.Concepto)),
-                                Estado = reader.GetString(nameof(Pago.Estado))
+                                Estado = reader.GetString(nameof(Pago.Estado)),
+                                Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha)))
                             };
                         }
                     }
@@ -118,7 +121,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = 0;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "SELECT COUNT(*) FROM Pago";
+                string sql = "SELECT COUNT(*) FROM Pago WHERE Estado <> 'Inactivo'";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     connection.Open();
@@ -138,9 +141,10 @@ namespace Inmobiliaria_.Net_Core.Models
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = @"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado
+                string sql = @"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado, p.Fecha
                     FROM Pago p
                     INNER JOIN Reserva r ON p.IdReserva = r.IdReserva
+                    WHERE p.Estado <> 'Inactivo'
                     ORDER BY p.IdPago
                     LIMIT @limit OFFSET @offset";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
@@ -158,7 +162,8 @@ namespace Inmobiliaria_.Net_Core.Models
                                 IdReserva = reader.GetInt32(nameof(Pago.IdReserva)),
                                 Monto = reader.GetDecimal(nameof(Pago.Monto)),
                                 Concepto = reader.GetString(nameof(Pago.Concepto)),
-                                Estado = reader.GetString(nameof(Pago.Estado))
+                                Estado = reader.GetString(nameof(Pago.Estado)),
+                                Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha)))
                             });
                         }
                     }

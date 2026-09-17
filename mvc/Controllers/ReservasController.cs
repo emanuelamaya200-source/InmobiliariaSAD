@@ -10,12 +10,14 @@ namespace mvc.Controllers
     public class ReservasController : Controller
     {
         private readonly IRepositorioReserva repositorio;
+        private readonly IRepositorioPago repoPago;
         private readonly IRepositorioInquilino repoInquilino;
         private readonly IRepositorioInmueble repoInmueble;
 
-        public ReservasController(IRepositorioReserva repositorio, IRepositorioInquilino repoInquilino, IRepositorioInmueble repoInmueble)
+        public ReservasController(IRepositorioReserva repositorio, IRepositorioPago repoPago, IRepositorioInquilino repoInquilino, IRepositorioInmueble repoInmueble)
         {
             this.repositorio = repositorio;
+            this.repoPago = repoPago;
             this.repoInquilino = repoInquilino;
             this.repoInmueble =  repoInmueble;
         }
@@ -110,6 +112,20 @@ namespace mvc.Controllers
                 else
                 {
                     repositorio.Alta(reserva);
+
+                    var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
+                    if (inmueble == null)
+                        throw new InvalidOperationException("No se encontró el inmueble de la reserva.");
+
+                    var cantidadDias = Math.Max(1, (reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).Days);
+                    repoPago.Alta(new Pago
+                    {
+                        IdReserva = reserva.IdReserva,
+                        Monto = cantidadDias * inmueble.PrecioPorDia,
+                        Concepto = "Pago inicial de reserva",
+                        Estado = "Activo",
+                        Fecha = DateOnly.FromDateTime(DateTime.Today)
+                    });
                 }
 
                 return RedirectToAction(nameof(Index));

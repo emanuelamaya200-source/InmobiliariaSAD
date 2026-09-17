@@ -16,8 +16,8 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (var connection = new MySqlConnection(connectionString))
             {
-                string sql = @"INSERT INTO Reserva (IdInmueble, IdInquilino, FechaDeEntrada, FechaDeSalida) 
-                            VALUES (@IdInmueble, @IdInquilino, @FechaDeEntrada, @FechaDeSalida);";
+                string sql = @"INSERT INTO Reserva (IdInmueble, IdInquilino, FechaDeEntrada, FechaDeSalida, Estado) 
+                            VALUES (@IdInmueble, @IdInquilino, @FechaDeEntrada, @FechaDeSalida, @Estado);";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
@@ -25,6 +25,7 @@ namespace Inmobiliaria_.Net_Core.Models
                     command.Parameters.AddWithValue("@IdInquilino", p.IdInquilino);
                     command.Parameters.AddWithValue("@FechaDeEntrada", p.FechaDeEntrada);
                     command.Parameters.AddWithValue("@FechaDeSalida", p.FechaDeSalida);
+                    command.Parameters.AddWithValue("@Estado", "Activo");
 
                     connection.Open();
                     command.ExecuteNonQuery();

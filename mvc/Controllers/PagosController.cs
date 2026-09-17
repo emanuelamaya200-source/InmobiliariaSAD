@@ -35,27 +35,28 @@ namespace mvc.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
-            if (id > 0)
-            {
-                var pago = repositorio.ObtenerPorId(id);
-                if (pago == null)
-                    return NotFound();
-                return View(pago);
-            }
-            return View(new Pago());
+            if (id <= 0)
+                return BadRequest();
+
+            var pago = repositorio.ObtenerPorId(id);
+            if (pago == null)
+                return NotFound();
+
+            return View(pago);
         }
 
         // POST: Pagos/Guardar
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult Guardar(Pago pago)
         {
+            if (pago.IdPago <= 0)
+                return BadRequest("Los pagos se crean al registrar una reserva.");
+
             if (ModelState.IsValid)
             {
-                if (pago.IdPago > 0)
-                    repositorio.Modificacion(pago);
-                else
-                    repositorio.Alta(pago);
+                repositorio.Modificacion(pago);
 
                 return RedirectToAction(nameof(Index));
             }
