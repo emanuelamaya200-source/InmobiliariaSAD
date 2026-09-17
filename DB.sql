@@ -22,12 +22,11 @@ CREATE TABLE IF NOT EXISTS `inquilino` (
     PRIMARY KEY (`IdInquilino`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
 CREATE TABLE IF NOT EXISTS `tipoInmueble` (
     `IdTipoInmueble` INT NOT NULL AUTO_INCREMENT,
     `Descripcion` VARCHAR(50) NOT NULL,
     PRIMARY KEY (`IdTipoInmueble`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `inmueble` (
     `IdInmueble` INT NOT NULL AUTO_INCREMENT,
@@ -41,35 +40,41 @@ CREATE TABLE IF NOT EXISTS `inmueble` (
     `IdTipoInmueble` INT NOT NULL,
     `Portada` VARCHAR(255) NULL,
     PRIMARY KEY (`IdInmueble`),
-    CONSTRAINT `FK_Inmueble_Propietario` 
-        FOREIGN KEY (`PropietarioId`) 
+    CONSTRAINT `FK_Inmueble_Propietario`
+        FOREIGN KEY (`PropietarioId`)
         REFERENCES `propietario` (`IdPropietario`),
-    CONSTRAINT `FK_Inmueble_tipoInmueble` 
-        FOREIGN KEY (`IdTipoInmueble`) 
-        REFERENCES `tipoInmueble` (`IdTipoInmueble`)  
-        ON DELETE CASCADE 
+    CONSTRAINT `FK_Inmueble_tipoInmueble`
+        FOREIGN KEY (`IdTipoInmueble`)
+        REFERENCES `tipoInmueble` (`IdTipoInmueble`)
+        ON DELETE CASCADE
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `reserva` (
-    `idReserva` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `idInmueble` INT NOT NULL ,
+    `idReserva` INT NOT NULL AUTO_INCREMENT,
+    `idInmueble` INT NOT NULL,
     `idInquilino` INT NOT NULL,
     `FechaDeEntrada` DATETIME NOT NULL,
     `FechaDeSalida` DATETIME NOT NULL,
-    `IdMonto` INT NOT NULL,
     `Estado` VARCHAR(50) NOT NULL,
-    
+    PRIMARY KEY (`idReserva`),
     CONSTRAINT `FK_Reservas_Inmuebles`
         FOREIGN KEY (`idInmueble`) REFERENCES `inmueble`(`idInmueble`),
-        
     CONSTRAINT `FK_Reservas_Inquilinos`
         FOREIGN KEY (`idInquilino`) REFERENCES `inquilino`(`idInquilino`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-    CONSTRAINT `FK_Reservas_Pagos`
-        FOREIGN KEY (`IdMonto`) REFERENCES `pago`(`IdPago`)    
-        
-);
+CREATE TABLE IF NOT EXISTS `pago` (
+    `IdPago` INT NOT NULL AUTO_INCREMENT,
+    `IdReserva` INT NOT NULL,
+    `Monto` DECIMAL(10,2) NOT NULL,
+    `Concepto` VARCHAR(100) NOT NULL,
+    `Estado` VARCHAR(50) NOT NULL,
+    `Fecha` DATE NOT NULL,
+    PRIMARY KEY (`IdPago`),
+    CONSTRAINT `FK_Pago_Reserva`
+        FOREIGN KEY (`IdReserva`) REFERENCES `reserva`(`idReserva`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `usuarios` (
     `Id` INT NOT NULL AUTO_INCREMENT,
@@ -81,18 +86,6 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
     `Rol` INT NOT NULL DEFAULT 2,
     PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS `pago` (
-    `IdPago` INT NOT NULL AUTO_INCREMENT,
-    `IdReserva` INT NOT NULL,
-    `Monto` DECIMAL(10,2) NOT NULL,
-    `Concepto` VARCHAR(100) NOT NULL,
-    `Estado` VARCHAR(50) NOT NULL,
-    PRIMARY KEY (`IdPago`),
-    CONSTRAINT `FK_Pago_Reserva`
-        FOREIGN KEY (`IdReserva`) REFERENCES `reserva`(`idReserva`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 INSERT INTO `propietario` (`Nombre`, `Apellido`, `Dni`, `Telefono`, `Email`, `Clave`) VALUES
 ('Carlos', 'Gómez', '28456123', '2664123456', 'carlos.gomez@gmail.com', '123456'),
@@ -132,6 +125,5 @@ INSERT INTO `usuarios` (`Nombre`, `Apellido`, `Avatar`, `Email`, `Clave`, `Rol`)
 ('Bruno', 'Martinez', NULL, 'bruno.martinez@gmail.com', '123456', 2),
 ('Carla', 'Rodriguez', NULL, 'carla.rodriguez@gmail.com', '123456', 2),
 ('Diego', 'Fernandez', NULL, 'diego.fernandez@gmail.com', '123456', 2),
-('Elena', 'Lopez', NULL, 'elena.lopez@gmail.com', '123456', 2);
+('Elena', 'Lopez', NULL, 'elena.lopez@gmail.com', '123456', 2),
 ('admin', 'admin', '0000', 'admin@inmobiliaria.com', 'admin1234', 1);
-

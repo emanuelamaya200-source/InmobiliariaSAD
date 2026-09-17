@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers
 {
-    public class PagoController : Controller
+    public class PagosController : Controller
     {
         private readonly IRepositorioPago repositorio;
     
-        public PagoController(IRepositorioPago repositorio)
+        public PagosController(IRepositorioPago repositorio)
         {
             this.repositorio = repositorio;
         }
@@ -17,6 +17,7 @@ namespace mvc.Controllers
         public IActionResult Index()
         {
             var lista = repositorio.ObtenerLista(1, 100);
+            Console.WriteLine(lista);
             return View(lista);
         }
 

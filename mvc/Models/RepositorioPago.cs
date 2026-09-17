@@ -129,6 +129,7 @@ namespace Inmobiliaria_.Net_Core.Models
             return res;
         }
 
+
         public IList<Pago> ObtenerLista(int pagina, int tamanioPagina)
         {
             var lista = new List<Pago>();
@@ -137,10 +138,11 @@ namespace Inmobiliaria_.Net_Core.Models
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = @"SELECT IdPago, IdReserva, Monto, Concepto, Estado     
-                       FROM Pago 
-                       ORDER BY IdPago 
-                       LIMIT @limit OFFSET @offset";
+                string sql = @"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado
+                    FROM Pago p
+                    INNER JOIN Reserva r ON p.IdReserva = r.IdReserva
+                    ORDER BY p.IdPago
+                    LIMIT @limit OFFSET @offset";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@limit", tamanioPagina);

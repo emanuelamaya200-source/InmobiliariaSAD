@@ -22,7 +22,9 @@ namespace Inmobiliaria_.Net_Core.Models
         public DateTime FechaDeSalida { get; set; }
 
         [Required(ErrorMessage = "El campo es obligatorio")]
-        public int IdMonto { get; set; }
+        public int MontoTotal { get; set; }
+
+        public int PagoRealizado { get; set; }
 
         [Required(ErrorMessage = "El campo es obligatorio")]
         [Display(Name = "Estado")]

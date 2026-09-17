@@ -17,6 +17,8 @@
             <th>@Html.DisplayNameFor(model => model.IdReserva)</th>
             <th>@Html.DisplayNameFor(model => model.IdInmueble)</th>
             <th>@Html.DisplayNameFor(model => model.IdInquilino)</th>
+            <th>@Html.DisplayNameFor(model => model.MontoTotal)</th>
+            <th>@Html.DisplayNameFor(model => model.PagoRealizado)</th>
             <th>Fecha de Entrada</th>
             <th>Fecha de Salida</th>
             <th>Acciones</th>
@@ -31,6 +33,8 @@
             <td>@item.IdReserva</td>
             <td>@item.IdInmueble</td>
             <td>@item.IdInquilino</td>
+            <td>@item.MontoTotal</td>
+            <td>@item.PagoRealizado</td>
             <td>@item.FechaDeEntrada.ToString("dd/MM/yyyy")</td>
             <td>@item.FechaDeSalida.ToString("dd/MM/yyyy")</td>
             <td>
@@ -53,7 +57,7 @@
 else
 {
     <tr>
-        <td colspan="6" class="text-center">No hay reservas registradas.</td>
+        <td colspan="8" class="text-center">No hay reservas registradas.</td>
     </tr>
 }
     </tbody>

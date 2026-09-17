@@ -10,9 +10,6 @@ namespace Inmobiliaria_.Net_Core.Models
         public int IdPago { get; set; }
 
         [Required(ErrorMessage = "El campo es obligatorio")]
-        public int idReserva { get; set; }
-
-        [Required(ErrorMessage = "El campo es obligatorio")]
         public int IdReserva { get; set; }
 
         [Required(ErrorMessage = "El campo es obligatorio")]
@@ -21,11 +18,13 @@ namespace Inmobiliaria_.Net_Core.Models
 
         [Required(ErrorMessage = "El campo es obligatorio")]
         [Display(Name = "Concepto")]
-        public string Concepto { get; set; }
+        public string Concepto { get; set; } ="";
 
         [Required(ErrorMessage = "El campo es obligatorio")]
         [Display(Name = "Estado")]
-        public String Estado { get; set; }
+        public String Estado { get; set; } ="";
+
+        public DateOnly Fecha { get; set; }
 
     }
 }
