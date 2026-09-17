@@ -1,0 +1,16 @@
+@model Inmobiliaria_.Net_Core.Models.Pago
+
+<h2>@(Model == null || Model.IdPago == 0 ? "Alta de Pago" : "Modificar Pago")</h2>
+
+<form asp-action="Guardar" method="post">
+    <input type="hidden" asp-for="IdPago" />
+
+    <div class="form-group mb-2">
+        <label asp-for="Concepto" class="control-label"></label>
+        <input asp-for="Concepto" class="form-control" />
+        <span asp-validation-for="Concepto" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</form>
