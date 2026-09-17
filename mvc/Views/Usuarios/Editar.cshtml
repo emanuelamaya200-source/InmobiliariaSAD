@@ -40,6 +40,14 @@
 				<div class="form-group">
 					<label class="control-label">Rol</label>
 					<select class="form-control" name="Rol">
+						@if (Roles == null)
+						{
+							<option value="">No hay roles disponibles</option>
+						}
+						else
+						{
+							<option value="">Seleccione un rol</option>
+						}
 						@foreach (var kvp in Roles)
 						{
 							<option selected="@(kvp.Key == Model.Rol)" value="@kvp.Key">@kvp.Value</option>

@@ -116,3 +116,5 @@ INSERT INTO `usuarios` (`Nombre`, `Apellido`, `Avatar`, `Email`, `Clave`, `Rol`)
 ('Carla', 'Rodriguez', NULL, 'carla.rodriguez@gmail.com', '123456', 2),
 ('Diego', 'Fernandez', NULL, 'diego.fernandez@gmail.com', '123456', 2),
 ('Elena', 'Lopez', NULL, 'elena.lopez@gmail.com', '123456', 2);
+('admin', 'admin', '0000', 'admin@inmobiliaria.com', 'admin1234', 1);
+
