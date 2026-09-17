@@ -41,6 +41,9 @@
                 <a asp-action="Detalles" asp-route-id="@item.IdReserva" class="btn btn-sm btn-info" title="Detalles">
                     <i class="bi bi-info-circle"> </i> Detalles
                 </a>
+                <a asp-controller="Pagos" asp-action="Pagar" asp-route-idReserva="@item.IdReserva" class="btn btn-sm btn-success" title="Pagar">
+                    <i class="bi bi-credit-card"></i> Pagar
+                </a>
                 @if (User.IsInRole("Administrador"))
 					{
                 <a asp-action="Editar" asp-route-id="@item.IdReserva" class="btn btn-sm btn-warning" title="Modificar">

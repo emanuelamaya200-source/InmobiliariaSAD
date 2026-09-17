@@ -49,7 +49,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "UPDATE Pago SET Estado = 'Inactivo' WHERE IdPago = @id";
+                string sql = "UPDATE Pago SET Estado = 'Inactivo' WHERE IdPago = @id AND Estado <> 'Inactivo'";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
@@ -57,6 +57,23 @@ namespace Inmobiliaria_.Net_Core.Models
                     connection.Open();
                     res = command.ExecuteNonQuery();
                     connection.Close();
+                }
+            }
+            return res;
+        }
+
+        public int Reactivar(int id)
+        {
+            int res = -1;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = "UPDATE Pago SET Estado = 'Activo' WHERE IdPago = @id AND Estado = 'Inactivo'";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    res = command.ExecuteNonQuery();
                 }
             }
             return res;
@@ -116,6 +133,40 @@ namespace Inmobiliaria_.Net_Core.Models
             return p;
         }
 
+        public Pago? ObtenerPorReserva(int idReserva)
+        {
+            Pago? p = null;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"SELECT IdPago, IdReserva, Monto, Concepto, Estado, Fecha
+                    FROM Pago
+                    WHERE IdReserva = @idReserva
+                    ORDER BY IdPago DESC
+                    LIMIT 1";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@idReserva", idReserva);
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            p = new Pago
+                            {
+                                IdPago = reader.GetInt32(nameof(Pago.IdPago)),
+                                IdReserva = reader.GetInt32(nameof(Pago.IdReserva)),
+                                Monto = reader.GetDecimal(nameof(Pago.Monto)),
+                                Concepto = reader.GetString(nameof(Pago.Concepto)),
+                                Estado = reader.GetString(nameof(Pago.Estado)),
+                                Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha)))
+                            };
+                        }
+                    }
+                }
+            }
+            return p;
+        }
+
         public int ObtenerCantidad()
         {
             int res = 0;
@@ -135,16 +186,22 @@ namespace Inmobiliaria_.Net_Core.Models
 
         public IList<Pago> ObtenerLista(int pagina, int tamanioPagina)
         {
+            return ObtenerLista(pagina, tamanioPagina, false);
+        }
+
+        public IList<Pago> ObtenerLista(int pagina, int tamanioPagina, bool incluirInactivos)
+        {
             var lista = new List<Pago>();
             int offset = (pagina - 1) * tamanioPagina;
             if (offset < 0) offset = 0;
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = @"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado, p.Fecha
+                string filtroEstado = incluirInactivos ? "" : "WHERE p.Estado <> 'Inactivo'";
+                string sql = $@"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado, p.Fecha
                     FROM Pago p
                     INNER JOIN Reserva r ON p.IdReserva = r.IdReserva
-                    WHERE p.Estado <> 'Inactivo'
+                    {filtroEstado}
                     ORDER BY p.IdPago
                     LIMIT @limit OFFSET @offset";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))

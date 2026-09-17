@@ -28,9 +28,22 @@
                 <a asp-action="Editar" asp-route-id="@item.IdPago" class="btn btn-sm btn-warning">
                     <i class="bi bi-pencil-square"> </i> Modificar
                 </a>
-                <a asp-action="Eliminar" asp-route-id="@item.IdPago" class="btn btn-sm btn-danger">
-                    <i class="bi bi-trash-fill"> </i> Baja
-                </a>
+                @if (item.Estado == "Inactivo")
+                {
+                    <form asp-action="Alta" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.IdPago" />
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <i class="bi bi-check-circle-fill"></i> Alta
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-action="Eliminar" asp-route-id="@item.IdPago" class="btn btn-sm btn-danger">
+                        <i class="bi bi-trash-fill"></i> Baja
+                    </a>
+                }
                 }
             </td>
         </tr>

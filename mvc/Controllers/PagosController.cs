@@ -16,7 +16,7 @@ namespace mvc.Controllers
         // GET: Pagos
         public IActionResult Index()
         {
-            var lista = repositorio.ObtenerLista(1, 100);
+            var lista = repositorio.ObtenerLista(1, 100, true);
             return View(lista);
         }
 
@@ -27,7 +27,7 @@ namespace mvc.Controllers
             {
                 return NotFound();
             }
-            return View(pago);
+            return View("Editar", pago);
         }
 
         // GET: Pagos/Editar/5
@@ -41,7 +41,7 @@ namespace mvc.Controllers
             if (pago == null)
                 return NotFound();
 
-            return View(pago);
+            return View("Editar", pago);
         }
 
         // POST: Pagos/Guardar
@@ -70,7 +70,21 @@ namespace mvc.Controllers
             if (pago == null)
                 return NotFound();
 
-            return View(pago);
+            return View("Baja", pago);
+        }
+
+        // GET: Pagos/Pagar/5
+        [Authorize(Roles = "Administrador")]
+        public IActionResult Pagar(int idReserva)
+        {
+            if (idReserva <= 0)
+                return BadRequest();
+
+            var pago = repositorio.ObtenerPorReserva(idReserva);
+            if (pago == null)
+                return NotFound();
+
+            return View("Editar", pago);
         }
 
         // POST: Pagos/Borrar/5
@@ -80,6 +94,16 @@ namespace mvc.Controllers
         public IActionResult Borrar(int id)
         {
             repositorio.Baja(id);
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Pagos/Alta/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
+        public IActionResult Alta(int id)
+        {
+            repositorio.Reactivar(id);
             return RedirectToAction(nameof(Index));
         }
     }
