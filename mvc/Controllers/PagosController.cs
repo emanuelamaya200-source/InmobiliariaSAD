@@ -17,7 +17,6 @@ namespace mvc.Controllers
         public IActionResult Index()
         {
             var lista = repositorio.ObtenerLista(1, 100);
-            Console.WriteLine(lista);
             return View(lista);
         }
 

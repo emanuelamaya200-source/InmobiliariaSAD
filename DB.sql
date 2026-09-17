@@ -120,6 +120,33 @@ INSERT INTO `tipoInmueble` (`Descripcion`) VALUES
 ('Cochera'),
 ('Terreno');
 
+INSERT INTO `inmueble`
+    (`Direccion`, `Cupo`, `PrecioPorDia`, `PorcentajeReserva`, `Latitud`, `Longitud`, `PropietarioId`, `IdTipoInmueble`, `Portada`)
+VALUES
+    ('Av. del Sol 1450', 6, 85000.00, 30.00, -33.30120000, -66.33780000, 1, 1, NULL),
+    ('Calle Las Heras 820', 4, 62000.00, 25.00, -33.29540000, -66.32810000, 2, 2, NULL),
+    ('Ruta Provincial 3 km 12', 8, 110000.00, 35.00, -33.31870000, -66.35420000, 3, 3, NULL),
+    ('Pasaje Los Alamos 230', 2, 28000.00, 20.00, -33.28990000, -66.34150000, 4, 4, NULL),
+    ('Camino del Valle 560', 5, 54000.00, 25.00, -33.32560000, -66.31970000, 5, 5, NULL);
+
+INSERT INTO `reserva`
+    (`idInmueble`, `idInquilino`, `FechaDeEntrada`, `FechaDeSalida`, `Estado`)
+VALUES
+    (1, 1, '2026-10-05 14:00:00', '2026-10-10 10:00:00', 'Activo'),
+    (2, 2, '2026-10-12 14:00:00', '2026-10-18 10:00:00', 'Activo'),
+    (3, 3, '2026-11-01 14:00:00', '2026-11-08 10:00:00', 'Activo'),
+    (4, 4, '2026-11-15 14:00:00', '2026-11-17 10:00:00', 'Activo'),
+    (5, 5, '2026-12-20 14:00:00', '2026-12-27 10:00:00', 'Activo');
+
+INSERT INTO `pago`
+    (`IdReserva`, `Monto`, `Concepto`, `Estado`, `Fecha`)
+VALUES
+    (1, 425000.00, 'Pago inicial de reserva', 'Activo', '2026-09-17'),
+    (2, 372000.00, 'Pago inicial de reserva', 'Activo', '2026-09-17'),
+    (3, 770000.00, 'Pago inicial de reserva', 'Activo', '2026-09-17'),
+    (4, 56000.00, 'Pago inicial de reserva', 'Activo', '2026-09-17'),
+    (5, 378000.00, 'Pago inicial de reserva', 'Activo', '2026-09-17');
+
 INSERT INTO `usuarios` (`Nombre`, `Apellido`, `Avatar`, `Email`, `Clave`, `Rol`) VALUES
 ('Ana', 'Gonzalez', NULL, 'ana.gonzalez@gmail.com', '123456', 2),
 ('Bruno', 'Martinez', NULL, 'bruno.martinez@gmail.com', '123456', 2),
