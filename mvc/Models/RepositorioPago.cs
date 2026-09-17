@@ -85,14 +85,13 @@ namespace Inmobiliaria_.Net_Core.Models
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 string sql = @"UPDATE Pago 
-                    SET Monto=@monto, Concepto=@concepto
+                    SET Concepto=@concepto
                     WHERE IdPago = @id";
 
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
                     command.Parameters.AddWithValue("@concepto", p.Concepto);
-                    command.Parameters.AddWithValue("@monto", p.Monto);
                     command.Parameters.AddWithValue("@id", p.IdPago);
 
                     connection.Open();
