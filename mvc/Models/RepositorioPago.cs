@@ -24,14 +24,16 @@ namespace Inmobiliaria_.Net_Core.Models
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 string sql = @"INSERT INTO Pago
-                    (IdReserva, Monto)
-                    VALUES (@idreserva, @monto);
+                    (IdReserva, Monto, Concepto, Estado)
+                    VALUES (@idreserva, @monto, @concepto, @estado);
                     SELECT LAST_INSERT_ID();";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
                     command.Parameters.AddWithValue("@idreserva", p.IdReserva);
                     command.Parameters.AddWithValue("@monto", p.Monto);
+                    command.Parameters.AddWithValue("@concepto", p.Concepto);
+                    command.Parameters.AddWithValue("@estado", p.Estado);
                     connection.Open();
                     res = Convert.ToInt32(command.ExecuteScalar());
                     p.IdPago = res;
@@ -46,7 +48,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "DELETE FROM Pago WHERE IdPago = @id";
+                string sql = "UPDATE Pago SET Estado = 'Inactivo' WHERE IdPago = @id";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
@@ -65,14 +67,13 @@ namespace Inmobiliaria_.Net_Core.Models
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 string sql = @"UPDATE Pago 
-                    SET IdReserva=@idreserva, Monto=@monto
+                    SET Concepto=@concepto
                     WHERE IdPago = @id";
 
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
-                    command.Parameters.AddWithValue("@idreserva", p.IdReserva);
-                    command.Parameters.AddWithValue("@monto", p.Monto);
+                    command.Parameters.AddWithValue("@concepto", p.Concepto);
                     command.Parameters.AddWithValue("@id", p.IdPago);
 
                     connection.Open();
@@ -87,7 +88,7 @@ namespace Inmobiliaria_.Net_Core.Models
             Pago? p = null;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "SELECT IdPago, IdReserva, Monto FROM Pago WHERE IdPago = @id";
+                string sql = "SELECT IdPago, IdReserva, Monto, Concepto, Estado FROM Pago WHERE IdPago = @id";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
@@ -100,7 +101,9 @@ namespace Inmobiliaria_.Net_Core.Models
                             {
                                 IdPago = reader.GetInt32(nameof(Pago.IdPago)),
                                 IdReserva = reader.GetInt32(nameof(Pago.IdReserva)),
-                                Monto = reader.GetDecimal(nameof(Pago.Monto))
+                                Monto = reader.GetDecimal(nameof(Pago.Monto)),
+                                Concepto = reader.GetString(nameof(Pago.Concepto)),
+                                Estado = reader.GetString(nameof(Pago.Estado))
                             };
                         }
                     }
@@ -134,7 +137,7 @@ namespace Inmobiliaria_.Net_Core.Models
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = @"SELECT IdPago, IdReserva, Monto 
+                string sql = @"SELECT IdPago, IdReserva, Monto, Concepto, Estado     
                        FROM Pago 
                        ORDER BY IdPago 
                        LIMIT @limit OFFSET @offset";
@@ -151,7 +154,9 @@ namespace Inmobiliaria_.Net_Core.Models
                             {
                                 IdPago = reader.GetInt32(nameof(Pago.IdPago)),
                                 IdReserva = reader.GetInt32(nameof(Pago.IdReserva)),
-                                Monto = reader.GetDecimal(nameof(Pago.Monto))
+                                Monto = reader.GetDecimal(nameof(Pago.Monto)),
+                                Concepto = reader.GetString(nameof(Pago.Concepto)),
+                                Estado = reader.GetString(nameof(Pago.Estado))
                             });
                         }
                     }

@@ -57,12 +57,18 @@ CREATE TABLE IF NOT EXISTS `reserva` (
     `idInquilino` INT NOT NULL,
     `FechaDeEntrada` DATETIME NOT NULL,
     `FechaDeSalida` DATETIME NOT NULL,
+    `IdMonto` INT NOT NULL,
+    `Estado` VARCHAR(50) NOT NULL,
     
     CONSTRAINT `FK_Reservas_Inmuebles`
         FOREIGN KEY (`idInmueble`) REFERENCES `inmueble`(`idInmueble`),
         
     CONSTRAINT `FK_Reservas_Inquilinos`
         FOREIGN KEY (`idInquilino`) REFERENCES `inquilino`(`idInquilino`)
+
+    CONSTRAINT `FK_Reservas_Pagos`
+        FOREIGN KEY (`IdMonto`) REFERENCES `pago`(`IdPago`)    
+        
 );
 
 CREATE TABLE IF NOT EXISTS `usuarios` (
@@ -74,6 +80,17 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
     `Clave` VARCHAR(100) NOT NULL,
     `Rol` INT NOT NULL DEFAULT 2,
     PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `pago` (
+    `IdPago` INT NOT NULL AUTO_INCREMENT,
+    `IdReserva` INT NOT NULL,
+    `Monto` DECIMAL(10,2) NOT NULL,
+    `Concepto` VARCHAR(100) NOT NULL,
+    `Estado` VARCHAR(50) NOT NULL,
+    PRIMARY KEY (`IdPago`),
+    CONSTRAINT `FK_Pago_Reserva`
+        FOREIGN KEY (`IdReserva`) REFERENCES `reserva`(`idReserva`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

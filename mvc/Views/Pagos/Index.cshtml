@@ -1,0 +1,46 @@
+@model IEnumerable<Inmobiliaria_.Net_Core.Models.Pago>
+
+<h2>Listado de Pagos</h2>
+
+<p>
+    <a asp-action="Editar" class="btn btn-primary">Modificar Pagos</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>IdReserva</th>
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (Inmobiliaria_.Net_Core.Models.Pago item in Model) {
+        <tr>
+            <td>@item.IdPago</td>
+            <td>@item.IdReserva</td>
+            <td>@item.Concepto</td>
+            <td>@item.Monto</td>
+            <td>@item.Fecha</td>
+            <td>@item.Estado</td>
+            <td>
+                 <a asp-action="Detalles" asp-route-id="@item.IdPago" class="btn btn-sm btn-info" title="Detalles">
+                    <i class="bi bi-info-circle"> </i> Detalles
+                </a>
+                @if (User.IsInRole("Administrador"))
+					{
+                <a asp-action="Editar" asp-route-id="@item.IdPago" class="btn btn-sm btn-warning">
+                    <i class="bi bi-pencil-square"> </i> Modificar
+                </a>
+                <a asp-action="Baja" asp-route-id="@item.IdPago" class="btn btn-sm btn-danger">
+                    <i class="bi bi-trash-fill"> </i> Baja
+                </a>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -6,6 +6,7 @@ using Inmobiliaria_.Net_Core.Models;
 using Microsoft.AspNetCore.Authorization;
 namespace mvc.Controllers
 {
+    
     public class ReservasController : Controller
     {
         private readonly IRepositorioReserva repositorio;

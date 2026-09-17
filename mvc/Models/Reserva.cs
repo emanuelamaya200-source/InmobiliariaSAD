@@ -20,5 +20,12 @@ namespace Inmobiliaria_.Net_Core.Models
 
         [Required(ErrorMessage = "El campo es obligatorio")]
         public DateTime FechaDeSalida { get; set; }
+
+        [Required(ErrorMessage = "El campo es obligatorio")]
+        public int IdMonto { get; set; }
+
+        [Required(ErrorMessage = "El campo es obligatorio")]
+        [Display(Name = "Estado")]
+        public string Estado { get; set; }
     }
 }
