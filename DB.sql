@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `tipoInmueble` (
     PRIMARY KEY (`IdTipoInmueble`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `inmueble` (
+CREATE TABLE IF NOT EXISTS `inmueble` (
     `IdInmueble` INT NOT NULL AUTO_INCREMENT,
     `Direccion` VARCHAR(150) NOT NULL,
     `Cupo` INT NOT NULL DEFAULT 1,
@@ -109,3 +109,10 @@ INSERT INTO `tipoInmueble` (`Descripcion`) VALUES
 ('Local Comercial'),
 ('Cochera'),
 ('Terreno');
+
+INSERT INTO `usuarios` (`Nombre`, `Apellido`, `Avatar`, `Email`, `Clave`, `Rol`) VALUES
+('Ana', 'Gonzalez', NULL, 'ana.gonzalez@gmail.com', '123456', 2),
+('Bruno', 'Martinez', NULL, 'bruno.martinez@gmail.com', '123456', 2),
+('Carla', 'Rodriguez', NULL, 'carla.rodriguez@gmail.com', '123456', 2),
+('Diego', 'Fernandez', NULL, 'diego.fernandez@gmail.com', '123456', 2),
+('Elena', 'Lopez', NULL, 'elena.lopez@gmail.com', '123456', 2);
