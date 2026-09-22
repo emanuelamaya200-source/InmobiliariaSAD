@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = Model.Id == 0 ? "Alta de Inmueble" : "Modificar Inmueble";
     IList<Propietario>? propietarios = (IList<Propietario>?)ViewBag.Propietarios ?? new List<Propietario>();
-    IList<tipoInmueble>? tiposInmuebles = (IList<tipoInmueble>?)ViewBag.tipoInmueble ?? new List<tipoInmueble>();    
+    IList<tipoInmueble>? tiposInmuebles = (IList<tipoInmueble>?)ViewBag.tipoInmueble ?? new List<tipoInmueble>();
 }
 
 <h2>@(Model.Id == 0 ? "Alta de Inmueble" : "Modificar Inmueble")</h2>
@@ -32,7 +32,7 @@
             <div class="form-group mb-3">
                 <label class="control-label">Tipo Inmueble</label>
                 <select class="form-select" asp-for="IdTipoInmueble" required>
-                    <option value="">-- Seleccione el Tipo de Inmueble  --</option>
+                    <option value="">-- Seleccione el Tipo de Inmueble --</option>
                     @foreach (tipoInmueble t in tiposInmuebles)
                     {
                         <option value="@t.idTipoInmueble" selected="@(t.idTipoInmueble == Model.IdTipoInmueble)">
@@ -67,28 +67,81 @@
                 <span asp-validation-for="Latitud" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-2">
-                <label asp-for="Longitud" class="control-label"></label>
-                <input asp-for="Longitud" class="form-control" type="number" step="any" />
-                <span asp-validation-for="Longitud" class="text-danger"></span>
-            </div>
+            <div class="form-group mb-2"> <label asp-for="Longitud" class="control-label"></label> <input
+                asp-for="Longitud" class="form-control" type="number" step="any" /> <span
+                asp-validation-for="Longitud" class="text-danger"></span> </div>
 
-            <div class="form-group mb-3">
-                <label class="control-label">Propietario</label>
-                <select class="form-select" asp-for="PropietarioId" required>
-                    <option value="">-- Seleccione un Propietario --</option>
-                    @foreach (var p in propietarios)
-                    {
-                        <option value="@p.IdPropietario" selected="@(p.IdPropietario == Model.PropietarioId)">
-                            @p.Nombre @p.Apellido (DNI: @p.Dni)
-                        </option>
-                    }
-                </select>
-                <span asp-validation-for="PropietarioId" class="text-danger"></span>
-            </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">Propietario (DNI)</label>
 
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <a asp-action="Index" class="btn btn-secondary">Volver</a>
-        </form>
+                    <div class="input-group">
+                        <input list="listaDnis" class="form-control" id="dniPropietario" placeholder="Escriba el DNI..."
+                               autocomplete="off" />
+
+                        <button type="button" class="btn btn-primary" onclick="confirmarPropietario()">
+                            Confirmar
+                        </button>
+                    </div>
+                    <datalist id="listaDnis">
+                        @foreach (var p in propietarios)
+                        {
+                            <option value="@p.Dni">
+                                @p.Nombre @p.Apellido
+                            </option>
+                        }
+                    </datalist>
+
+                    <div id="propietarioEncontrado" class="mt-2"></div>
+
+                    <input type="hidden" asp-for="PropietarioId" id="PropietarioId" />
+
+                    <span asp-validation-for="PropietarioId" class="text-danger"></span>
+                </div>
+            
+
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" class="btn btn-secondary">Volver</a>
+            </form>
+        </div>
     </div>
-</div>
+    <script>
+        function confirmarPropietario() {
+
+            const dni = document.getElementById("dniPropietario").value.trim();
+
+            const propietarios = @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(propietarios)
+                            );
+
+            const propietario = propietarios.find(p =>
+                p.Dni.toString() === dni
+            );
+
+            const resultado = document.getElementById("propietarioEncontrado");
+            const id = document.getElementById("PropietarioId");
+
+            if (propietario) {
+
+                id.value = propietario.IdPropietario;
+
+                resultado.innerHTML = `
+                    <div class="alert alert-success">
+                        ✓ <strong>Propietario confirmado</strong><br>
+                        ${propietario.Nombre} ${propietario.Apellido}<br>
+                        DNI: ${propietario.Dni}
+                    </div>
+                `;
+
+            } else {
+
+                id.value = "";
+
+                resultado.innerHTML = `
+                    <div class="alert alert-danger">
+                        ✕ <strong>DNI no encontrado</strong><br>
+                        Verifique el número ingresado.
+                    </div>
+                `;
+            }
+        }
+    </script>

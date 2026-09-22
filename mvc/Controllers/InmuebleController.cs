@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Inmobiliaria_.Net_Core.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class InmueblesController : Controller
     {
         private readonly IRepositorioInmueble repositorio;
@@ -87,6 +87,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         // POST: Inmuebles/Guardar
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Guardar(Inmueble entidad)
         {
             try
@@ -202,6 +203,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
         // POST: Inmuebles/CambiarEstado/5
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public ActionResult CambiarEstado(int id)
         {
             try

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers
 {
+    [Authorize]
     public class PropietariosController : Controller
     {
         private readonly IRepositorioPropietario repositorio;
