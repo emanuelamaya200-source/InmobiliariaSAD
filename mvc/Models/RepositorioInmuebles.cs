@@ -148,7 +148,7 @@ namespace Inmobiliaria_.Net_Core.Models
 			using (MySqlConnection connection = new MySqlConnection(connectionString))
 			{
 				string sql = @$"
-					SELECT COUNT(Id)
+					SELECT COUNT(IdInmueble)
 					FROM Inmueble
 				";
 				using (MySqlCommand command = new MySqlCommand(sql, connection))

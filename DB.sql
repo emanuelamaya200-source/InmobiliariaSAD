@@ -153,8 +153,17 @@ INSERT INTO `usuarios` (`Nombre`, `Apellido`, `Avatar`, `Email`, `Clave`, `Rol`)
 ('Carla', 'Rodriguez', NULL, 'carla.rodriguez@gmail.com', '123456', 2),
 ('Diego', 'Fernandez', NULL, 'diego.fernandez@gmail.com', '123456', 2),
 ('Elena', 'Lopez', NULL, 'elena.lopez@gmail.com', '123456', 2),
-('admin', 'admin', '0000', 'admin@inmobiliaria.com', 'admin1234', 1);
-
+('admin', 'admin', '0000', 'admin@inmobiliaria.com', 'admin1234', 1),
+('Federico', 'Romero', NULL, 'federico.romero@gmail.com', '123456', 2),
+('Gisela', 'Morales', NULL, 'gisela.morales@gmail.com', '123456', 2),
+('Hernan', 'Alvarez', NULL, 'hernan.alvarez@gmail.com', '123456', 2),
+('Ignacio', 'Benitez', NULL, 'ignacio.benitez@gmail.com', '123456', 2),
+('Julieta', 'Castro', NULL, 'julieta.castro@gmail.com', '123456', 2),
+('Lucas', 'Herrera', NULL, 'lucas.herrera@gmail.com', '123456', 2),
+('Mariana', 'Silva', NULL, 'mariana.silva@gmail.com', '123456', 2),
+('Nicolas', 'Torres', NULL, 'nicolas.torres@gmail.com', '123456', 2),
+('Paula', 'Acuna', NULL, 'paula.acuna@gmail.com', '123456', 2),
+('Rodrigo', 'Gutierrez', NULL, 'rodrigo.gutierrez@gmail.com', '123456', 2);
 ALTER TABLE `inmueble` 
 ADD COLUMN `Disponible` TINYINT(1) NOT NULL DEFAULT 1;
 
