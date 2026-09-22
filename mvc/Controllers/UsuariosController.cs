@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Inmobiliaria_.Net_Core.Controllers
 {
-    [Authorize(Roles = "Administrador,Empleado")]
+    [Authorize(Roles = "Administrador")]
     public class UsuariosController : Controller
     {
         private readonly ILogger<UsuariosController> logger;
@@ -32,7 +32,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios
-        // [Authorize(Roles = "Administrador")]
+         [Authorize(Roles = "Administrador")]
         public ActionResult Index(int pagina = 1)
         {
             const int tamPagina = 10;

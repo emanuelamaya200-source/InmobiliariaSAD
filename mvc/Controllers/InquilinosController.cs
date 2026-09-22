@@ -67,6 +67,7 @@ namespace mvc.Controllers
         // POST: Inquilinos/Guardar
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult Guardar(Inquilino inquilino)
         {
             if (ModelState.IsValid)

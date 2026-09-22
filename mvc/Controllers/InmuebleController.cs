@@ -147,6 +147,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         // POST: Inmuebles/GuardarAjax
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public ActionResult GuardarAjax(int id, Inmueble entidad)
         {
             try

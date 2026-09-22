@@ -227,6 +227,7 @@ namespace mvc.Controllers
         // POST: Reservas/TerminarReservaAnticipada
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult TerminarReservaAnticipada(int idReserva, DateTime nuevoFinFecha)
         {
             try
@@ -248,6 +249,7 @@ namespace mvc.Controllers
         // POST: Reservas/RenovarReserva
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult RenovarReserva(int idReserva, DateTime nuevoFinFecha, decimal nuevoPrecio)
         {
             try
