@@ -24,78 +24,84 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        <!-- Visible para todos -->
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home"
-                               asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+
+                        <!-- Visible solo para usuarios logueados (Empleados o Administradores) -->
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Propietarios"
-                               asp-action="Index">Propietarios</a>
+                            <a class="nav-link text-dark" asp-controller="Propietarios" asp-action="Index">Propietarios</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Inquilinos" asp-action="Index">Inquilinos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="TipoInmueble" asp-action="Index">Tipo
-                                Inmuebles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Inmuebles" asp-action="Index">Inmuebles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Reservas" asp-action="Index">Reservas</a>
-                            </li>
+                            <a class="nav-link text-dark" asp-controller="TipoInmueble" asp-action="Index">Tipo Inmuebles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Inmuebles" asp-action="Index">Inmuebles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Reservas" asp-action="Index">Reservas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Pagos" asp-action="Index">Pagos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Usuarios" asp-action="Perfil">Mi Perfil</a>
+                        </li>
+                        }
+
+                        <!-- Visible exclusivamente para el rol Administrador -->
+                        @if (User.IsInRole("Administrador"))
+                        {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="usuarios" asp-action="Index">Usuarios</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Pagos" asp-action="Index">Pagos</a>
-                            </li>
-                            @if (User.Identity?.IsAuthenticated == true)
-                            {
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Usuarios" asp-action="Perfil">Mi Perfil</a></li>
-                            }
-                        </ul>
-                        <div>
-                            @if (User.Identity != null && User.Identity.IsAuthenticated)
-                            {
-                                <a class="btn btn-outline-danger" asp-controller="Home" asp-action="Logout"
-                                   title="Cerrar sesion">
-                                    <i class="bi bi-x-circle"></i> Cerrar Sesion
-                                </a>
-
-                            }
-                            else
-                            {
+                        }
+                    </ul>
+                    <div>
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <a class="btn btn-outline-danger" asp-controller="Home" asp-action="Logout"
+                               title="Cerrar sesion">
+                                <i class="bi bi-x-circle"></i> Cerrar Sesion
+                            </a>
+                        }
+                        else
+                        {
                             <a class="btn btn-outline-primary" asp-controller="Login" asp-action="Index"
                                title="Iniciar sesion">
                                 <i class="bi bi-person-fill"></i> Iniciar Sesion
                             </a>
-                            }
-                        </div>
-
+                        }
                     </div>
-                </div>
-            </nav>
-        </header>
-        <div class="container">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
-        </div>
 
-        <footer class="border-top footer text-muted">
-            <div class="container">
-                &copy; 2026 - Inmobiliaria - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                </div>
             </div>
-        </footer>
-        <script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="~/js/site.js" asp-append-version="true"></script>
-        @await RenderSectionAsync("Scripts", required: false)
-    </body>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - Inmobiliaria - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
 
 </html>
