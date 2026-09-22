@@ -4,5 +4,7 @@ namespace Inmobiliaria_.Net_Core.Models
 	{
 		int ModificarPortada(int InmuebleId, string ruta);
 		IList<Inmueble> BuscarPorPropietario(int idPropietario);
+
+		IList<Inmueble> BuscarPorTipo(string tipo);
 	}
 }

@@ -298,7 +298,62 @@ public Inmueble? ObtenerPorId(int id)
             }
 
             return cantidadDeDias * inmueble.PrecioPorDia;
-        }
+		}
 
-    }
+		public IList<Inmueble> BuscarPorTipo(string busqueda)
+		{
+			var lista = new List<Inmueble>();
+			using (MySqlConnection connection = new MySqlConnection(connectionString))
+			{
+				string sql = $@"SELECT i.IdInmueble AS {nameof(Inmueble.Id)}, i.{nameof(Inmueble.Direccion)}, i.{nameof(Inmueble.Cupo)},
+                i.{nameof(Inmueble.PrecioPorDia)}, i.{nameof(Inmueble.PorcentajeReserva)},
+                i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)}, i.{nameof(Inmueble.IdTipoInmueble)}, i.{nameof(Inmueble.Portada)},
+                p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}, t.{nameof(tipoInmueble.Descripcion)} 
+                FROM Inmueble i 
+                INNER JOIN Propietario p ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.IdPropietario)} 
+                INNER JOIN TipoInmueble t ON i.{nameof(Inmueble.IdTipoInmueble)} = t.IdTipoInmueble
+                WHERE i.Direccion LIKE @busqueda OR t.Descripcion LIKE @busqueda
+                ORDER BY i.IdInmueble";
+
+				using (MySqlCommand command = new MySqlCommand(sql, connection))
+				{
+					command.Parameters.AddWithValue("@busqueda", $"%{busqueda}%");
+					connection.Open();
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							lista.Add(new Inmueble
+							{
+								Id = reader.GetInt32(nameof(Inmueble.Id)),
+								Direccion = reader[nameof(Inmueble.Direccion)] == DBNull.Value ? "" : reader.GetString(nameof(Inmueble.Direccion)),
+								Portada = reader[nameof(Inmueble.Portada)] == DBNull.Value ? null : reader.GetString(nameof(Inmueble.Portada)),
+								Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
+								PrecioPorDia = reader.GetDecimal(nameof(Inmueble.PrecioPorDia)),
+								PorcentajeReserva = reader.GetDecimal(nameof(Inmueble.PorcentajeReserva)),
+								Latitud = reader.GetDecimal(nameof(Inmueble.Latitud)),
+								Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
+								PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+								IdTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
+								Duenio = new Propietario
+								{
+									IdPropietario = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+									Nombre = reader.GetString(nameof(Propietario.Nombre)),
+									Apellido = reader.GetString(nameof(Propietario.Apellido))
+								},
+								Tipo = new tipoInmueble
+								{
+									idTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
+									Descripcion = reader.GetString(nameof(tipoInmueble.Descripcion))
+								}
+							});
+						}
+					}
+					connection.Close();
+				}
+			}
+			return lista;
+		}
+
+	}
 }

@@ -6,6 +6,17 @@
     <a asp-action="Editar" class="btn btn-primary">Alta Propietario</a>
 </p>
 
+<div class="col-md-6">
+    <form asp-action="Index" method="get" class="d-flex">
+        <input type="text" name="nombre" class="form-control me-2" placeholder="Buscar por nombre, apellido o DNI..." value="@ViewBag.Nombre" />
+        <button type="submit" class="btn btn-outline-secondary">Buscar</button>
+        @if (!string.IsNullOrEmpty(ViewBag.Nombre))
+        {
+            <a asp-action="Index" class="btn btn-outline-danger ms-2" title="Limpiar búsqueda">Limpiar</a>
+        }
+    </form>
+</div>
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -44,11 +55,15 @@
 }
     </tbody>
 </table>
-<ul class="pagination">
-    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
-    {
-        <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
-            <a class="page-link" asp-route-pagina="@i" asp-route-nombre="@ViewBag.Nombre">@i</a>
-        </li>
-    }
-</ul>
+
+@if (ViewBag.TotalPaginas > 1)
+{
+    <ul class="pagination">
+        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+        {
+            <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@i" asp-route-nombre="@ViewBag.Nombre">@i</a>
+            </li>
+        }
+    </ul>
+}

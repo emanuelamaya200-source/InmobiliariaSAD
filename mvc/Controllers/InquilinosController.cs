@@ -15,14 +15,28 @@ namespace mvc.Controllers
         }
 
         // GET: Inquilinos
-        public IActionResult Index(int pagina = 1)
+        public IActionResult Index(string? nombre, int pagina = 1)
         {
             const int tamPagina = 10;
             pagina = Math.Max(1, pagina);
-            var lista = repositorio.ObtenerLista(pagina, tamPagina);
-            var total = repositorio.ObtenerCantidad();
+            IList<Inquilino> resultados;
+
+            if (!string.IsNullOrWhiteSpace(nombre))
+            {
+                resultados = repositorio.BuscarPorNombre(nombre);
+            }
+            else
+            {
+                resultados = repositorio.ObtenerLista(1, int.MaxValue);
+            }
+
+            var total = resultados.Count;
+            var lista = resultados.Skip((pagina - 1) * tamPagina).Take(tamPagina).ToList();
+
             ViewBag.PaginaActual = pagina;
             ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
+            ViewBag.Nombre = nombre; 
+
             return View(lista);
         }
 

@@ -172,5 +172,39 @@ namespace Inmobiliaria_.Net_Core.Models
             return lista;
         }
 
+                public IList<Inquilino> BuscarPorNombre(string nombre)
+        {
+            var lista = new List<Inquilino>();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"SELECT IdInquilino, Nombre, Apellido, Dni, Telefono, Email 
+                       FROM Inquilino 
+                       WHERE Nombre LIKE @nombre OR Apellido LIKE @nombre OR Dni LIKE @nombre
+                       ORDER BY IdInquilino";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@nombre", $"%{nombre}%");
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Inquilino
+                            {
+                                IdInquilino = reader.GetInt32(nameof(Inquilino.IdInquilino)),
+                                Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                                Apellido = reader.GetString(nameof(Inquilino.Apellido)),
+                                Dni = reader.GetString(nameof(Inquilino.Dni)),
+                                Telefono = reader.IsDBNull(reader.GetOrdinal(nameof(Inquilino.Telefono))) ? "" : reader.GetString(nameof(Inquilino.Telefono)),
+                                Email = reader.GetString(nameof(Inquilino.Email))
+                            });
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            return lista;
+        }
+
     }
 }

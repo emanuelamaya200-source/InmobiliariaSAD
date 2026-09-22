@@ -177,9 +177,39 @@ namespace Inmobiliaria_.Net_Core.Models
             return lista;
         }
 
-        public IList<Propietario> BuscarPorNombre(string Nombre)
+        public IList<Propietario> BuscarPorNombre(string nombre)
         {
-            throw new NotImplementedException();
+            var lista = new List<Propietario>();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"SELECT IdPropietario, Nombre, Apellido, Dni, Telefono, Email, Clave 
+                       FROM Propietario 
+                       WHERE Nombre LIKE @nombre OR Apellido LIKE @nombre OR Dni LIKE @nombre
+                       ORDER BY IdPropietario";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@nombre", $"%{nombre}%");
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Propietario
+                            {
+                                IdPropietario = reader.GetInt32(nameof(Propietario.IdPropietario)),
+                                Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                                Apellido = reader.GetString(nameof(Propietario.Apellido)),
+                                Dni = reader.GetString(nameof(Propietario.Dni)),
+                                Telefono = reader.IsDBNull(reader.GetOrdinal(nameof(Propietario.Telefono))) ? "" : reader.GetString(nameof(Propietario.Telefono)),
+                                Email = reader.GetString(nameof(Propietario.Email)),
+                                Clave = reader.GetString(nameof(Propietario.Clave))
+                            });
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            return lista;
         }
 
 

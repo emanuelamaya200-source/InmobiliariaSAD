@@ -22,26 +22,41 @@ namespace Inmobiliaria_.Net_Core.Controllers
         {
             this.repositorio = repositorio;
             this.repoPropietario = repoPropietrio;
-            this.repoTipoInmueble =  repoTipoInmueble;
+            this.repoTipoInmueble = repoTipoInmueble;
         }
 
         // GET: Inmuebles
-        public ActionResult Index(int pagina = 1)
+        public ActionResult Index(int pagina = 1, string? nombre = null)
         {
             const int tamPagina = 10;
             pagina = Math.Max(1, pagina);
-            var lista = repositorio.ObtenerLista(pagina, tamPagina);
-            int total = repositorio.ObtenerCantidad();
+            IList<Inmueble> resultados;
+
+            if (!string.IsNullOrWhiteSpace(nombre))
+            {
+                resultados = repositorio.BuscarPorTipo(nombre);
+            }
+            else
+            {
+                resultados = repositorio.ObtenerLista(1, int.MaxValue);
+            }
+
+            var total = resultados.Count;
+            var lista = resultados.Skip((pagina - 1) * tamPagina).Take(tamPagina).ToList();
+
             ViewBag.PaginaActual = pagina;
             ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
+            ViewBag.Nombre = nombre;
+
             if (TempData.ContainsKey("Id"))
                 ViewBag.Id = TempData["Id"];
             if (TempData.ContainsKey("Mensaje"))
                 ViewBag.Mensaje = TempData["Mensaje"];
+
             return View(lista);
         }
 
-         public IActionResult Detalles(int id)
+        public IActionResult Detalles(int id)
         {
             var tipo = repositorio.ObtenerPorId(id);
             if (tipo == null)
