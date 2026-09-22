@@ -76,7 +76,12 @@ namespace Inmobiliaria_.Net_Core.Models
 
         public int ObtenerCantidad()
         {
-            throw new NotImplementedException();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlCommand command = new MySqlCommand("SELECT COUNT(*) FROM tipoInmueble", connection))
+            {
+                connection.Open();
+                return Convert.ToInt32(command.ExecuteScalar());
+            }
         }
 
         public IList<tipoInmueble> ObtenerLista(int pagina, int tamanioPagina)

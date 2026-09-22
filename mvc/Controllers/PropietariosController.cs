@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Administrador,Empleado")]
     public class PropietariosController : Controller
     {
         private readonly IRepositorioPropietario repositorio;
@@ -15,19 +15,26 @@ namespace mvc.Controllers
         }
 
         // GET: Propietarios
-        public IActionResult Index(string? nombre)
+        public IActionResult Index(string? nombre, int pagina = 1)
         {
-            IList<Propietario> lista;
+            const int tamPagina = 10;
+            pagina = Math.Max(1, pagina);
+            IList<Propietario> resultados;
 
             if (!string.IsNullOrWhiteSpace(nombre))
             {
-                lista = repositorio.BuscarPorNombre(nombre);
+                resultados = repositorio.BuscarPorNombre(nombre);
             }
             else
             {
-                lista = repositorio.ObtenerLista();
+                resultados = repositorio.ObtenerLista(1, int.MaxValue);
             }
 
+            var total = resultados.Count;
+            var lista = resultados.Skip((pagina - 1) * tamPagina).Take(tamPagina).ToList();
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
+            ViewBag.Nombre = nombre;
             return View(lista);
         }
 

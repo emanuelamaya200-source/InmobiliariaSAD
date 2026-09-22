@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Inmobiliaria_.Net_Core.Controllers
 {
+    [Authorize(Roles = "Administrador,Empleado")]
     public class UsuariosController : Controller
     {
         private readonly ILogger<UsuariosController> logger;
@@ -34,7 +35,12 @@ namespace Inmobiliaria_.Net_Core.Controllers
         // [Authorize(Roles = "Administrador")]
         public ActionResult Index(int pagina = 1)
         {
-            var usuarios = repositorio.ObtenerLista(pagina);
+            const int tamPagina = 10;
+            pagina = Math.Max(1, pagina);
+            var usuarios = repositorio.ObtenerLista(pagina, tamPagina);
+            var total = repositorio.ObtenerCantidad();
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
             return View(usuarios);
         }
 

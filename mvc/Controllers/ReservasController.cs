@@ -8,6 +8,7 @@ using System.Security.Claims;
 namespace mvc.Controllers
 {
 
+    [Authorize(Roles = "Administrador,Empleado")]
     public class ReservasController : Controller
     {
         private readonly IRepositorioReserva repositorio;
@@ -24,20 +25,26 @@ namespace mvc.Controllers
         }
 
         // GET: Reservas
-        public IActionResult Index(int? id, DateTime? inicio, DateTime? fin, int? cupo)
+        public IActionResult Index(int? id, DateTime? inicio, DateTime? fin, int? cupo, int pagina = 1)
         {
-            IList<Reserva> lista;
+            const int tamPagina = 10;
+            pagina = Math.Max(1, pagina);
+            IList<Reserva> resultados;
 
             if (id.HasValue && id.Value > 0)
             {
                 var r = repositorio.ObtenerPorId(id.Value);
-                lista = r is null ? new List<Reserva>() : new List<Reserva> { r };
+                resultados = r is null ? new List<Reserva>() : new List<Reserva> { r };
             }
             else
             {
-                lista = repositorio.ObtenerPorRango(inicio, fin, cupo);
+                resultados = repositorio.ObtenerPorRango(inicio, fin, cupo);
             }
 
+            var total = resultados.Count;
+            var lista = resultados.Skip((pagina - 1) * tamPagina).Take(tamPagina).ToList();
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
             ViewBag.Inicio = inicio?.ToString("yyyy-MM-dd");
             ViewBag.Fin = fin?.ToString("yyyy-MM-dd");
             ViewBag.Cupo = cupo;

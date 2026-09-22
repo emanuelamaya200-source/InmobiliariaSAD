@@ -5,6 +5,7 @@ using System.Security.Claims;
 
 namespace mvc.Controllers
 {
+    [Authorize(Roles = "Administrador,Empleado")]
     public class PagosController : Controller
     {
         private readonly IRepositorioPago repositorio;
@@ -15,9 +16,14 @@ namespace mvc.Controllers
         }
 
         // GET: Pagos
-        public IActionResult Index()
+        public IActionResult Index(int pagina = 1)
         {
-            var lista = repositorio.ObtenerLista(1, 100, true);
+            const int tamPagina = 10;
+            pagina = Math.Max(1, pagina);
+            var lista = repositorio.ObtenerLista(pagina, tamPagina, true);
+            var total = repositorio.ObtenerCantidad(true);
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
             return View(lista);
         }
 

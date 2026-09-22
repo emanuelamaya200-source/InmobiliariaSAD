@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Inmobiliaria_.Net_Core.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Administrador,Empleado")]
     public class InmueblesController : Controller
     {
         private readonly IRepositorioInmueble repositorio;
@@ -26,9 +26,14 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Inmuebles
-        public ActionResult Index(int paginaNro = 1, int tamPagina = 10)
+        public ActionResult Index(int pagina = 1)
         {
-            var lista = repositorio.ObtenerLista(paginaNro, tamPagina);
+            const int tamPagina = 10;
+            pagina = Math.Max(1, pagina);
+            var lista = repositorio.ObtenerLista(pagina, tamPagina);
+            int total = repositorio.ObtenerCantidad();
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
             if (TempData.ContainsKey("Id"))
                 ViewBag.Id = TempData["Id"];
             if (TempData.ContainsKey("Mensaje"))

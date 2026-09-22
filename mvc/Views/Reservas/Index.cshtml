@@ -74,3 +74,11 @@ else
 }
     </tbody>
 </table>
+<ul class="pagination">
+    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+    {
+        <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+            <a class="page-link" asp-route-pagina="@i" asp-route-inicio="@ViewBag.Inicio" asp-route-fin="@ViewBag.Fin" asp-route-cupo="@ViewBag.Cupo">@i</a>
+        </li>
+    }
+</ul>

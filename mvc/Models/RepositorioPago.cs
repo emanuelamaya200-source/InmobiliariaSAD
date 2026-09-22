@@ -179,10 +179,15 @@ namespace Inmobiliaria_.Net_Core.Models
 
         public int ObtenerCantidad()
         {
+            return ObtenerCantidad(false);
+        }
+
+        public int ObtenerCantidad(bool incluirInactivos)
+        {
             int res = 0;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "SELECT COUNT(*) FROM Pago WHERE Estado <> 'Inactivo'";
+                string sql = incluirInactivos ? "SELECT COUNT(*) FROM Pago" : "SELECT COUNT(*) FROM Pago WHERE Estado <> 'Inactivo'";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     connection.Open();

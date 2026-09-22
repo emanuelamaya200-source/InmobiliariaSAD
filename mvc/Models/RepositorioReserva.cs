@@ -41,7 +41,11 @@ namespace Inmobiliaria_.Net_Core.Models
             using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand(sql, c); q.Parameters.AddWithValue("@inmueble", p.IdInmueble); q.Parameters.AddWithValue("@inquilino", p.IdInquilino); q.Parameters.AddWithValue("@entrada", p.FechaDeEntrada); q.Parameters.AddWithValue("@salida", p.FechaDeSalida); q.Parameters.AddWithValue("@id", p.IdReserva); c.Open(); return q.ExecuteNonQuery();
         }
 
-        public IList<Reserva> ObtenerLista(int paginaNro = 1, int tamPagina = 100) => ObtenerPorRango(null, null, null);
+        public IList<Reserva> ObtenerLista(int paginaNro = 1, int tamPagina = 10)
+        {
+            var reservas = ObtenerPorRango(null, null, null);
+            return reservas.Skip(Math.Max(0, paginaNro - 1) * tamPagina).Take(tamPagina).ToList();
+        }
 
         public IList<Reserva> ObtenerPorRango(DateTime? inicio, DateTime? fin, int? cupo)
         {
