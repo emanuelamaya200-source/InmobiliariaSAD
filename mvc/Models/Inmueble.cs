@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Inmobiliaria_.Net_Core.Models
 {
-	[Table("Inmuebles")]
 	public class Inmueble
 	{
 		[Display(Name = "Nº")]
@@ -27,17 +25,11 @@ namespace Inmobiliaria_.Net_Core.Models
 		public decimal Longitud { get; set; }
 		[Display(Name = "Dueño")]
 		public int PropietarioId { get; set; }
-		[ForeignKey(nameof(PropietarioId))]
 		public int IdTipoInmueble { get; set; }
-		[ForeignKey(nameof(IdTipoInmueble))]
     [BindNever]
 		public Propietario? Duenio { get; set; }
 		public tipoInmueble? Tipo { get; set;}
 		public string? Portada { get; set; }
-		[NotMapped]//Para EF
-		public IFormFile? PortadaFile { get; set; }
-		[ForeignKey(nameof(Imagen.InmuebleId))]
-		public IList<Imagen> Imagenes { get; set; } = new List<Imagen>();
 		public bool Habilitado { get; set; } = true;
 	}
 	

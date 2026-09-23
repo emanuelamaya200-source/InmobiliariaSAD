@@ -15,13 +15,15 @@ namespace mvc.Controllers
         private readonly IRepositorioPago repoPago;
         private readonly IRepositorioInquilino repoInquilino;
         private readonly IRepositorioInmueble repoInmueble;
+        private readonly IRepositorioAuditoria auditoriaRepositorio;
 
-        public ReservasController(IRepositorioReserva repositorio, IRepositorioPago repoPago, IRepositorioInquilino repoInquilino, IRepositorioInmueble repoInmueble)
+        public ReservasController(IRepositorioReserva repositorio, IRepositorioPago repoPago, IRepositorioInquilino repoInquilino, IRepositorioInmueble repoInmueble, IRepositorioAuditoria auditoriaRepositorio)
         {
             this.repositorio = repositorio;
             this.repoPago = repoPago;
             this.repoInquilino = repoInquilino;
             this.repoInmueble = repoInmueble;
+            this.auditoriaRepositorio = auditoriaRepositorio;
         }
 
         [Authorize(Roles = "Administrador,Empleado")]
@@ -43,6 +45,7 @@ namespace mvc.Controllers
                 if (ModelState.IsValid)
                 {
                     repositorio.Alta(reserva);
+                    auditoriaRepositorio.Registrar(User, "Reserva", reserva.IdReserva, "Alta", $"Inmueble {reserva.IdInmueble}");
                     TempData["Mensaje"] = "Reserva creada correctamente";
                     return RedirectToAction(nameof(Index));
                 }
@@ -171,6 +174,7 @@ namespace mvc.Controllers
                 if (reserva.IdReserva > 0)
                 {
                     repositorio.Modificacion(reserva);
+                    auditoriaRepositorio.Registrar(User, "Reserva", reserva.IdReserva, "Modificacion", $"Inmueble {reserva.IdInmueble}");
                 }
                 else
                 {
@@ -188,6 +192,7 @@ namespace mvc.Controllers
                         Estado = "Activo",
                         Fecha = DateOnly.FromDateTime(DateTime.Today)
                     });
+                    auditoriaRepositorio.Registrar(User, "Reserva", reserva.IdReserva, "Alta", $"Inmueble {reserva.IdInmueble}");
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -220,6 +225,7 @@ namespace mvc.Controllers
             try
             {
                 repositorio.Cancelar(id, UsuarioActualId());
+                auditoriaRepositorio.Registrar(User, "Reserva", id, "Baja", "Reserva cancelada");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -271,6 +277,7 @@ namespace mvc.Controllers
                     return BadRequest("No se pudo terminar la reserva.");
                 }
 
+                auditoriaRepositorio.Registrar(User, "Reserva", idReserva, "Modificacion", $"Finalizada el {nuevoFinFecha:dd/MM/yyyy}");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -293,6 +300,7 @@ namespace mvc.Controllers
                     return BadRequest("No se pudo renovar la reserva.");
                 }
 
+                auditoriaRepositorio.Registrar(User, "Reserva", idReserva, "Alta", $"Renovada hasta {nuevoFinFecha:dd/MM/yyyy}");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception e)

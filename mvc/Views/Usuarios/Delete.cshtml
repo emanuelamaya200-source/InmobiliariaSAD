@@ -1,0 +1,10 @@
+@model Inmobiliaria_.Net_Core.Models.Usuario
+
+<h2>Eliminar usuario</h2>
+<p>¿Desea eliminar a <strong>@Model.Nombre @Model.Apellido</strong>?</p>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

@@ -1,0 +1,51 @@
+@model IEnumerable<Inmobiliaria_.Net_Core.Models.Auditoria>
+
+@{
+    ViewData["Title"] = "Auditoría";
+}
+
+<h2>Auditoría del sistema</h2>
+
+<table class="table table-bordered table-striped table-sm">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Entidad</th>
+            <th>Id</th>
+            <th>Acción</th>
+            <th>Usuario</th>
+            <th>Detalle</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.Entidad</td>
+                    <td>@item.EntidadId</td>
+                    <td>@item.Accion</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.UsuarioNombre) ? (item.UsuarioId.HasValue ? item.UsuarioId.Value.ToString() : "-") : item.UsuarioNombre)</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.Detalle) ? "-" : item.Detalle)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">No hay registros de auditoría.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<ul class="pagination">
+    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+    {
+        <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+            <a class="page-link" asp-route-pagina="@i">@i</a>
+        </li>
+    }
+</ul>

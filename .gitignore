@@ -31,7 +31,7 @@ msbuild.wrn
 packages/
 **/packages/*
 
-## Bases de Datos Locales y Entity Framework
+## Bases de Datos Locales
 *.db
 *.db-shm
 *.db-wal

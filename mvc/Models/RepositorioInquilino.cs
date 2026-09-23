@@ -49,13 +49,32 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "DELETE FROM Inquilino WHERE IdInquilino = @id";
+                string sql = @"
+                    DELETE FROM pago
+                    WHERE IdReserva IN (
+                        SELECT IdReserva FROM (
+                            SELECT IdReserva FROM reserva WHERE IdInquilino = @id
+                        ) AS reservas_inquilino
+                    );
+                    DELETE FROM reserva WHERE IdInquilino = @id;
+                    DELETE FROM Inquilino WHERE IdInquilino = @id;";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
                     command.Parameters.AddWithValue("@id", id);
                     connection.Open();
-                    res = command.ExecuteNonQuery();
+                    using var transaction = connection.BeginTransaction();
+                    command.Transaction = transaction;
+                    try
+                    {
+                        res = command.ExecuteNonQuery();
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                     connection.Close();
                 }
             }

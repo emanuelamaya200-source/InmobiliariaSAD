@@ -9,10 +9,12 @@ namespace mvc.Controllers
     public class PagosController : Controller
     {
         private readonly IRepositorioPago repositorio;
+        private readonly IRepositorioAuditoria auditoriaRepositorio;
 
-        public PagosController(IRepositorioPago repositorio)
+        public PagosController(IRepositorioPago repositorio, IRepositorioAuditoria auditoriaRepositorio)
         {
             this.repositorio = repositorio;
+            this.auditoriaRepositorio = auditoriaRepositorio;
         }
 
         // GET: Pagos
@@ -37,7 +39,7 @@ namespace mvc.Controllers
             return View("Editar", pago);
         }
 
-        // GET: Pagos/Editar/5 (SOLO Administrador)
+        // GET: Pagos/Editar/5
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
@@ -51,14 +53,14 @@ namespace mvc.Controllers
             return View("Editar", pago);
         }
 
-        // GET: Pagos/Crear (Permitido para Administradores y Empleados)
+        // GET: Pagos/Crear 
         public IActionResult Crear(int idReserva)
         {
             if (idReserva <= 0) return BadRequest();
             return View("Crear", new Pago { IdReserva = idReserva, Estado = "Activo", Fecha = DateOnly.FromDateTime(DateTime.Today) });
         }
 
-        // POST: Pagos/GuardarCrear (Para nuevos pagos creados por Empleados o Admins)
+        // POST: Pagos/GuardarCrear 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult GuardarCrear(Pago pago)
@@ -68,12 +70,13 @@ namespace mvc.Controllers
                 pago.UsuarioCreacionId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var usuarioId) ? usuarioId : null;
                 pago.Estado = "Activo";
                 repositorio.Alta(pago);
+                auditoriaRepositorio.Registrar(User, "Pago", pago.IdPago, "Alta", $"Reserva {pago.IdReserva}: {pago.Concepto}");
                 return RedirectToAction(nameof(Index));
             }
             return View("Crear", pago);
         }
 
-        // POST: Pagos/Guardar (SOLO Administrador para modificaciones)
+        // POST: Pagos/Guardar 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
@@ -82,12 +85,13 @@ namespace mvc.Controllers
             if (ModelState.IsValid)
             {
                 repositorio.Modificacion(pago);
+                auditoriaRepositorio.Registrar(User, "Pago", pago.IdPago, "Modificacion", $"Reserva {pago.IdReserva}: {pago.Concepto}");
                 return RedirectToAction(nameof(Index));
             }
             return View("Editar", pago);
         }
 
-        // GET: Pagos/Eliminar/5 (SOLO Administrador)
+        // GET: Pagos/Eliminar/5 
         [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
         {
@@ -98,23 +102,25 @@ namespace mvc.Controllers
             return View("Baja", pago);
         }
 
-        // POST: Pagos/Borrar/5 (Baja lógica - SOLO Administrador)
+        // POST: Pagos/Borrar/5 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
         public IActionResult Borrar(int id)
         {
             repositorio.Baja(id);
+            auditoriaRepositorio.Registrar(User, "Pago", id, "Baja", "Pago dado de baja");
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Pagos/Alta/5 (Reactivación - SOLO Administrador)
+        // POST: Pagos/Alta/5 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
         public IActionResult Alta(int id)
         {
             repositorio.Reactivar(id);
+            auditoriaRepositorio.Registrar(User, "Pago", id, "Alta", "Pago reactivado");
             return RedirectToAction(nameof(Index));
         }
     }

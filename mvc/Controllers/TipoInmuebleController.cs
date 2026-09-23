@@ -8,10 +8,12 @@ namespace mvc.Controllers
         public class TipoInmuebleController : Controller
     {
         private readonly IRepositorioTipoInmueble repositorio;
+        private readonly IRepositorioAuditoria auditoriaRepositorio;
 
-        public TipoInmuebleController(IRepositorioTipoInmueble repositorio)
+        public TipoInmuebleController(IRepositorioTipoInmueble repositorio, IRepositorioAuditoria auditoriaRepositorio)
         {
             this.repositorio = repositorio;
+            this.auditoriaRepositorio = auditoriaRepositorio;
         }
 
         // GET: Inquilinos
@@ -65,10 +67,12 @@ namespace mvc.Controllers
                 if (tipoInmueble.idTipoInmueble > 0)
                 {
                     repositorio.Modificacion(tipoInmueble);
+                    auditoriaRepositorio.Registrar(User, "TipoInmueble", tipoInmueble.idTipoInmueble, "Modificacion", tipoInmueble.Descripcion);
                 }
                 else
                 {
                     repositorio.Alta(tipoInmueble);
+                    auditoriaRepositorio.Registrar(User, "TipoInmueble", tipoInmueble.idTipoInmueble, "Alta", tipoInmueble.Descripcion);
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -97,7 +101,15 @@ namespace mvc.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Borrar(int id)
         {
-            repositorio.Baja(id);
+            try
+            {
+                repositorio.Baja(id);
+                auditoriaRepositorio.Registrar(User, "TipoInmueble", id, "Baja", "Tipo de inmueble eliminado");
+            }
+            catch (MySql.Data.MySqlClient.MySqlException)
+            {
+                TempData["Error"] = "No se puede eliminar este tipo porque tiene inmuebles o reservas relacionadas.";
+            }
             return RedirectToAction(nameof(Index));
         }
 

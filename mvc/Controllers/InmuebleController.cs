@@ -17,12 +17,14 @@ namespace Inmobiliaria_.Net_Core.Controllers
         private readonly IRepositorioPropietario repoPropietario;
 
         private readonly IRepositorioTipoInmueble repoTipoInmueble;
+        private readonly IRepositorioAuditoria auditoriaRepositorio;
 
-        public InmueblesController(IRepositorioInmueble repositorio, IRepositorioPropietario repoPropietrio, IRepositorioTipoInmueble repoTipoInmueble)
+        public InmueblesController(IRepositorioInmueble repositorio, IRepositorioPropietario repoPropietrio, IRepositorioTipoInmueble repoTipoInmueble, IRepositorioAuditoria auditoriaRepositorio)
         {
             this.repositorio = repositorio;
             this.repoPropietario = repoPropietrio;
             this.repoTipoInmueble = repoTipoInmueble;
+            this.auditoriaRepositorio = auditoriaRepositorio;
         }
 
         // GET: Inmuebles
@@ -117,12 +119,14 @@ namespace Inmobiliaria_.Net_Core.Controllers
                     if (entidad.Id == 0)
                     {
                         repositorio.Alta(entidad);
+                        auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Alta", $"Dirección: {entidad.Direccion}");
                         TempData["Id"] = entidad.Id;
                         TempData["Mensaje"] = "Inmueble creado correctamente";
                     }
                     else
                     {
                         repositorio.Modificacion(entidad);
+                        auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Modificacion", $"Dirección: {entidad.Direccion}");
                         TempData["Mensaje"] = "Inmueble modificado correctamente";
                     }
                     return RedirectToAction(nameof(Index));
@@ -157,10 +161,12 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 if (id == 0)
                 {
                     id = repositorio.Alta(entidad);
+                    auditoriaRepositorio.Registrar(User, "Inmueble", id, "Alta", $"Dirección: {entidad.Direccion}");
                 }
                 else
                 {
                     repositorio.Modificacion(entidad);
+                    auditoriaRepositorio.Registrar(User, "Inmueble", id, "Modificacion", $"Dirección: {entidad.Direccion}");
                 }
                 var res = repositorio.BuscarPorPropietario(entidad.PropietarioId);
                 return Ok(res);
@@ -192,6 +198,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
             try
             {
                 repositorio.Baja(id);
+                auditoriaRepositorio.Registrar(User, "Inmueble", id, "Baja", "Inmueble eliminado");
                 TempData["Mensaje"] = "Eliminación realizada correctamente";
                 return RedirectToAction(nameof(Index));
             }
@@ -212,6 +219,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
             try
             {
                 repositorio.Baja(id);
+                auditoriaRepositorio.Registrar(User, "Inmueble", id, "Baja", "Inmueble eliminado");
                 TempData["Mensaje"] = "Eliminación realizada correctamente";
                 return RedirectToAction(nameof(Index));
             }
@@ -234,6 +242,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                     return NotFound();
                 entidad.Habilitado = !entidad.Habilitado;
                 repositorio.Modificacion(entidad);
+                auditoriaRepositorio.Registrar(User, "Inmueble", id, "Modificacion", $"Estado habilitado: {entidad.Habilitado}");
                 return Ok(entidad);
             }
             catch (Exception ex)

@@ -15,16 +15,18 @@ namespace Inmobiliaria_.Net_Core.Controllers
         private readonly IConfiguration configuration;
         private readonly IWebHostEnvironment environment;
         private readonly IRepositorioUsuario repositorio;
+        private readonly IRepositorioAuditoria auditoriaRepositorio;
 
-        public UsuariosController(IConfiguration configuration, IWebHostEnvironment environment, IRepositorioUsuario repositorio, ILogger<UsuariosController> logger)
+        public UsuariosController(IConfiguration configuration, IWebHostEnvironment environment, IRepositorioUsuario repositorio, IRepositorioAuditoria auditoriaRepositorio, ILogger<UsuariosController> logger)
         {
             this.configuration = configuration;
             this.environment = environment;
             this.repositorio = repositorio;
+            this.auditoriaRepositorio = auditoriaRepositorio;
             this.logger = logger;
         }
 
-        // Método auxiliar para obtener el ID del usuario logueado desde los Claims
+        
         private int UsuarioId()
         {
             var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -77,7 +79,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                             iterationCount: 1000,
                             numBytesRequested: 256 / 8));
                 u.Clave = hashed;
-                var nbreRnd = Guid.NewGuid();//posible nombre aleatorio
+                var nbreRnd = Guid.NewGuid();
                 int res = repositorio.Alta(u);
                 if (u.AvatarFile != null && u.Id > 0)
                 {
@@ -97,6 +99,8 @@ namespace Inmobiliaria_.Net_Core.Controllers
                     }
                     repositorio.Modificacion(u);
                 }
+
+                auditoriaRepositorio.Registrar(User, "Usuario", u.Id, "Alta", "Usuario creado");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -138,10 +142,9 @@ namespace Inmobiliaria_.Net_Core.Controllers
             var vista = nameof(Editar);
             try
             {
-                if (!User.IsInRole("Administrador"))//no soy admin
+                if (!User.IsInRole("Administrador"))
                 {
-                    vista = nameof(Perfil);//solo puedo ver mi perfil
-                    // El Id ya viene en la cookie: se compara directo, sin ir a la BD.
+                    vista = nameof(Perfil);
                     if (UsuarioId() != id)
                         return RedirectToAction(nameof(Index), "Home");
                 }
@@ -165,6 +168,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                     actual.Avatar = "/Uploads/" + fileName;
                 }
                 repositorio.Modificacion(actual);
+                auditoriaRepositorio.Registrar(User, "Usuario", actual.Id, "Modificacion", $"Email: {actual.Email}");
 
                 return RedirectToAction(vista);
             }
@@ -179,8 +183,11 @@ namespace Inmobiliaria_.Net_Core.Controllers
         [Authorize(Roles = "Administrador")]
         public ActionResult Delete(int id)
         {
-            // TODO: Add delete logic here
-            throw new NotImplementedException();
+            var usuario = repositorio.ObtenerPorId(id);
+            if (usuario == null)
+                return NotFound();
+
+            return View(usuario);
         }
 
         // POST: Usuarios/Delete/5
@@ -195,6 +202,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 if (System.IO.File.Exists(ruta))
                     System.IO.File.Delete(ruta);
                 repositorio.Baja(id);
+                auditoriaRepositorio.Registrar(User, "Usuario", id, "Baja", "Usuario eliminado");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

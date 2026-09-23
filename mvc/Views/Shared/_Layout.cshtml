@@ -28,10 +28,6 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-
                         <!-- Visible solo para usuarios logueados (Empleados o Administradores) -->
                         @if (User.Identity?.IsAuthenticated == true)
                         {
@@ -64,6 +60,9 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="usuarios" asp-action="Index">Usuarios</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Auditorias" asp-action="Index">Auditoría</a>
+                            </li>
                         }
                     </ul>
                     <div>
@@ -95,7 +94,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - Inmobiliaria - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - Inmobiliaria
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

@@ -164,6 +164,24 @@ INSERT INTO `usuarios` (`Nombre`, `Apellido`, `Avatar`, `Email`, `Clave`, `Rol`)
 ('Nicolas', 'Torres', NULL, 'nicolas.torres@gmail.com', '123456', 2),
 ('Paula', 'Acuna', NULL, 'paula.acuna@gmail.com', '123456', 2),
 ('Rodrigo', 'Gutierrez', NULL, 'rodrigo.gutierrez@gmail.com', '123456', 2);
+
+CREATE TABLE IF NOT EXISTS `Auditoria` (
+    `Id` INT NOT NULL AUTO_INCREMENT,
+    `Entidad` VARCHAR(50) NOT NULL,
+    `EntidadId` INT NOT NULL,
+    `Accion` VARCHAR(30) NOT NULL,
+    `UsuarioId` INT NULL,
+    `UsuarioNombre` VARCHAR(120) NULL,
+    `Fecha` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `Detalle` VARCHAR(500) NULL,
+    PRIMARY KEY (`Id`),
+    INDEX `IX_Auditoria_Fecha` (`Fecha`),
+    INDEX `IX_Auditoria_UsuarioId` (`UsuarioId`),
+    CONSTRAINT `FK_Auditoria_Usuario`
+        FOREIGN KEY (`UsuarioId`) REFERENCES `usuarios` (`Id`)
+        ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 ALTER TABLE `inmueble` 
 ADD COLUMN `Disponible` TINYINT(1) NOT NULL DEFAULT 1;
 

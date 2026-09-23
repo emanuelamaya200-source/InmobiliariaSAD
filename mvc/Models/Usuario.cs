@@ -1,6 +1,5 @@
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Inmobiliaria_.Net_Core.Models
 {
@@ -24,11 +23,9 @@ namespace Inmobiliaria_.Net_Core.Models
 		[Required, DataType(DataType.Password)]
 		public string Clave { get; set; } = "";
 		public string? Avatar { get; set; }
-		[NotMapped]
 		public IFormFile? AvatarFile { get; set; }
 
 		public int Rol { get; set; }
-		[NotMapped]
 		public string RolNombre => Rol > 0 ? ((enRoles)Rol).ToString() : "";
 
 		public static IDictionary<int, string> ObtenerRoles()

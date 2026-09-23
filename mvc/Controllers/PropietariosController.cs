@@ -8,10 +8,12 @@ namespace mvc.Controllers
     public class PropietariosController : Controller
     {
         private readonly IRepositorioPropietario repositorio;
+        private readonly IRepositorioAuditoria auditoriaRepositorio;
 
-        public PropietariosController(IRepositorioPropietario repositorio)
+        public PropietariosController(IRepositorioPropietario repositorio, IRepositorioAuditoria auditoriaRepositorio)
         {
             this.repositorio = repositorio;
+            this.auditoriaRepositorio = auditoriaRepositorio;
         }
 
         // GET: Propietarios
@@ -76,10 +78,12 @@ namespace mvc.Controllers
                 if (propietario.IdPropietario > 0)
                 {
                     repositorio.Modificacion(propietario);
+                    auditoriaRepositorio.Registrar(User, "Propietario", propietario.IdPropietario, "Modificacion", $"Email: {propietario.Email}");
                 }
                 else
                 {
                     repositorio.Alta(propietario);
+                    auditoriaRepositorio.Registrar(User, "Propietario", propietario.IdPropietario, "Alta", $"Email: {propietario.Email}");
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -107,7 +111,15 @@ namespace mvc.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Borrar(int id)
         {
-            repositorio.Baja(id);
+            try
+            {
+                repositorio.Baja(id);
+                auditoriaRepositorio.Registrar(User, "Propietario", id, "Baja", "Propietario eliminado");
+            }
+            catch (MySql.Data.MySqlClient.MySqlException)
+            {
+                TempData["Error"] = "No se puede eliminar este propietario porque tiene inmuebles relacionados.";
+            }
             return RedirectToAction(nameof(Index));
         }
 

@@ -8,10 +8,12 @@ namespace mvc.Controllers
     public class InquilinosController : Controller
     {
         private readonly IRepositorioInquilino repositorio;
+        private readonly IRepositorioAuditoria auditoriaRepositorio;
 
-        public InquilinosController(IRepositorioInquilino repositorio)
+        public InquilinosController(IRepositorioInquilino repositorio, IRepositorioAuditoria auditoriaRepositorio)
         {
             this.repositorio = repositorio;
+            this.auditoriaRepositorio = auditoriaRepositorio;
         }
 
         // GET: Inquilinos
@@ -73,9 +75,15 @@ namespace mvc.Controllers
             if (ModelState.IsValid)
             {
                 if (inquilino.IdInquilino > 0)
+                {
                     repositorio.Modificacion(inquilino);
+                    auditoriaRepositorio.Registrar(User, "Inquilino", inquilino.IdInquilino, "Modificacion", $"Email: {inquilino.Email}");
+                }
                 else
+                {
                     repositorio.Alta(inquilino);
+                    auditoriaRepositorio.Registrar(User, "Inquilino", inquilino.IdInquilino, "Alta", $"Email: {inquilino.Email}");
+                }
 
                 return RedirectToAction(nameof(Index));
             }
@@ -100,6 +108,7 @@ namespace mvc.Controllers
         public IActionResult Borrar(int id)
         {
             repositorio.Baja(id);
+            auditoriaRepositorio.Registrar(User, "Inquilino", id, "Baja", "Inquilino eliminado");
             return RedirectToAction(nameof(Index));
         }
     }
