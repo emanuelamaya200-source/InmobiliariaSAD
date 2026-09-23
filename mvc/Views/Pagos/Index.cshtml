@@ -11,6 +11,7 @@
             <th>Monto</th>
             <th>Fecha</th>
             <th>Estado</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -24,26 +25,26 @@
             <td>@item.Estado</td>
             <td>
                 @if (User.IsInRole("Administrador"))
-					{
-                <a asp-action="Editar" asp-route-id="@item.IdPago" class="btn btn-sm btn-warning">
-                    <i class="bi bi-pencil-square"> </i> Modificar
-                </a>
-                @if (item.Estado == "Inactivo")
                 {
-                    <form asp-action="Alta" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@item.IdPago" />
-                        <button type="submit" class="btn btn-sm btn-success">
-                            <i class="bi bi-check-circle-fill"></i> Alta
-                        </button>
-                    </form>
-                }
-                else
-                {
-                    <a asp-action="Eliminar" asp-route-id="@item.IdPago" class="btn btn-sm btn-danger">
-                        <i class="bi bi-trash-fill"></i> Baja
+                    <a asp-action="Editar" asp-route-id="@item.IdPago" class="btn btn-sm btn-warning" title="Modificar Concepto">
+                        <i class="bi bi-pencil-square"> </i> Modificar
                     </a>
-                }
+                    @if (item.Estado == "Inactivo")
+                    {
+                        <form asp-action="Alta" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.IdPago" />
+                            <button type="submit" class="btn btn-sm btn-success" title="Dar Alta">
+                                <i class="bi bi-check-circle-fill"></i> Alta
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-action="Eliminar" asp-route-id="@item.IdPago" class="btn btn-sm btn-danger" title="Dar Baja">
+                            <i class="bi bi-trash-fill"></i> Baja
+                        </a>
+                    }
                 }
             </td>
         </tr>

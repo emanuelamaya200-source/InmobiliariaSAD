@@ -1,36 +1,38 @@
 @model Inmobiliaria_.Net_Core.Models.Pago
 
-<h2>Modificar Pago</h2>
+<h2>Agregar Pago</h2>
 
-<form asp-action="Guardar" method="post">
+<!-- Agregamos esto para ver si hay errores de validación -->
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+<form asp-action="GuardarCrear" method="post">
     @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="IdPago" />
     <input type="hidden" asp-for="IdReserva" />
-    <input type="hidden" asp-for="Estado" />
+    <input type="hidden" asp-for="Estado" value="Activo" />
 
     <div class="form-group mb-2">
-        <label asp-for="IdReserva" class="control-label"></label>
+        <label asp-for="IdReserva" class="control-label">ID Reserva</label>
         <input asp-for="IdReserva" class="form-control" readonly />
     </div>
 
     <div class="form-group mb-2">
         <label asp-for="Monto" class="control-label"></label>
-        <input asp-for="Monto" class="form-control" readonly />
-        <span class="text-muted small">El monto no se puede modificar.</span>
+        <input asp-for="Monto" class="form-control" type="number" min="0" step="0.01" required />
+        <span asp-validation-for="Monto" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-2">
         <label asp-for="Fecha" class="control-label"></label>
-        <input asp-for="Fecha" class="form-control" readonly />
-        <span class="text-muted small">La fecha no se puede modificar.</span>
+        <input asp-for="Fecha" class="form-control" type="date" required />
+        <span asp-validation-for="Fecha" class="text-danger"></span>
     </div>
-    
+
     <div class="form-group mb-2">
         <label asp-for="Concepto" class="control-label"></label>
         <input asp-for="Concepto" class="form-control" required />
         <span asp-validation-for="Concepto" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+    <button type="submit" class="btn btn-success">Guardar</button>
     <a asp-action="Index" class="btn btn-secondary">Volver</a>
 </form>

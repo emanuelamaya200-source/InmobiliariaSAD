@@ -8,7 +8,7 @@
 <h2>Listado de Reservas</h2>
 
 <p>
-    <a asp-action="Editar" class="btn btn-primary">Alta Reserva</a>
+    <a asp-action="Crear" class="btn btn-primary">Alta Reserva</a>
 </p>
 
 <form method="get" class="row g-2 mb-3">
@@ -49,7 +49,7 @@
                 <a asp-action="Detalles" asp-route-id="@item.IdReserva" class="btn btn-sm btn-info" title="Detalles">
                     <i class="bi bi-info-circle"> </i> Detalles
                 </a>
-                <a asp-controller="Pagos" asp-action="Pagar" asp-route-idReserva="@item.IdReserva" class="btn btn-sm btn-success" title="Pagar">
+                <a asp-controller="Pagos" asp-action="Crear" asp-route-idReserva="@item.IdReserva" class="btn btn-sm btn-success" title="Pagar">
                     <i class="bi bi-credit-card"></i> Pagar
                 </a>
                 @if (User.IsInRole("Administrador"))

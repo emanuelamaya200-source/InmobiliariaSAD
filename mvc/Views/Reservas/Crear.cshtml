@@ -2,18 +2,17 @@
 @model Inmobiliaria_.Net_Core.Models.Reserva
 
 @{
-    ViewData["Title"] = "Modificar Reserva";
+    ViewData["Title"] = "Alta de Reserva";
     IList<Inquilino>? inquilinos = (IList<Inquilino>?)ViewBag.Inquilinos ?? new List<Inquilino>();
     IList<Inmueble>? inmuebles = (IList<Inmueble>?)ViewBag.Inmuebles ?? new List<Inmueble>();    
 }
 
-<h2>Modificar Reserva</h2>
+<h2>Alta de Reserva</h2>
 
 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-<form asp-action="Editar" method="post">
+<form asp-action="Crear" method="post">
     @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="IdReserva" />
 
     <div class="form-group mb-3">
         <label class="control-label">Seleccione el Inmueble</label>
@@ -21,7 +20,7 @@
             <option value="">-- Seleccione un Inmueble --</option>
             @foreach (Inmueble t in inmuebles)
             {
-                <option value="@t.Id" selected="@(t.Id == Model.IdInmueble)">
+                <option value="@t.Id">
                     (@t.Id) , @t.Direccion , @t.Tipo.Descripcion
                 </option>
             }
@@ -35,7 +34,7 @@
             <option value="">-- Seleccione un Inquilino --</option>
             @foreach (Inquilino p in inquilinos)
             {
-                <option value="@p.IdInquilino" selected="@(p.IdInquilino == Model.IdInquilino)">
+                <option value="@p.IdInquilino">
                     (@p.Nombre @p.Apellido) (DNI: @p.Dni)
                 </option>
             }
@@ -55,6 +54,6 @@
         <span asp-validation-for="FechaDeSalida" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+    <button type="submit" class="btn btn-success">Guardar</button>
     <a asp-action="Index" class="btn btn-secondary">Volver</a>
 </form>

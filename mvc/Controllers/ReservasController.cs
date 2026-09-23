@@ -24,6 +24,39 @@ namespace mvc.Controllers
             this.repoInmueble = repoInmueble;
         }
 
+        [Authorize(Roles = "Administrador,Empleado")]
+        public IActionResult Crear()
+        {
+            ViewBag.Inquilinos = repoInquilino.ObtenerLista(1, int.MaxValue);
+            ViewBag.Inmuebles = repoInmueble.ObtenerLista(1, int.MaxValue);
+            return View(new Reserva());
+        }
+
+        // POST: Reservas/Crear
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador,Empleado")]
+        public IActionResult Crear(Reserva reserva)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    repositorio.Alta(reserva);
+                    TempData["Mensaje"] = "Reserva creada correctamente";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+            }
+
+            ViewBag.Inquilinos = repoInquilino.ObtenerLista(1, int.MaxValue);
+            ViewBag.Inmuebles = repoInmueble.ObtenerLista(1, int.MaxValue);
+            return View(reserva);
+        }
+
         // GET: Reservas
         public IActionResult Index(int? id, DateTime? inicio, DateTime? fin, int? cupo, int pagina = 1)
         {
