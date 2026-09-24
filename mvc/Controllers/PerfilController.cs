@@ -16,6 +16,7 @@ namespace mvc.Controllers
         }
 
         // GET: /Perfil o /Perfil/Index
+        [HttpGet]
         public IActionResult Index()
         {
 

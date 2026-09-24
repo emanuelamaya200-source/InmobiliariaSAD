@@ -127,6 +127,7 @@ namespace mvc.Controllers
         }
 
         // GET: Reservas
+        [HttpGet]
         public IActionResult Index(int? id, DateTime? inicio, DateTime? fin, int? cupo, int pagina = 1)
         {
             const int tamPagina = 10;
@@ -155,6 +156,7 @@ namespace mvc.Controllers
         }
 
         // GET: Reservas/Detalles/5
+        [HttpGet]
         public IActionResult Detalles(int id)
         {
             var reserva = repositorio.ObtenerPorId(id);
@@ -166,7 +168,8 @@ namespace mvc.Controllers
             return View(reserva);
         }
 
-        // GET: Reservas/Editar/5 (Crear si id <= 0, Modificar si id > 0)
+        // GET: Reservas/Editar/5
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
@@ -221,7 +224,6 @@ namespace mvc.Controllers
                 return View("Editar", reserva);
             }
 
-            // Validar solapamiento de fechas
             var reservasExistentes = repositorio.ObtenerLista();
             bool haySolapamiento = reservasExistentes.Any(r =>
                 r.IdInmueble == reserva.IdInmueble &&
@@ -284,6 +286,7 @@ namespace mvc.Controllers
         }
 
         // GET: Reservas/Eliminar/5 
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
         {

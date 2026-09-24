@@ -17,6 +17,7 @@ namespace mvc.Controllers
         }
 
         // GET: TipoInmueble
+        [HttpGet]
         public IActionResult Index(int pagina = 1)
         {
             const int tamPagina = 10;
@@ -40,6 +41,7 @@ namespace mvc.Controllers
 
 
         // GET: TipoInmueble/Crear
+        [HttpGet]
         public IActionResult Crear()
         {
             return View(new tipoInmueble());
@@ -62,6 +64,7 @@ namespace mvc.Controllers
 
 
         // GET: TipoInmueble/Editar/5 
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
@@ -95,6 +98,7 @@ namespace mvc.Controllers
 
 
         // GET: TipoInmueble/Eliminar/5
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
         {

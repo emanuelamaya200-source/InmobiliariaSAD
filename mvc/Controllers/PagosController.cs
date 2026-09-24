@@ -26,6 +26,7 @@ namespace mvc.Controllers
         }
 
         // GET: Pagos
+        [HttpGet]
         public IActionResult Index(int pagina = 1)
         {
             const int tamPagina = 10;
@@ -48,6 +49,7 @@ namespace mvc.Controllers
         }
 
         // GET: Pagos/Editar/5
+        [HttpGet]
         [Authorize(Roles = "Administrador, Empleado")]
         public IActionResult Editar(int id)
         {
@@ -62,6 +64,7 @@ namespace mvc.Controllers
         }
 
         // GET: Pagos/Crear 
+        [HttpGet]
         public IActionResult Crear(int idReserva)
         {
             if (idReserva <= 0) return BadRequest();
@@ -78,7 +81,7 @@ namespace mvc.Controllers
                 montoTotal = dias * inmueble.PrecioPorDia;
             }
 
-            //  Cálculo de la seña mínima en base al porcentaje del inmueble
+
             decimal porcentajeSeña = inmueble?.PorcentajeReserva ?? 0;
             decimal montoSeñaMinima = montoTotal * (porcentajeSeña / 100m);
 
@@ -138,7 +141,7 @@ namespace mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Recargar los ViewBag si vuelve a la vista por error
+
             ViewBag.MontoTotalReserva = montoTotal;
             ViewBag.MontoSeniaMinima = minSeña;
             ViewBag.PorcentajeSenia = porcentajeSeña;
@@ -190,7 +193,8 @@ namespace mvc.Controllers
 
             return View("Editar", pago);
         }
-        // GET: Pagos/Eliminar/5 
+        // GET: Pagos/Eliminar/5
+        [HttpGet] 
         [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
         {

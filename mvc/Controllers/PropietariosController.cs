@@ -17,6 +17,7 @@ namespace mvc.Controllers
         }
 
         // GET: Propietarios
+        [HttpGet]
 
         public IActionResult Index(string? nombre, int pagina = 1)
         {

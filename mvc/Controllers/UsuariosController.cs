@@ -33,6 +33,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios
+        [HttpGet]
         [Authorize(Roles = "Administrador,Empleado")]
         public ActionResult Index(int pagina = 1)
         {
@@ -46,6 +47,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios/Details/5
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public ActionResult Details(int id)
         {
@@ -54,6 +56,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios/Create
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public ActionResult Create()
         {
@@ -113,6 +116,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
 
         // GET: Usuarios/Perfil
+        [HttpGet]
         [Authorize]
         public ActionResult Perfil()
         {
@@ -226,6 +230,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
 
         // GET: Usuarios/Edit/5
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public ActionResult Editar(int id)
         {
@@ -283,6 +288,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
         // GET: Usuarios/Delete/5
         [Authorize(Roles = "Administrador")]
+        [HttpGet]
         public ActionResult Delete(int id)
         {
             var usuario = repositorio.ObtenerPorId(id);
@@ -409,6 +415,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
         [AllowAnonymous]
         // GET: Usuarios/Login/
+        [HttpGet]
         public ActionResult LoginModal()
         {
             return PartialView("_LoginModal", new Login());
@@ -416,6 +423,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
         [AllowAnonymous]
         // GET: Usuarios/Login/
+        [HttpGet]
         public ActionResult Login(string returnUrl)
         {
             TempData["returnUrl"] = returnUrl;
@@ -477,6 +485,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: /salir
+        [HttpGet]
         [Route("salir", Name = "logout")]
         public async Task<ActionResult> Logout()
         {
