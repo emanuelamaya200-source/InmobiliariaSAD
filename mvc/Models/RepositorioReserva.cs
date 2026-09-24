@@ -76,9 +76,24 @@ namespace Inmobiliaria_.Net_Core.Models
         public IList<Reserva> ObtenerPorRango(DateTime? inicio, DateTime? fin, int? cupo)
         {
             var result = new List<Reserva>();
-            const string sql = @"SELECT r.IdReserva, r.IdInmueble, r.IdInquilino, r.FechaDeEntrada, r.FechaDeSalida, r.Estado, r.MontoDiario, r.FechaFinEfectiva, r.UsuarioCreacionId, r.UsuarioFinalizacionId
-                FROM reserva r INNER JOIN inmueble i ON i.IdInmueble=r.IdInmueble WHERE (@inicio IS NULL OR r.FechaDeEntrada < @fin) AND (@fin IS NULL OR COALESCE(r.FechaFinEfectiva,r.FechaDeSalida)>@inicio) AND (@cupo IS NULL OR i.Cupo>=@cupo) ORDER BY r.FechaDeEntrada";
-            using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand(sql, c); q.Parameters.AddWithValue("@inicio", (object?)inicio ?? DBNull.Value); q.Parameters.AddWithValue("@fin", (object?)fin ?? DBNull.Value); q.Parameters.AddWithValue("@cupo", (object?)cupo ?? DBNull.Value); c.Open(); using var reader = q.ExecuteReader(); while (reader.Read()) result.Add(Map(reader)); return result;
+                            const string sql = @"SELECT r.*,
+                                i.Direccion AS NombreInmueble,
+                                CONCAT(inqui.Nombre, ' ', inqui.Apellido) AS NombreInquilino
+                FROM reserva r
+                INNER JOIN inmueble i ON r.IdInmueble = i.IdInmueble
+                                INNER JOIN inquilino inqui ON r.IdInquilino = inqui.IdInquilino";
+            using var c = new MySqlConnection(connectionString);
+            using var q = new MySqlCommand(sql, c);
+            c.Open();
+            using var reader = q.ExecuteReader();
+            while (reader.Read())
+            {
+                var reserva = Map(reader);
+                reserva.NombreInmueble = reader.GetString("NombreInmueble");
+                reserva.NombreInquilino = reader.GetString("NombreInquilino");
+                result.Add(reserva);
+            }
+            return result;
         }
 
         public int ObtenerCantidad() { using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand("SELECT COUNT(*) FROM reserva", c); c.Open(); return Convert.ToInt32(q.ExecuteScalar()); }

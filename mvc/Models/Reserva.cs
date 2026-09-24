@@ -6,14 +6,20 @@ namespace Inmobiliaria_.Net_Core.Models
     public class Reserva
     {
         [Key]
-        [Display(Name = "Identificacion de Reserva")]
+        [Display(Name = "Numero de Reserva")]
         public int IdReserva { get; set; }
 
         [Required(ErrorMessage = "El campo es obligatorio")]
+        
+        [Display(Name ="Inmueble")]
         public int IdInmueble { get; set; }
 
         [Required(ErrorMessage = "El campo es obligatorio")]
+
+        [Display(Name ="Inquilino")]
         public int IdInquilino { get; set; }
+        public string NombreInquilino { get; set; } = "";
+        public string NombreInmueble { get; set; } = "";
 
         [Required(ErrorMessage = "El campo es obligatorio")]
         public DateTime FechaDeEntrada { get; set; }
