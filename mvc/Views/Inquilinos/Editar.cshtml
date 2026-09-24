@@ -2,7 +2,7 @@
 
 <h2>@(Model == null || Model.IdInquilino == 0 ? "Alta de Inquilino" : "Modificar Inquilino")</h2>
 
-<form asp-action="Guardar" method="post">
+<form asp-action="Editar" method="post">
     <input type="hidden" asp-for="IdInquilino" />
 
     <div class="form-group mb-2">

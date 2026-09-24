@@ -18,7 +18,6 @@ namespace mvc.Controllers
 
         // GET: Propietarios
         [HttpGet]
-
         public IActionResult Index(string? nombre, int pagina = 1)
         {
             const int tamPagina = 10;
