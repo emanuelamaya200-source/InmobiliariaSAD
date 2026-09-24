@@ -15,7 +15,6 @@ namespace Inmobiliaria_.Net_Core.Controllers
     {
         private readonly IRepositorioInmueble repositorio;
         private readonly IRepositorioPropietario repoPropietario;
-
         private readonly IRepositorioTipoInmueble repoTipoInmueble;
         private readonly IRepositorioAuditoria auditoriaRepositorio;
 
@@ -68,7 +67,43 @@ namespace Inmobiliaria_.Net_Core.Controllers
             return View(tipo);
         }
 
-        // GET: Inmuebles/Editar/5 (o Inmuebles/Editar para Alta)
+        // GET: Inmuebles/Crear
+        public ActionResult Crear()
+        {
+            ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
+            ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
+            return View(new Inmueble());
+        }
+
+        // POST: Inmuebles/Crear
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Crear(Inmueble entidad)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    repositorio.Alta(entidad);
+                    auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Alta", $"Dirección: {entidad.Direccion}");
+                    TempData["Id"] = entidad.Id;
+                    TempData["Mensaje"] = "Inmueble creado correctamente";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                ViewBag.StackTrace = ex.StackTrace;
+            }
+
+            ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
+            ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
+            return View(entidad);
+        }
+
+
+        // GET: Inmuebles/Editar/5
         [Authorize(Roles = "Administrador")]
         public ActionResult Editar(int id)
         {
@@ -80,16 +115,43 @@ namespace Inmobiliaria_.Net_Core.Controllers
             if (TempData.ContainsKey("Error"))
                 ViewBag.Error = TempData["Error"];
 
-            if (id > 0)
+            var entidad = repositorio.ObtenerPorId(id);
+            if (entidad == null)
+                return NotFound();
+
+            return View(entidad);
+        }
+
+        // POST: Inmuebles/Editar/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
+        public ActionResult Editar(int id, Inmueble entidad)
+        {
+            if (id != entidad.Id)
+                return NotFound();
+
+            try
             {
-                var entidad = repositorio.ObtenerPorId(id);
-                if (entidad == null)
-                    return NotFound();
-                return View(entidad);
+                if (ModelState.IsValid)
+                {
+                    repositorio.Modificacion(entidad);
+                    auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Modificacion", $"Dirección: {entidad.Direccion}");
+                    TempData["Mensaje"] = "Inmueble modificado correctamente";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                ViewBag.StackTrace = ex.StackTrace;
             }
 
-            return View(new Inmueble());
+            ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
+            ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
+            return View(entidad);
         }
+
 
         // GET: Inmuebles/BuscarPorPropietario/5
         [HttpGet]
@@ -106,52 +168,9 @@ namespace Inmobiliaria_.Net_Core.Controllers
             return View(entidad);
         }
 
-        // POST: Inmuebles/Guardar
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador")]
-        public ActionResult Guardar(Inmueble entidad)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    if (entidad.Id == 0)
-                    {
-                        repositorio.Alta(entidad);
-                        auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Alta", $"Dirección: {entidad.Direccion}");
-                        TempData["Id"] = entidad.Id;
-                        TempData["Mensaje"] = "Inmueble creado correctamente";
-                    }
-                    else
-                    {
-                        repositorio.Modificacion(entidad);
-                        auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Modificacion", $"Dirección: {entidad.Direccion}");
-                        TempData["Mensaje"] = "Inmueble modificado correctamente";
-                    }
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                {
-                    ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
-                    ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
-                    return View("Editar", entidad);
-                }
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
-                ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
-                ViewBag.Error = ex.Message;
-                ViewBag.StackTrate = ex.StackTrace;
-                return View("Editar", entidad);
-            }
-        }
-
         // POST: Inmuebles/GuardarAjax
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador")]
         public ActionResult GuardarAjax(int id, Inmueble entidad)
         {
             try
@@ -205,12 +224,12 @@ namespace Inmobiliaria_.Net_Core.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error = ex.Message;
-                ViewBag.StackTrate = ex.StackTrace;
+                ViewBag.StackTrace = ex.StackTrace;
                 return View(entidad);
             }
         }
 
-        // POST: Inmuebles/Borrar/5 (para formularios que postean a Borrar)
+        // POST: Inmuebles/Borrar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]

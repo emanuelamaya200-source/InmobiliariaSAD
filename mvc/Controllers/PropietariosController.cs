@@ -50,47 +50,62 @@ namespace mvc.Controllers
             return View(tipo);
         }
 
+
+        // GET: Propietarios/Crear
+        public IActionResult Crear()
+        {
+            return View(new Propietario());
+        }
+
+        // POST: Propietarios/Crear
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Crear(Propietario propietario)
+        {
+            if (ModelState.IsValid)
+            {
+                repositorio.Alta(propietario);
+                auditoriaRepositorio.Registrar(User, "Propietario", propietario.IdPropietario, "Alta", $"Email: {propietario.Email}");
+                return RedirectToAction(nameof(Index));
+            }
+            return View(propietario);
+        }
+
+
+
         // GET: Propietarios/Editar/5 
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
-            if (id > 0)
+            var propietario = repositorio.ObtenerPorId(id);
+            if (propietario == null)
             {
-                var propietario = repositorio.ObtenerPorId(id);
-                if (propietario == null)
-                {
-                    return NotFound();
-                }
-                return View(propietario);
+                return NotFound();
             }
-
-            return View(new Propietario());
+            return View(propietario);
         }
 
-        // POST: Propietarios/Guardar
+        // POST: Propietarios/Editar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
-        public IActionResult Guardar(Propietario propietario)
+        public IActionResult Editar(int id, Propietario propietario)
         {
-            if (ModelState.IsValid)
+            if (id != propietario.IdPropietario)
             {
-                if (propietario.IdPropietario > 0)
-                {
-                    repositorio.Modificacion(propietario);
-                    auditoriaRepositorio.Registrar(User, "Propietario", propietario.IdPropietario, "Modificacion", $"Email: {propietario.Email}");
-                }
-                else
-                {
-                    repositorio.Alta(propietario);
-                    auditoriaRepositorio.Registrar(User, "Propietario", propietario.IdPropietario, "Alta", $"Email: {propietario.Email}");
-                }
-
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
 
-            return View("Editar", propietario);
+            if (ModelState.IsValid)
+            {
+                repositorio.Modificacion(propietario);
+                auditoriaRepositorio.Registrar(User, "Propietario", propietario.IdPropietario, "Modificacion", $"Email: {propietario.Email}");
+                return RedirectToAction(nameof(Index));
+            }
+            return View(propietario);
         }
+
+
 
         // GET: Propietarios/Eliminar/5
         [Authorize(Roles = "Administrador")]

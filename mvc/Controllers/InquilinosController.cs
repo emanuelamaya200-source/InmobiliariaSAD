@@ -52,43 +52,55 @@ namespace mvc.Controllers
             return View(tipo);
         }
 
+        // GET: Inquilinos/Crear
+        public IActionResult Crear()
+        {
+            return View(new Inquilino());
+        }
+
+        // POST: Inquilinos/Crear
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Crear(Inquilino inquilino)
+        {
+            if (ModelState.IsValid)
+            {
+                repositorio.Alta(inquilino);
+                auditoriaRepositorio.Registrar(User, "Inquilino", inquilino.IdInquilino, "Alta", $"Email: {inquilino.Email}");
+                return RedirectToAction(nameof(Index));
+            }
+            return View(inquilino);
+        }
+
+
         // GET: Inquilinos/Editar/5
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
-            if (id > 0)
-            {
-                var inquilino = repositorio.ObtenerPorId(id);
-                if (inquilino == null)
-                    return NotFound();
-                return View(inquilino);
-            }
-            return View(new Inquilino());
+            var inquilino = repositorio.ObtenerPorId(id);
+            if (inquilino == null)
+                return NotFound();
+            return View(inquilino);
         }
 
-        // POST: Inquilinos/Guardar
+        // POST: Inquilinos/Editar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
-        public IActionResult Guardar(Inquilino inquilino)
+        public IActionResult Editar(int id, Inquilino inquilino)
         {
+            if (id != inquilino.IdInquilino)
+                return NotFound();
+
             if (ModelState.IsValid)
             {
-                if (inquilino.IdInquilino > 0)
-                {
-                    repositorio.Modificacion(inquilino);
-                    auditoriaRepositorio.Registrar(User, "Inquilino", inquilino.IdInquilino, "Modificacion", $"Email: {inquilino.Email}");
-                }
-                else
-                {
-                    repositorio.Alta(inquilino);
-                    auditoriaRepositorio.Registrar(User, "Inquilino", inquilino.IdInquilino, "Alta", $"Email: {inquilino.Email}");
-                }
-
+                repositorio.Modificacion(inquilino);
+                auditoriaRepositorio.Registrar(User, "Inquilino", inquilino.IdInquilino, "Modificacion", $"Email: {inquilino.Email}");
                 return RedirectToAction(nameof(Index));
             }
-            return View("Editar", inquilino);
+            return View(inquilino);
         }
+
 
         // GET: Inquilinos/Eliminar/5
         [Authorize(Roles = "Administrador")]
