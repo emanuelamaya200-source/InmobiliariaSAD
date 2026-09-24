@@ -11,5 +11,6 @@ namespace Inmobiliaria_.Net_Core.Models
         Reserva RenovarReserva(int idReserva, DateTime nuevoFinFecha, decimal nuevoPrecio);
         IList<Reserva> ObtenerPorRango(DateTime? inicio, DateTime? fin, int? cupo);
         int Cancelar(int id, int usuarioId);
+        bool ExisteSolapamiento(int idInmueble, DateTime entrada, DateTime salida, int? idReservaExcluir = null);
     }
 }

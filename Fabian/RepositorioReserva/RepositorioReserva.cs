@@ -133,6 +133,12 @@ namespace Inmobiliaria_.Net_Core.Models
 
         public Reserva? ObtenerPorId(int id)
         {
+            using var c = new MySqlConnection(connectionString); 
+            using var q = new MySqlCommand("SELECT IdReserva, IdInmueble, IdInquilino, FechaDeEntrada, FechaDeSalida, Estado, MontoDiario, MontoTotal, FechaFinEfectiva, UsuarioCreacionId, UsuarioFinalizacionId FROM reserva WHERE IdReserva=@id", c); 
+            q.Parameters.AddWithValue("@id", id); 
+            c.Open(); 
+            using var reader = q.ExecuteReader(); 
+            return reader.Read() ? Map(reader) : null;
             const string sql = @"SELECT r.*,
                     i.Direccion AS NombreInmueble,
                     CONCAT(inqui.Nombre, ' ', inqui.Apellido) AS NombreInquilino
@@ -148,8 +154,8 @@ namespace Inmobiliaria_.Net_Core.Models
             if (!reader.Read()) return null;
 
             var reserva = Map(reader);
-            reserva.NombreInmueble = reader["NombreInmueble"] is DBNull ? string.Empty : reader.GetString("NombreInmueble");
-            reserva.NombreInquilino = reader["NombreInquilino"] is DBNull ? string.Empty : reader.GetString("NombreInquilino");
+            reserva.NombreInmueble = reader.GetString("NombreInmueble");
+            reserva.NombreInquilino = reader.GetString("NombreInquilino");
             return reserva;
 
         }
