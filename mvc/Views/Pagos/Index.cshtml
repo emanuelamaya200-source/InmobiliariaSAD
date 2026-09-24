@@ -24,11 +24,12 @@
             <td>@item.Fecha</td>
             <td>@item.Estado</td>
             <td>
-                @if (User.IsInRole("Administrador"))
-                {
+                
                     <a asp-action="Editar" asp-route-id="@item.IdPago" class="btn btn-sm btn-warning" title="Modificar Concepto">
                         <i class="bi bi-pencil-square"> </i> Modificar
                     </a>
+                @if (User.IsInRole("Administrador"))
+                {
                     @if (item.Estado == "Inactivo")
                     {
                         <form asp-action="Alta" method="post" class="d-inline">

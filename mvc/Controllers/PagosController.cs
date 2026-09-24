@@ -14,9 +14,9 @@ namespace mvc.Controllers
         private readonly IRepositorioInmueble repoInmueble;
 
         public PagosController(
-            IRepositorioPago repositorio, 
-            IRepositorioAuditoria auditoriaRepositorio, 
-            IRepositorioReserva repoReserva, 
+            IRepositorioPago repositorio,
+            IRepositorioAuditoria auditoriaRepositorio,
+            IRepositorioReserva repoReserva,
             IRepositorioInmueble repoInmueble)
         {
             this.repositorio = repositorio;
@@ -48,7 +48,7 @@ namespace mvc.Controllers
         }
 
         // GET: Pagos/Editar/5
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador, Empleado")]
         public IActionResult Editar(int id)
         {
             if (id <= 0)
@@ -89,7 +89,7 @@ namespace mvc.Controllers
             return View("Crear", new Pago
             {
                 IdReserva = idReserva,
-                Monto = montoSeñaMinima, 
+                Monto = montoSeñaMinima,
                 Concepto = $"Seña de reserva ({porcentajeSeña}%)",
                 Estado = "Activo",
                 Fecha = DateOnly.FromDateTime(DateTime.Today)
@@ -109,7 +109,7 @@ namespace mvc.Controllers
             if (reserva != null)
             {
                 var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
-                
+
                 if (montoTotal == 0 && inmueble != null)
                 {
                     int dias = Math.Max(1, (reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).Days);
@@ -135,7 +135,7 @@ namespace mvc.Controllers
                 pago.Estado = "Activo";
                 repositorio.Alta(pago);
                 auditoriaRepositorio.Registrar(User, "Pago", pago.IdPago, "Alta", $"Reserva {pago.IdReserva}: {pago.Concepto} - Monto: {pago.Monto}");
-                return RedirectToAction(nameof(Index)); 
+                return RedirectToAction(nameof(Index));
             }
 
             // Recargar los ViewBag si vuelve a la vista por error
@@ -146,21 +146,50 @@ namespace mvc.Controllers
             return View("Crear", pago);
         }
 
-        // POST: Pagos/Guardar 
+        // POST: Pagos/Guardar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador,Empleado")]
         public IActionResult Guardar(Pago pago)
         {
+            var pagoOriginal = repositorio.ObtenerPorId(pago.IdPago);
+
+            if (pagoOriginal == null)
+                return NotFound();
+
+            if (User.IsInRole("Empleado"))
+            {
+                pagoOriginal.Concepto = pago.Concepto;
+
+                repositorio.Modificacion(pagoOriginal);
+
+                auditoriaRepositorio.Registrar(
+                    User,
+                    "Pago",
+                    pagoOriginal.IdPago,
+                    "Modificacion",
+                    $"Concepto del pago modificado: {pagoOriginal.Concepto}"
+                );
+
+                return RedirectToAction(nameof(Index));
+            }
             if (ModelState.IsValid)
             {
                 repositorio.Modificacion(pago);
-                auditoriaRepositorio.Registrar(User, "Pago", pago.IdPago, "Modificacion", $"Reserva {pago.IdReserva}: {pago.Concepto}");
+
+                auditoriaRepositorio.Registrar(
+                    User,
+                    "Pago",
+                    pago.IdPago,
+                    "Modificacion",
+                    $"Reserva {pago.IdReserva}: {pago.Concepto}"
+                );
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View("Editar", pago);
         }
-
         // GET: Pagos/Eliminar/5 
         [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
