@@ -190,6 +190,7 @@ ADD COLUMN `MontoDiario` DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER `Estado`,
 ADD COLUMN `FechaFinEfectiva` DATETIME NULL AFTER `FechaDeSalida`,
 ADD COLUMN `UsuarioCreacionId` INT NULL AFTER `MontoDiario`,
 ADD COLUMN `UsuarioFinalizacionId` INT NULL AFTER `UsuarioCreacionId`,
+ADD COLUMN `MontoTotal` INT NOT NULL DEFAULT 0,
 ADD CONSTRAINT `FK_Reserva_UsuarioCrea` FOREIGN KEY (`UsuarioCreacionId`) REFERENCES `usuarios`(`Id`),
 ADD CONSTRAINT `FK_Reserva_UsuarioFin` FOREIGN KEY (`UsuarioFinalizacionId`) REFERENCES `usuarios`(`Id`);
 
