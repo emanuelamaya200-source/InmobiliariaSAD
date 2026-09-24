@@ -28,5 +28,10 @@ namespace Inmobiliaria_.Net_Core.Models
         public int? UsuarioCreacionId { get; set; }
         public int? UsuarioAnulacionId { get; set; }
 
+        public int IdInmueble { get; set; }
+        public string Direccion { get; set; } = "";
+        public string DniInquilino { get; set; } = "";
+        public string NombreInquilino { get; set; } = "";
+
     }
 }

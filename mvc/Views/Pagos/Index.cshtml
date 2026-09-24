@@ -5,8 +5,11 @@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>IdReserva</th>
+            <th>Número</th>
+            <th>DNI</th>
+            <th>Inquilino</th>
+            <th>Dirección</th>
+            <th>Inmueble</th>
             <th>Concepto</th>
             <th>Monto</th>
             <th>Fecha</th>
@@ -17,8 +20,11 @@
     <tbody>
 @foreach (Inmobiliaria_.Net_Core.Models.Pago item in Model) {
         <tr>
-            <td>@item.IdPago</td>
-            <td>@item.IdReserva</td>
+            <td>@item.IdPago / @item.IdReserva</td>
+            <td>@item.DniInquilino</td>
+            <td>@item.NombreInquilino</td>
+            <td>@item.Direccion</td>
+            <td>@item.IdInmueble</td>
             <td>@item.Concepto</td>
             <td>@item.Monto</td>
             <td>@item.Fecha</td>

@@ -107,7 +107,15 @@ namespace Inmobiliaria_.Net_Core.Models
             Pago? p = null;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "SELECT IdPago, IdReserva, Monto, Concepto, Estado, Fecha FROM Pago WHERE IdPago = @id";
+                string sql = @"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado, p.Fecha,
+                    io.Dni AS DniInquilino,
+                    CONCAT(io.Apellido, ', ', io.Nombre) AS NombreInquilino,
+                    ie.IdInmueble, ie.Direccion
+                    FROM Pago p
+                    INNER JOIN Reserva r ON p.IdReserva = r.IdReserva
+                    INNER JOIN Inmueble ie ON r.IdInmueble = ie.IdInmueble
+                    INNER JOIN Inquilino io ON r.IdInquilino = io.IdInquilino
+                    WHERE p.IdPago = @id";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
@@ -123,7 +131,11 @@ namespace Inmobiliaria_.Net_Core.Models
                                 Monto = reader.GetDecimal(nameof(Pago.Monto)),
                                 Concepto = reader.GetString(nameof(Pago.Concepto)),
                                 Estado = reader.GetString(nameof(Pago.Estado)),
-                                Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha)))
+                                Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha))),
+                                IdInmueble = reader.GetInt32(nameof(Pago.IdInmueble)),
+                                Direccion = reader.GetString(nameof(Pago.Direccion)),
+                                DniInquilino = reader.GetString(nameof(Pago.DniInquilino)),
+                                NombreInquilino = reader.GetString(nameof(Pago.NombreInquilino))
                             };
                         }
                     }
@@ -213,9 +225,13 @@ namespace Inmobiliaria_.Net_Core.Models
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 string filtroEstado = incluirInactivos ? "" : "WHERE p.Estado <> 'Inactivo'";
-                string sql = $@"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado, p.Fecha
+                string sql = $@"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado, p.Fecha,
+                CONCAT(io.Apellido, ', ', io.Nombre) AS NombreInquilino,
+                io.Dni AS DniInquilino, ie.Direccion, ie.IdInmueble
                     FROM Pago p
                     INNER JOIN Reserva r ON p.IdReserva = r.IdReserva
+                    INNER JOIN Inmueble ie ON r.IdInmueble = ie.IdInmueble
+                    INNER JOIN Inquilino io ON r.IdInquilino = io.IdInquilino
                     {filtroEstado}
                     ORDER BY p.IdPago
                     LIMIT @limit OFFSET @offset";
@@ -235,7 +251,11 @@ namespace Inmobiliaria_.Net_Core.Models
                                 Monto = reader.GetDecimal(nameof(Pago.Monto)),
                                 Concepto = reader.GetString(nameof(Pago.Concepto)),
                                 Estado = reader.GetString(nameof(Pago.Estado)),
-                                Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha)))
+                                Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha))),
+                                IdInmueble = reader.GetInt32(nameof(Pago.IdInmueble)),
+                                Direccion = reader.GetString(nameof(Pago.Direccion)),
+                                DniInquilino = reader.GetString(nameof(Pago.DniInquilino)),
+                                NombreInquilino = reader.GetString(nameof(Pago.NombreInquilino))
                             });
                         }
                     }
