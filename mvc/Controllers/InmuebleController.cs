@@ -27,6 +27,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Inmuebles
+        [HttpGet]
         public ActionResult Index(int pagina = 1, string? nombre = null)
         {
             const int tamPagina = 10;
@@ -68,6 +69,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Inmuebles/Crear
+        [HttpGet]
         public ActionResult Crear()
         {
             ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
@@ -104,6 +106,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
 
         // GET: Inmuebles/Editar/5
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public ActionResult Editar(int id)
         {
@@ -162,6 +165,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Inmuebles/Details/5
+        [HttpGet]
         public ActionResult Ver(int id)
         {
             var entidad = id == 0 ? new Inmueble() : repositorio.ObtenerPorId(id);
@@ -197,6 +201,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Inmuebles/Eliminar/5
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public ActionResult Eliminar(int id)
         {

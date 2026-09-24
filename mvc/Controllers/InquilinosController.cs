@@ -17,6 +17,7 @@ namespace mvc.Controllers
         }
 
         // GET: Inquilinos
+        
         public IActionResult Index(string? nombre, int pagina = 1)
         {
             const int tamPagina = 10;
@@ -74,6 +75,7 @@ namespace mvc.Controllers
 
 
         // GET: Inquilinos/Editar/5
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {

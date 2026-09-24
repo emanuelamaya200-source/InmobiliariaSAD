@@ -17,6 +17,7 @@ namespace mvc.Controllers
         }
 
         // GET: Propietarios
+
         public IActionResult Index(string? nombre, int pagina = 1)
         {
             const int tamPagina = 10;
@@ -52,6 +53,7 @@ namespace mvc.Controllers
 
 
         // GET: Propietarios/Crear
+        [HttpGet]
         public IActionResult Crear()
         {
             return View(new Propietario());
@@ -74,6 +76,7 @@ namespace mvc.Controllers
 
 
         // GET: Propietarios/Editar/5 
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
@@ -108,6 +111,7 @@ namespace mvc.Controllers
 
 
         // GET: Propietarios/Eliminar/5
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
         {
