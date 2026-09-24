@@ -42,21 +42,87 @@ namespace mvc.Controllers
         {
             try
             {
+                if (reserva.FechaDeSalida <= reserva.FechaDeEntrada)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "La fecha de salida debe ser posterior a la fecha de entrada."
+                    );
+                }
+
+                var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
+
+                if (inmueble == null)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "No se encontró el inmueble seleccionado."
+                    );
+                }
+
                 if (ModelState.IsValid)
                 {
+
+                    reserva.UsuarioCreacionId = UsuarioActualId();
+
+
+                    reserva.MontoDiario = inmueble!.PrecioPorDia;
+
+
+                    int cantidadDias = Math.Max(
+                        1,
+                        (reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).Days
+                    );
+
+                    reserva.MontoTotal = (int)(
+                        cantidadDias * inmueble.PrecioPorDia
+                    );
                     repositorio.Alta(reserva);
-                    auditoriaRepositorio.Registrar(User, "Reserva", reserva.IdReserva, "Alta", $"Inmueble {reserva.IdInmueble}");
+
+                    decimal montoSeniaMinima =
+                        reserva.MontoTotal *
+                        (inmueble.PorcentajeReserva / 100m);
+
+                    var pago = new Pago
+                    {
+                        IdReserva = reserva.IdReserva,
+                        Monto = montoSeniaMinima,
+                        Concepto = $"Seña inicial ({inmueble.PorcentajeReserva}%)",
+                        Estado = "Activo",
+                        Fecha = DateOnly.FromDateTime(DateTime.Today),
+                        UsuarioCreacionId = UsuarioActualId()
+                    };
+
+                    repoPago.Alta(pago);
+
+
+                    auditoriaRepositorio.Registrar(
+                        User,
+                        "Reserva",
+                        reserva.IdReserva,
+                        "Alta",
+                        $"Inmueble {reserva.IdInmueble}"
+                    );
+
                     TempData["Mensaje"] = "Reserva creada correctamente";
+
                     return RedirectToAction(nameof(Index));
                 }
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Error al crear la reserva: " + ex.Message
+                );
             }
 
-            ViewBag.Inquilinos = repoInquilino.ObtenerLista(1, int.MaxValue);
-            ViewBag.Inmuebles = repoInmueble.ObtenerLista(1, int.MaxValue);
+            ViewBag.Inquilinos =
+                repoInquilino.ObtenerLista(1, int.MaxValue);
+
+            ViewBag.Inmuebles =
+                repoInmueble.ObtenerLista(1, int.MaxValue);
+
             return View(reserva);
         }
 
@@ -137,7 +203,7 @@ namespace mvc.Controllers
         // POST: Reservas/Guardar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador,Empleado")] 
+        [Authorize(Roles = "Administrador,Empleado")]
         public IActionResult Guardar(Reserva reserva)
         {
             if (!ModelState.IsValid)
@@ -176,11 +242,10 @@ namespace mvc.Controllers
             {
                 reserva.UsuarioCreacionId = UsuarioActualId();
                 var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
-                
+
                 if (inmueble == null)
                     throw new InvalidOperationException("No se encontró el inmueble de la reserva");
 
-                // Cálculo automático de días, monto total y precio diario
                 var cantidadDias = Math.Max(1, (reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).Days);
                 reserva.MontoDiario = inmueble.PrecioPorDia;
                 reserva.MontoTotal = (int)(cantidadDias * inmueble.PrecioPorDia);
@@ -194,7 +259,6 @@ namespace mvc.Controllers
                 {
                     repositorio.Alta(reserva);
 
-                    // Cálculo del monto de seña mínimo requerido según el porcentaje del inmueble
                     decimal montoSeniaMinima = reserva.MontoTotal * (inmueble.PorcentajeReserva / 100m);
 
                     repoPago.Alta(new Pago
@@ -249,6 +313,21 @@ namespace mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+        // GET: Reservas/Finalizar/5
+        [HttpGet]
+        [Authorize(Roles = "Administrador,Empleado")]
+        public IActionResult Finalizar(int id)
+        {
+            var reserva = repositorio.ObtenerPorId(id);
+
+            if (reserva == null)
+                return NotFound();
+
+            if (reserva.Estado != "Activo")
+                return BadRequest("La reserva no está activa.");
+
+            return View(reserva);
+        }
 
         // GET: Reservas/VerificarDisponibilidad
         [HttpGet]
@@ -281,25 +360,87 @@ namespace mvc.Controllers
         // POST: Reservas/TerminarReservaAnticipada
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador")]
-        public IActionResult TerminarReservaAnticipada(int idReserva, DateTime nuevoFinFecha)
+        [Authorize(Roles = "Administrador,Empleado")]
+        public IActionResult TerminarReservaAnticipada(
+    int idReserva,
+    DateTime nuevoFinFecha)
         {
             try
             {
-                var ok = repositorio.TerminarReservaAnticipada(idReserva, nuevoFinFecha);
-                if (!ok)
+                var reserva = repositorio.ObtenerPorId(idReserva);
+
+                if (reserva == null)
+                    return NotFound();
+
+                if (reserva.Estado != "Activo")
+                    return BadRequest("La reserva no está activa.");
+
+                if (nuevoFinFecha <= reserva.FechaDeEntrada)
+                    return BadRequest("La fecha de finalización debe ser posterior a la fecha de entrada.");
+
+                if (nuevoFinFecha >= reserva.FechaDeSalida)
+                    return BadRequest("La fecha seleccionada debe ser anterior a la fecha de salida original.");
+
+                int usuarioId = UsuarioActualId();
+
+                if (usuarioId <= 0)
+                    return BadRequest("No se pudo identificar al usuario actual.");
+
+                decimal multa = repositorio.CalcularMulta(idReserva, nuevoFinFecha);
+
+
+                bool finalizada = repositorio.TerminarReservaAnticipada(
+                    idReserva,
+                    nuevoFinFecha,
+                    usuarioId
+                );
+
+                if (!finalizada)
+                    return BadRequest("No se pudo finalizar la reserva.");
+
+
+                if (multa > 0)
                 {
-                    return BadRequest("No se pudo terminar la reserva.");
+                    var pago = new Pago
+                    {
+                        IdReserva = idReserva,
+                        Monto = multa,
+                        Concepto = "Multa por finalización anticipada",
+                        Estado = "Activo",
+                        Fecha = DateOnly.FromDateTime(DateTime.Today),
+                        UsuarioCreacionId = usuarioId
+                    };
+
+                    repoPago.Alta(pago);
+
+                    auditoriaRepositorio.Registrar(
+                        User,
+                        "Pago",
+                        pago.IdPago,
+                        "Alta",
+                        $"Multa por finalización anticipada de reserva {idReserva}: {multa:C}"
+                    );
                 }
 
-                auditoriaRepositorio.Registrar(User, "Reserva", idReserva, "Modificacion", $"Finalizada el {nuevoFinFecha:dd/MM/yyyy}");
-                return RedirectToAction(nameof(Index));
+                auditoriaRepositorio.Registrar(
+                    User,
+                    "Reserva",
+                    idReserva,
+                    "Modificacion",
+                    $"Finalizada anticipadamente el {nuevoFinFecha:dd/MM/yyyy}. Multa: {multa:C}"
+                );
+
+                TempData["Mensaje"] =
+                    $"Reserva finalizada correctamente. Multa: {multa:C}";
+
+                return RedirectToAction(nameof(Detalles), new { id = idReserva });
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+
 
         // POST: Reservas/RenovarReserva
         [HttpPost]

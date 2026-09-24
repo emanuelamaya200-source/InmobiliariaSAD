@@ -8,19 +8,45 @@ namespace Inmobiliaria_.Net_Core.Models
     {
         public RepositorioReserva(IConfiguration configuration) : base(configuration) { }
 
-        private static Reserva Map(MySqlDataReader reader) => new Reserva
+        private static Reserva Map(MySqlDataReader reader)
         {
-            IdReserva = reader.GetInt32("IdReserva"),
-            IdInmueble = reader.GetInt32("IdInmueble"),
-            IdInquilino = reader.GetInt32("IdInquilino"),
-            FechaDeEntrada = reader.GetDateTime("FechaDeEntrada"),
-            FechaDeSalida = reader.GetDateTime("FechaDeSalida"),
-            Estado = reader.GetString("Estado"),
-            MontoDiario = reader.GetDecimal("MontoDiario"),
-            FechaFinEfectiva = reader["FechaFinEfectiva"] is DBNull ? null : reader.GetDateTime("FechaFinEfectiva"),
-            UsuarioCreacionId = reader["UsuarioCreacionId"] is DBNull ? null : reader.GetInt32("UsuarioCreacionId"),
-            UsuarioFinalizacionId = reader["UsuarioFinalizacionId"] is DBNull ? null : reader.GetInt32("UsuarioFinalizacionId")
-        };
+            var entrada = reader.GetDateTime("FechaDeEntrada");
+            var salida = reader.GetDateTime("FechaDeSalida");
+            var montoDiario = reader.GetDecimal("MontoDiario");
+
+            int cantidadDias = Math.Max(
+                1,
+                (salida.Date - entrada.Date).Days
+            );
+
+            return new Reserva
+            {
+                IdReserva = reader.GetInt32("IdReserva"),
+                IdInmueble = reader.GetInt32("IdInmueble"),
+                IdInquilino = reader.GetInt32("IdInquilino"),
+
+                FechaDeEntrada = entrada,
+                FechaDeSalida = salida,
+
+                Estado = reader.GetString("Estado"),
+
+                MontoDiario = montoDiario,
+
+                MontoTotal = (int)(cantidadDias * montoDiario),
+
+                FechaFinEfectiva = reader["FechaFinEfectiva"] is DBNull
+                    ? null
+                    : reader.GetDateTime("FechaFinEfectiva"),
+
+                UsuarioCreacionId = reader["UsuarioCreacionId"] is DBNull
+                    ? null
+                    : reader.GetInt32("UsuarioCreacionId"),
+
+                UsuarioFinalizacionId = reader["UsuarioFinalizacionId"] is DBNull
+                    ? null
+                    : reader.GetInt32("UsuarioFinalizacionId")
+            };
+        }
 
         public int Alta(Reserva p)
         {
@@ -75,7 +101,76 @@ namespace Inmobiliaria_.Net_Core.Models
             using var c = new MySqlConnection(connectionString); using var q = new MySqlCommand(sql, c); q.Parameters.AddWithValue("@inmueble", idInmueble); q.Parameters.AddWithValue("@entrada", entrada); q.Parameters.AddWithValue("@salida", salida); q.Parameters.AddWithValue("@excluir", (object?)idReservaExcluir ?? DBNull.Value); c.Open(); return Convert.ToInt32(q.ExecuteScalar()) > 0;
         }
 
-        public decimal CalcularMulta(int idReserva, DateTime finFecha) => 0;
+        public decimal CalcularMulta(int idReserva, DateTime finFecha)
+        {
+            var reserva = ObtenerPorId(idReserva);
+
+            if (reserva == null)
+                throw new InvalidOperationException("La reserva no existe.");
+
+            if (finFecha <= reserva.FechaDeEntrada)
+                throw new InvalidOperationException("La fecha de finalización no es válida.");
+
+            if (finFecha >= reserva.FechaDeSalida)
+                return 0;
+
+
+            decimal diasTotales =
+                (decimal)(reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).TotalDays;
+
+            decimal diasTranscurridos =
+                (decimal)(finFecha.Date - reserva.FechaDeEntrada.Date).TotalDays;
+
+
+            decimal diasRestantes = diasTotales - diasTranscurridos;
+
+            if (diasRestantes <= 0)
+                return 0;
+
+
+            decimal porcentajeMulta;
+
+            if (diasTranscurridos < diasTotales / 2m)
+            {
+                porcentajeMulta = 0.50m;
+            }
+            else
+            {
+                porcentajeMulta = 0.25m;
+            }
+
+            decimal alquilerRestante = diasRestantes * reserva.MontoDiario;
+
+            return alquilerRestante * porcentajeMulta;
+        }
+
+        public bool TerminarReservaAnticipada(
+     int idReserva,
+     DateTime nuevoFinFecha,
+     int usuarioFinalizacionId)
+        {
+            const string sql = @"
+        UPDATE reserva
+        SET FechaFinEfectiva = @fin,
+            UsuarioFinalizacionId = @usuario,
+            Estado = 'Finalizada'
+        WHERE IdReserva = @id
+          AND Estado = 'Activo'
+          AND FechaDeEntrada < @fin
+          AND @fin < FechaDeSalida";
+
+            using var c = new MySqlConnection(connectionString);
+            using var q = new MySqlCommand(sql, c);
+
+            q.Parameters.AddWithValue("@fin", nuevoFinFecha);
+            q.Parameters.AddWithValue("@usuario", usuarioFinalizacionId);
+            q.Parameters.AddWithValue("@id", idReserva);
+
+            c.Open();
+
+            return q.ExecuteNonQuery() > 0;
+        }
+
 
         public bool TerminarReservaAnticipada(int idReserva, DateTime nuevoFinFecha)
         {
@@ -88,5 +183,8 @@ namespace Inmobiliaria_.Net_Core.Models
             if (nuevoFinFecha <= original.FechaDeSalida || ExisteSolapamiento(original.IdInmueble, original.FechaDeSalida, nuevoFinFecha)) throw new InvalidOperationException("Las fechas seleccionadas no son válidas o están ocupadas.");
             var nueva = new Reserva { IdInmueble = original.IdInmueble, IdInquilino = original.IdInquilino, FechaDeEntrada = original.FechaDeSalida, FechaDeSalida = nuevoFinFecha, MontoDiario = nuevoPrecio > 0 ? nuevoPrecio : original.MontoDiario, UsuarioCreacionId = original.UsuarioCreacionId }; Alta(nueva); return nueva;
         }
+
     }
+
+
 }

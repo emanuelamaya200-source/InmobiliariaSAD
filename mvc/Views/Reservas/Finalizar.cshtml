@@ -1,0 +1,114 @@
+@model Inmobiliaria_.Net_Core.Models.Reserva
+
+@{
+    ViewData["Title"] = "Finalizar Reserva";
+}
+
+<h2>Finalizar reserva anticipadamente</h2>
+
+<div class="card">
+    <div class="card-body">
+
+        <p>
+            <strong>Reserva:</strong> @Model.IdReserva
+        </p>
+
+        <p>
+            <strong>Entrada:</strong>
+            @Model.FechaDeEntrada.ToString("dd/MM/yyyy")
+        </p>
+
+        <p>
+            <strong>Salida original:</strong>
+            @Model.FechaDeSalida.ToString("dd/MM/yyyy")
+        </p>
+
+        <form asp-action="TerminarReservaAnticipada" method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="idReserva"
+                   value="@Model.IdReserva" />
+
+            <div class="mb-3">
+                <label for="nuevoFinFecha" class="form-label">
+                    Fecha de finalización efectiva
+                </label>
+
+                <input type="date"
+                       id="nuevoFinFecha"
+                       name="nuevoFinFecha"
+                       class="form-control"
+                       min="@Model.FechaDeEntrada.ToString("yyyy-MM-dd")"
+                       max="@Model.FechaDeSalida.AddDays(-1).ToString("yyyy-MM-dd")"
+                       required />
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Multa:</strong>
+                <span id="multa">$0,00</span>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-danger"
+                    id="btnFinalizar"
+                    disabled>
+                Finalizar reserva
+            </button>
+
+            <a asp-action="Detalles"
+               asp-route-id="@Model.IdReserva"
+               class="btn btn-secondary">
+                Cancelar
+            </a>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+
+<script>
+    const fechaInput = document.getElementById("nuevoFinFecha");
+    const multaSpan = document.getElementById("multa");
+    const btnFinalizar = document.getElementById("btnFinalizar");
+
+    fechaInput.addEventListener("change", function () {
+
+        if (!this.value) {
+            multaSpan.textContent = "$0,00";
+            btnFinalizar.disabled = true;
+            return;
+        }
+
+        const fecha = this.value;
+
+        fetch(`/Reservas/CalcularMulta?idReserva=@Model.IdReserva&finFecha=${fecha}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("No se pudo calcular la multa.");
+                }
+
+                return response.json();
+            })
+            .then(data => {
+
+                const multa = data.multa ?? data.Multa ?? 0;
+
+                multaSpan.textContent =
+                    new Intl.NumberFormat('es-AR', {
+                        style: 'currency',
+                        currency: 'ARS'
+                    }).format(multa);
+
+                btnFinalizar.disabled = false;
+            })
+            .catch(error => {
+                console.error(error);
+                multaSpan.textContent = "Error al calcular";
+                btnFinalizar.disabled = true;
+            });
+    });
+</script>
+
+}
