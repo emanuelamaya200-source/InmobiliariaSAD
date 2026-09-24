@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Inmobiliaria_.Net_Core.Controllers
 {
-    [Authorize(Roles = "Administrador")]
     public class UsuariosController : Controller
     {
         private readonly ILogger<UsuariosController> logger;
@@ -26,7 +25,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
             this.logger = logger;
         }
 
-        
+
         private int UsuarioId()
         {
             var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -34,7 +33,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         }
 
         // GET: Usuarios
-         [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador,Empleado")]
         public ActionResult Index(int pagina = 1)
         {
             const int tamPagina = 10;
@@ -112,16 +111,119 @@ namespace Inmobiliaria_.Net_Core.Controllers
             }
         }
 
-        // GET: Usuarios/Edit/5
+
+        // GET: Usuarios/Perfil
         [Authorize]
         public ActionResult Perfil()
         {
             ViewData["Title"] = "Mi perfil";
-            // Identity.Name ahora es el Id: se busca por clave primaria, no por email.
-            var u = repositorio.ObtenerPorId(UsuarioId());
-            ViewBag.Roles = Usuario.ObtenerRoles();
-            return View(nameof(Editar), u);
+
+            int id = UsuarioId();
+
+            var u = repositorio.ObtenerPorId(id);
+
+            if (u == null)
+                return NotFound();
+
+            return View("~/Views/Perfil/Index.cshtml", u);
         }
+        [HttpGet]
+        [Authorize]
+        public ActionResult EditarPerfil()
+        {
+            int id = UsuarioId();
+
+            var u = repositorio.ObtenerPorId(id);
+
+            if (u == null)
+                return NotFound();
+
+            ViewBag.Title = "Editar mi perfil";
+
+            return View("~/Views/Perfil/Editar.cshtml", u);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public ActionResult EditarPerfil(Usuario u)
+        {
+            try
+            {
+                int id = UsuarioId();
+
+                var actual = repositorio.ObtenerPorId(id);
+
+                if (actual == null)
+                    return NotFound();
+
+                ModelState.Remove("Clave");
+
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.Title = "Editar mi perfil";
+                    return View("~/Views/Perfil/Editar.cshtml", u);
+                }
+
+                actual.Nombre = u.Nombre;
+                actual.Apellido = u.Apellido;
+                actual.Email = u.Email;
+
+                if (!string.IsNullOrWhiteSpace(u.Clave))
+                {
+                    actual.Clave = Convert.ToBase64String(
+                        KeyDerivation.Pbkdf2(
+                            password: u.Clave,
+                            salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"] ?? ""),
+                            prf: KeyDerivationPrf.HMACSHA1,
+                            iterationCount: 1000,
+                            numBytesRequested: 256 / 8
+                        )
+                    );
+                }
+
+                if (u.AvatarFile != null)
+                {
+                    var path = Path.Combine(
+                        environment.WebRootPath,
+                        "Uploads"
+                    );
+
+                    Directory.CreateDirectory(path);
+
+                    var fileName = "avatar_" + id +
+                                   Path.GetExtension(u.AvatarFile.FileName);
+
+                    using var stream = new FileStream(
+                        Path.Combine(path, fileName),
+                        FileMode.Create
+                    );
+
+                    u.AvatarFile.CopyTo(stream);
+
+                    actual.Avatar = "/Uploads/" + fileName;
+                }
+
+                repositorio.Modificacion(actual);
+
+                auditoriaRepositorio.Registrar(
+                    User,
+                    "Usuario",
+                    actual.Id,
+                    "Modificacion",
+                    $"Email: {actual.Email}"
+                );
+
+                return RedirectToAction(nameof(Perfil));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error al editar el perfil");
+                throw;
+            }
+        }
+
+
 
         // GET: Usuarios/Edit/5
         [Authorize(Roles = "Administrador")]
