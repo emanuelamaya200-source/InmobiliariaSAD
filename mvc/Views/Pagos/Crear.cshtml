@@ -1,11 +1,24 @@
 @model Inmobiliaria_.Net_Core.Models.Pago
 
-<h2>Agregar Pago</h2>
+@{
+    ViewData["Title"] = "Agregar Pago";
+    decimal montoTotalReserva = ViewBag.MontoTotalReserva ?? 0m;
+    decimal montoSeniaMinima = ViewBag.MontoSeniaMinima ?? 0m;
+    decimal porcentajeSenia = ViewBag.PorcentajeSenia ?? 0m;
+}
 
-<!-- Agregamos esto para ver si hay errores de validación -->
+<h2>Agregar Pago de Reserva</h2>
+
 <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-<form asp-action="GuardarCrear" method="post">
+<!-- Tarjeta de referencia informativa -->
+<div class="card p-3 bg-light mb-3 col-md-6">
+    <h5 class="text-secondary">Información de la Reserva</h5>
+    <p class="mb-1"><strong>Monto Total de la Estadía:</strong> <span class="text-success fw-bold">@montoTotalReserva.ToString("C")</span></p>
+    <p class="mb-0"><strong>Seña Mínima Requerida (@porcentajeSenia%):</strong> <span class="text-primary fw-bold">@montoSeniaMinima.ToString("C")</span></p>
+</div>
+
+<form asp-action="GuardarCrear" method="post" class="col-md-6">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="IdReserva" />
     <input type="hidden" asp-for="Estado" value="Activo" />
@@ -16,9 +29,14 @@
     </div>
 
     <div class="form-group mb-2">
-        <label asp-for="Monto" class="control-label"></label>
-        <input asp-for="Monto" class="form-control" type="number" min="0" step="0.01" required />
+        <label asp-for="Monto" class="control-label">Monto a Pagar</label>
+        <div class="input-group">
+            <input asp-for="Monto" class="form-control" type="number" min="@montoSeniaMinima" max="@montoTotalReserva" step="0.01" id="inputMonto" required />
+            <button type="button" class="btn btn-outline-primary" onclick="setMonto(@montoSeniaMinima)">Pagar Seña Mínima</button>
+            <button type="button" class="btn btn-outline-success" onclick="setMonto(@montoTotalReserva)">Pagar Total</button>
+        </div>
         <span asp-validation-for="Monto" class="text-danger"></span>
+        <small class="text-muted">Puede abonar el monto mínimo de seña, un valor intermedio o el total de la reserva.</small>
     </div>
 
     <div class="form-group mb-2">
@@ -27,12 +45,20 @@
         <span asp-validation-for="Fecha" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-2">
+    <div class="form-group mb-3">
         <label asp-for="Concepto" class="control-label"></label>
         <input asp-for="Concepto" class="form-control" required />
         <span asp-validation-for="Concepto" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-success">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    <button type="submit" class="btn btn-success">Guardar Pago</button>
+    <a asp-controller="Reservas" asp-action="Index" class="btn btn-secondary">Volver</a>
 </form>
+
+@section Scripts {
+    <script>
+        function setMonto(valor) {
+            document.getElementById('inputMonto').value = valor.toFixed(2);
+        }
+    </script>
+}

@@ -22,6 +22,10 @@
 
         <dt class="col-sm-4 text-muted">Fecha Salida</dt>
         <dd class="col-sm-8">@Model.FechaDeSalida.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-4 text-muted">Monto Total</dt>
+        <dd class="col-sm-8 fw-bold text-success">@Model.MontoTotal.ToString("C")</dd>
+
         @if (User.IsInRole("Administrador"))
         {
             <dt class="col-sm-4 text-muted">Usuario creador</dt>
@@ -67,4 +71,5 @@
                 <td>@pago.Estado</td>
             </tr>
         }
-    </tbody></table>
+    </tbody>
+</table>

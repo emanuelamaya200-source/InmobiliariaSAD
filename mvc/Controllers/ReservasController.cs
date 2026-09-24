@@ -137,17 +137,21 @@ namespace mvc.Controllers
         // POST: Reservas/Guardar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador,Empleado")] 
         public IActionResult Guardar(Reserva reserva)
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.Inquilinos = repoInquilino.ObtenerLista();
+                ViewBag.Inmuebles = repoInmueble.ObtenerLista();
                 return View("Editar", reserva);
             }
 
             if (reserva.FechaDeSalida <= reserva.FechaDeEntrada)
             {
                 ModelState.AddModelError(string.Empty, "La fecha de salida debe ser posterior a la fecha de entrada.");
+                ViewBag.Inquilinos = repoInquilino.ObtenerLista();
+                ViewBag.Inmuebles = repoInmueble.ObtenerLista();
                 return View("Editar", reserva);
             }
 
@@ -162,7 +166,9 @@ namespace mvc.Controllers
 
             if (haySolapamiento)
             {
-                ModelState.AddModelError(string.Empty, "El inmueble no está disponible en las fechas elegidas.");
+                ModelState.AddModelError(string.Empty, "El inmueble no está disponible en las fechas elegidas");
+                ViewBag.Inquilinos = repoInquilino.ObtenerLista();
+                ViewBag.Inmuebles = repoInmueble.ObtenerLista();
                 return View("Editar", reserva);
             }
 
@@ -170,7 +176,15 @@ namespace mvc.Controllers
             {
                 reserva.UsuarioCreacionId = UsuarioActualId();
                 var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
-                reserva.MontoDiario = inmueble?.PrecioPorDia ?? 0;
+                
+                if (inmueble == null)
+                    throw new InvalidOperationException("No se encontró el inmueble de la reserva");
+
+                // Cálculo automático de días, monto total y precio diario
+                var cantidadDias = Math.Max(1, (reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).Days);
+                reserva.MontoDiario = inmueble.PrecioPorDia;
+                reserva.MontoTotal = (int)(cantidadDias * inmueble.PrecioPorDia);
+
                 if (reserva.IdReserva > 0)
                 {
                     repositorio.Modificacion(reserva);
@@ -180,15 +194,14 @@ namespace mvc.Controllers
                 {
                     repositorio.Alta(reserva);
 
-                    if (inmueble == null)
-                        throw new InvalidOperationException("No se encontró el inmueble de la reserva.");
+                    // Cálculo del monto de seña mínimo requerido según el porcentaje del inmueble
+                    decimal montoSeniaMinima = reserva.MontoTotal * (inmueble.PorcentajeReserva / 100m);
 
-                    var cantidadDias = Math.Max(1, (reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).Days);
                     repoPago.Alta(new Pago
                     {
                         IdReserva = reserva.IdReserva,
-                        Monto = cantidadDias * inmueble.PrecioPorDia,
-                        Concepto = "Pago inicial de reserva",
+                        Monto = montoSeniaMinima,
+                        Concepto = $"Seña inicial ({inmueble.PorcentajeReserva}%)",
                         Estado = "Activo",
                         Fecha = DateOnly.FromDateTime(DateTime.Today)
                     });
@@ -200,6 +213,8 @@ namespace mvc.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, "Error al guardar: " + ex.Message);
+                ViewBag.Inquilinos = repoInquilino.ObtenerLista();
+                ViewBag.Inmuebles = repoInmueble.ObtenerLista();
                 return View("Editar", reserva);
             }
         }

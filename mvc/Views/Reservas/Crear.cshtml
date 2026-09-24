@@ -11,17 +11,17 @@
 
 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-<form asp-action="Crear" method="post">
+<form asp-action="Crear" method="post" id="formReserva">
     @Html.AntiForgeryToken()
 
     <div class="form-group mb-3">
         <label class="control-label">Seleccione el Inmueble</label>
-        <select class="form-select" asp-for="IdInmueble" required>
+        <select class="form-select" asp-for="IdInmueble" id="selectInmueble" required>
             <option value="">-- Seleccione un Inmueble --</option>
             @foreach (Inmueble t in inmuebles)
             {
-                <option value="@t.Id">
-                    (@t.Id) , @t.Direccion , @t.Tipo.Descripcion
+                <option value="@t.Id" data-precio="@t.PrecioPorDia" data-porcentaje="@t.PorcentajeReserva">
+                    (@t.Id) , @t.Direccion , @t.Tipo?.Descripcion - ($@t.PrecioPorDia / día)
                 </option>
             }
         </select>
@@ -44,16 +44,65 @@
 
     <div class="form-group mb-2">
         <label asp-for="FechaDeEntrada" class="control-label">Fecha De Entrada</label>
-        <input asp-for="FechaDeEntrada" class="form-control" type="date" required />
+        <input asp-for="FechaDeEntrada" class="form-control" type="date" id="fechaEntrada" required />
         <span asp-validation-for="FechaDeEntrada" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
         <label asp-for="FechaDeSalida" class="control-label">Fecha De Salida</label>
-        <input asp-for="FechaDeSalida" class="form-control" type="date" required />
+        <input asp-for="FechaDeSalida" class="form-control" type="date" id="fechaSalida" required />
         <span asp-validation-for="FechaDeSalida" class="text-danger"></span>
+    </div>
+
+    <!-- Campos informativos calculados -->
+    <div class="card p-3 bg-light mb-3">
+        <div class="row">
+            <div class="col-md-6">
+                <label class="fw-bold">Monto Total Estimado:</label>
+                <input type="text" id="txtMontoTotal" class="form-control-plaintext fw-bold text-success fs-5" readonly value="$0.00" />
+            </div>
+            <div class="col-md-6">
+                <label class="fw-bold">Seña Mínima Requerida:</label>
+                <input type="text" id="txtSeniaMinima" class="form-control-plaintext fw-bold text-primary fs-5" readonly value="$0.00" />
+            </div>
+        </div>
     </div>
 
     <button type="submit" class="btn btn-success">Guardar</button>
     <a asp-action="Index" class="btn btn-secondary">Volver</a>
 </form>
+
+@section Scripts {
+    <script>
+        function calcularTotales() {
+            const select = document.getElementById('selectInmueble');
+            const option = select.options[select.selectedIndex];
+            const precioDia = parseFloat(option.getAttribute('data-precio')) || 0;
+            const porcentaje = parseFloat(option.getAttribute('data-porcentaje')) || 0;
+
+            const fEntrada = new Date(document.getElementById('fechaEntrada').value);
+            const fSalida = new Date(document.getElementById('fechaSalida').value);
+
+            if (fEntrada && fSalida && fSalida > fEntrada && precioDia > 0) {
+                const diffTime = Math.abs(fSalida - fEntrada);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                const total = diffDays * precioDia;
+                const senia = total * (porcentaje / 100);
+
+                document.getElementById('txtMontoTotal').value = total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+                document.getElementById('txtSeniaMinima').value = senia.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) + ` (${porcentaje}%)`;
+            } else {
+                document.getElementById('txtMontoTotal').value = '$0.00';
+                document.getElementById('txtSeniaMinima').value = '$0.00';
+            }
+        }
+
+        document.getElementById('selectInmueble').addEventListener('change', calcularTotales);
+        document.getElementById('fechaEntrada').addEventListener('change', calcularTotales);
+        document.getElementById('fechaSalida').addEventListener('change', calcularTotales);
+        
+        // Calcular al cargar si ya vienen datos
+        window.addEventListener('DOMContentLoaded', calcularTotales);
+    </script>
+}

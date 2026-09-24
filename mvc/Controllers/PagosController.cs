@@ -10,11 +10,19 @@ namespace mvc.Controllers
     {
         private readonly IRepositorioPago repositorio;
         private readonly IRepositorioAuditoria auditoriaRepositorio;
+        private readonly IRepositorioReserva repoReserva;
+        private readonly IRepositorioInmueble repoInmueble;
 
-        public PagosController(IRepositorioPago repositorio, IRepositorioAuditoria auditoriaRepositorio)
+        public PagosController(
+            IRepositorioPago repositorio, 
+            IRepositorioAuditoria auditoriaRepositorio, 
+            IRepositorioReserva repoReserva, 
+            IRepositorioInmueble repoInmueble)
         {
             this.repositorio = repositorio;
             this.auditoriaRepositorio = auditoriaRepositorio;
+            this.repoReserva = repoReserva;
+            this.repoInmueble = repoInmueble;
         }
 
         // GET: Pagos
@@ -57,7 +65,35 @@ namespace mvc.Controllers
         public IActionResult Crear(int idReserva)
         {
             if (idReserva <= 0) return BadRequest();
-            return View("Crear", new Pago { IdReserva = idReserva, Estado = "Activo", Fecha = DateOnly.FromDateTime(DateTime.Today) });
+
+            var reserva = repoReserva.ObtenerPorId(idReserva);
+            if (reserva == null) return NotFound();
+
+            var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
+
+            decimal montoTotal = reserva.MontoTotal > 0 ? reserva.MontoTotal : 0;
+            if (montoTotal == 0 && inmueble != null)
+            {
+                int dias = Math.Max(1, (reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).Days);
+                montoTotal = dias * inmueble.PrecioPorDia;
+            }
+
+            //  Cálculo de la seña mínima en base al porcentaje del inmueble
+            decimal porcentajeSeña = inmueble?.PorcentajeReserva ?? 0;
+            decimal montoSeñaMinima = montoTotal * (porcentajeSeña / 100m);
+
+            ViewBag.MontoTotalReserva = montoTotal;
+            ViewBag.MontoSeniaMinima = montoSeñaMinima;
+            ViewBag.PorcentajeSenia = porcentajeSeña;
+
+            return View("Crear", new Pago
+            {
+                IdReserva = idReserva,
+                Monto = montoSeñaMinima, 
+                Concepto = $"Seña de reserva ({porcentajeSeña}%)",
+                Estado = "Activo",
+                Fecha = DateOnly.FromDateTime(DateTime.Today)
+            });
         }
 
         // POST: Pagos/GuardarCrear 
@@ -65,14 +101,48 @@ namespace mvc.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult GuardarCrear(Pago pago)
         {
+            var reserva = repoReserva.ObtenerPorId(pago.IdReserva);
+            decimal montoTotal = reserva?.MontoTotal ?? 0;
+            decimal porcentajeSeña = 0;
+            decimal minSeña = 0;
+
+            if (reserva != null)
+            {
+                var inmueble = repoInmueble.ObtenerPorId(reserva.IdInmueble);
+                
+                if (montoTotal == 0 && inmueble != null)
+                {
+                    int dias = Math.Max(1, (reserva.FechaDeSalida.Date - reserva.FechaDeEntrada.Date).Days);
+                    montoTotal = dias * inmueble.PrecioPorDia;
+                }
+
+                porcentajeSeña = inmueble?.PorcentajeReserva ?? 0;
+                minSeña = montoTotal * (porcentajeSeña / 100m);
+
+                if (pago.Monto < minSeña)
+                {
+                    ModelState.AddModelError("Monto", $"El monto a pagar no puede ser menor a la seña mínima requerida ({minSeña.ToString("C")}).");
+                }
+                if (pago.Monto > montoTotal)
+                {
+                    ModelState.AddModelError("Monto", $"El monto no puede superar el total de la reserva ({montoTotal.ToString("C")}).");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 pago.UsuarioCreacionId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var usuarioId) ? usuarioId : null;
                 pago.Estado = "Activo";
                 repositorio.Alta(pago);
-                auditoriaRepositorio.Registrar(User, "Pago", pago.IdPago, "Alta", $"Reserva {pago.IdReserva}: {pago.Concepto}");
-                return RedirectToAction(nameof(Index));
+                auditoriaRepositorio.Registrar(User, "Pago", pago.IdPago, "Alta", $"Reserva {pago.IdReserva}: {pago.Concepto} - Monto: {pago.Monto}");
+                return RedirectToAction(nameof(Index)); 
             }
+
+            // Recargar los ViewBag si vuelve a la vista por error
+            ViewBag.MontoTotalReserva = montoTotal;
+            ViewBag.MontoSeniaMinima = minSeña;
+            ViewBag.PorcentajeSenia = porcentajeSeña;
+
             return View("Crear", pago);
         }
 
