@@ -59,15 +59,25 @@ namespace mvc.Controllers
                         "No se encontró el inmueble seleccionado."
                     );
                 }
+                else
+                {
+                    // Control de solapamiento al crear
+                    bool haySolapamiento = repositorio.ExisteSolapamiento(reserva.IdInmueble, reserva.FechaDeEntrada, reserva.FechaDeSalida);
+                    if (haySolapamiento)
+                    {
+                        ModelState.AddModelError(string.Empty, "El inmueble no está disponible en las fechas elegidas.");
+                    }
+                }
+
+                // Evitar conflictos con campos autocalculados en ModelState
+                ModelState.Remove(nameof(reserva.MontoTotal));
+                ModelState.Remove(nameof(reserva.MontoDiario));
+                ModelState.Remove(nameof(reserva.Estado));
 
                 if (ModelState.IsValid)
                 {
-
                     reserva.UsuarioCreacionId = UsuarioActualId();
-
-
                     reserva.MontoDiario = inmueble!.PrecioPorDia;
-
 
                     int cantidadDias = Math.Max(
                         1,
@@ -77,6 +87,7 @@ namespace mvc.Controllers
                     reserva.MontoTotal = (int)(
                         cantidadDias * inmueble.PrecioPorDia
                     );
+                    reserva.Estado = "Activo";
                     repositorio.Alta(reserva);
 
                     decimal montoSeniaMinima =
@@ -94,7 +105,6 @@ namespace mvc.Controllers
                     };
 
                     repoPago.Alta(pago);
-
 
                     auditoriaRepositorio.Registrar(
                         User,
@@ -209,32 +219,25 @@ namespace mvc.Controllers
         [Authorize(Roles = "Administrador,Empleado")]
         public IActionResult Guardar(Reserva reserva)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Inquilinos = repoInquilino.ObtenerLista();
-                ViewBag.Inmuebles = repoInmueble.ObtenerLista();
-                return View("Editar", reserva);
-            }
-
             if (reserva.FechaDeSalida <= reserva.FechaDeEntrada)
             {
                 ModelState.AddModelError(string.Empty, "La fecha de salida debe ser posterior a la fecha de entrada.");
-                ViewBag.Inquilinos = repoInquilino.ObtenerLista();
-                ViewBag.Inmuebles = repoInmueble.ObtenerLista();
-                return View("Editar", reserva);
             }
 
-            var reservasExistentes = repositorio.ObtenerLista();
-            bool haySolapamiento = reservasExistentes.Any(r =>
-                r.IdInmueble == reserva.IdInmueble &&
-                r.IdReserva != reserva.IdReserva &&
-                r.FechaDeEntrada < reserva.FechaDeSalida &&
-                r.FechaDeSalida > reserva.FechaDeEntrada
-            );
+            // Control de solapamiento optimizado al editar/guardar (excluyendo la reserva actual)
+            int? idExcluir = reserva.IdReserva > 0 ? reserva.IdReserva : null;
+            bool haySolapamiento = repositorio.ExisteSolapamiento(reserva.IdInmueble, reserva.FechaDeEntrada, reserva.FechaDeSalida, idExcluir);
 
             if (haySolapamiento)
             {
                 ModelState.AddModelError(string.Empty, "El inmueble no está disponible en las fechas elegidas");
+            }
+
+            ModelState.Remove(nameof(reserva.MontoTotal));
+            ModelState.Remove(nameof(reserva.MontoDiario));
+
+            if (!ModelState.IsValid)
+            {
                 ViewBag.Inquilinos = repoInquilino.ObtenerLista();
                 ViewBag.Inmuebles = repoInmueble.ObtenerLista();
                 return View("Editar", reserva);
@@ -269,7 +272,8 @@ namespace mvc.Controllers
                         Monto = montoSeniaMinima,
                         Concepto = $"Seña inicial ({inmueble.PorcentajeReserva}%)",
                         Estado = "Activo",
-                        Fecha = DateOnly.FromDateTime(DateTime.Today)
+                        Fecha = DateOnly.FromDateTime(DateTime.Today),
+                        UsuarioCreacionId = UsuarioActualId()
                     });
                     auditoriaRepositorio.Registrar(User, "Reserva", reserva.IdReserva, "Alta", $"Inmueble {reserva.IdInmueble}");
                 }
@@ -316,6 +320,7 @@ namespace mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
         // GET: Reservas/Finalizar/5
         [HttpGet]
         [Authorize(Roles = "Administrador,Empleado")]
@@ -365,8 +370,8 @@ namespace mvc.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador,Empleado")]
         public IActionResult TerminarReservaAnticipada(
-    int idReserva,
-    DateTime nuevoFinFecha)
+            int idReserva,
+            DateTime nuevoFinFecha)
         {
             try
             {
@@ -391,7 +396,6 @@ namespace mvc.Controllers
 
                 decimal multa = repositorio.CalcularMulta(idReserva, nuevoFinFecha);
 
-
                 bool finalizada = repositorio.TerminarReservaAnticipada(
                     idReserva,
                     nuevoFinFecha,
@@ -400,7 +404,6 @@ namespace mvc.Controllers
 
                 if (!finalizada)
                     return BadRequest("No se pudo finalizar la reserva.");
-
 
                 if (multa > 0)
                 {
@@ -443,7 +446,6 @@ namespace mvc.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
 
         // POST: Reservas/RenovarReserva
         [HttpPost]
