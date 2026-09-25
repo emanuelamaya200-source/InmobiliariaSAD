@@ -29,8 +29,6 @@ namespace mvc.Controllers
         [Authorize(Roles = "Administrador,Empleado")]
         public IActionResult Crear()
         {
-            ViewBag.Inquilinos = repoInquilino.ObtenerLista(1, int.MaxValue);
-            ViewBag.Inmuebles = repoInmueble.ObtenerLista(1, int.MaxValue);
             return View(new Reserva());
         }
 
@@ -127,13 +125,44 @@ namespace mvc.Controllers
                 );
             }
 
-            ViewBag.Inquilinos =
-                repoInquilino.ObtenerLista(1, int.MaxValue);
-
-            ViewBag.Inmuebles =
-                repoInmueble.ObtenerLista(1, int.MaxValue);
-
+            CargarSeleccionados(reserva);
             return View(reserva);
+        }
+
+        [HttpGet]
+        public IActionResult BuscarInmuebles(string term = "")
+        {
+            var inmuebles = string.IsNullOrWhiteSpace(term)
+                ? repoInmueble.ObtenerLista(1, int.MaxValue)
+                : repoInmueble.BuscarPorTipo(term.Trim());
+
+            var resultados = inmuebles
+                .Select(i => new
+                {
+                    id = i.Id,
+                    text = $"({i.Id}) {i.Direccion} - {i.Tipo?.Descripcion}",
+                    precio = i.PrecioPorDia,
+                    porcentaje = i.PorcentajeReserva
+                });
+
+            return Json(new { results = resultados });
+        }
+
+        [HttpGet]
+        public IActionResult BuscarInquilinos(string term = "")
+        {
+            var inquilinos = string.IsNullOrWhiteSpace(term)
+                ? repoInquilino.ObtenerLista(1, int.MaxValue)
+                : repoInquilino.BuscarPorNombre(term.Trim());
+
+            var resultados = inquilinos
+                .Select(i => new
+                {
+                    id = i.IdInquilino,
+                    text = $"{i.Nombre} {i.Apellido} (DNI: {i.Dni})"
+                });
+
+            return Json(new { results = resultados });
         }
 
         // GET: Reservas
@@ -183,9 +212,6 @@ namespace mvc.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
-            ViewBag.Inquilinos = repoInquilino.ObtenerLista();
-            ViewBag.Inmuebles = repoInmueble.ObtenerLista();
-
             if (id > 0)
             {
                 var reserva = repositorio.ObtenerPorId(id);
@@ -193,6 +219,7 @@ namespace mvc.Controllers
                 {
                     return NotFound();
                 }
+                CargarSeleccionados(reserva);
                 return View(reserva);
             }
 
@@ -208,8 +235,7 @@ namespace mvc.Controllers
             original.IdReserva = 0;
             original.FechaDeEntrada = entrada;
             original.FechaDeSalida = entrada.AddDays(1);
-            ViewBag.Inquilinos = repoInquilino.ObtenerLista();
-            ViewBag.Inmuebles = repoInmueble.ObtenerLista();
+            CargarSeleccionados(original);
             return View("Editar", original);
         }
 
@@ -238,8 +264,7 @@ namespace mvc.Controllers
 
             if (!ModelState.IsValid)
             {
-                ViewBag.Inquilinos = repoInquilino.ObtenerLista();
-                ViewBag.Inmuebles = repoInmueble.ObtenerLista();
+                CargarSeleccionados(reserva);
                 return View("Editar", reserva);
             }
 
@@ -283,10 +308,19 @@ namespace mvc.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, "Error al guardar: " + ex.Message);
-                ViewBag.Inquilinos = repoInquilino.ObtenerLista();
-                ViewBag.Inmuebles = repoInmueble.ObtenerLista();
+                CargarSeleccionados(reserva);
                 return View("Editar", reserva);
             }
+        }
+
+        private void CargarSeleccionados(Reserva reserva)
+        {
+            ViewBag.InmuebleSeleccionado = reserva.IdInmueble > 0
+                ? repoInmueble.ObtenerPorId(reserva.IdInmueble)
+                : null;
+            ViewBag.InquilinoSeleccionado = reserva.IdInquilino > 0
+                ? repoInquilino.ObtenerPorId(reserva.IdInquilino)
+                : null;
         }
 
         // GET: Reservas/Eliminar/5 
@@ -468,6 +502,12 @@ namespace mvc.Controllers
             {
                 return BadRequest(e.Message);
             }
+        }
+        // esto retorna los datos en json, tiene que ser asi para que lo maneje el front en javascript
+        public IActionResult ListarJson()
+        {
+            var Reservas = repositorio.ObtenerLista();
+            return Json(Reservas);
         }
     }
 }

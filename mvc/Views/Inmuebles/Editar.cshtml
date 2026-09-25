@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = Model.Id == 0 ? "Alta de Inmueble" : "Modificar Inmueble";
-    IList<Propietario>? propietarios = (IList<Propietario>?)ViewBag.Propietarios ?? new List<Propietario>();
+    Propietario? propietarioSeleccionado = ViewBag.PropietarioSeleccionado as Propietario;
     IList<tipoInmueble>? tiposInmuebles = (IList<tipoInmueble>?)ViewBag.tipoInmueble ?? new List<tipoInmueble>();
 }
 
@@ -75,9 +75,11 @@
                 <label asp-for="PropietarioId" class="control-label">Propietario</label>
                 <select asp-for="PropietarioId" class="form-control select2-propietarios" required>
                     <option value="">-- Busque DNI o Nombre --</option>
-                    @foreach (var p in propietarios)
+                    @if (propietarioSeleccionado != null)
                     {
-                        <option value="@p.IdPropietario">@p.Dni - @p.Nombre @p.Apellido</option>
+                        <option value="@propietarioSeleccionado.IdPropietario" selected>
+                            @propietarioSeleccionado.Dni - @propietarioSeleccionado.Nombre @propietarioSeleccionado.Apellido
+                        </option>
                     }
                 </select>
                 <span asp-validation-for="PropietarioId" class="text-danger"></span>
@@ -98,7 +100,13 @@
             $('.select2-propietarios').select2({
                 placeholder: "Busque por DNI o Nombre",
                 allowClear: true,
-                width: '100%'
+                width: '100%',
+                ajax: {
+                    url: '@Url.Action("BuscarPropietarios", "Inmuebles")',
+                    dataType: 'json',
+                    data: params => ({ term: params.term }),
+                    processResults: data => data
+                }
             });
         });
     </script>

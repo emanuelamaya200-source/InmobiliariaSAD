@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Alta de Inmueble";
-    var propietarios = ViewBag.Propietarios as IList<Inmobiliaria_.Net_Core.Models.Propietario> ?? new List<Inmobiliaria_.Net_Core.Models.Propietario>();
+    var propietarioSeleccionado = ViewBag.PropietarioSeleccionado as Inmobiliaria_.Net_Core.Models.Propietario;
     var tiposInmueble = ViewBag.tipoInmueble as IList<Inmobiliaria_.Net_Core.Models.tipoInmueble> ?? new List<Inmobiliaria_.Net_Core.Models.tipoInmueble>();
 }
 
@@ -36,11 +36,13 @@
 
     <div class="form-group mb-2">
         <label asp-for="PropietarioId" class="control-label">Propietario</label>
-        <select asp-for="PropietarioId" class="form-control" required>
-            <option value="">-- Seleccione un propietario --</option>
-            @foreach (var prop in propietarios)
+        <select asp-for="PropietarioId" class="form-control" id="selectPropietario" required>
+            <option value=""></option>
+            @if (propietarioSeleccionado != null)
             {
-                <option value="@prop.IdPropietario">@prop.Nombre @prop.Apellido (DNI: @prop.Dni)</option>
+                <option value="@propietarioSeleccionado.IdPropietario" selected>
+                    @propietarioSeleccionado.Nombre @propietarioSeleccionado.Apellido (DNI: @propietarioSeleccionado.Dni)
+                </option>
             }
         </select>
         <span asp-validation-for="PropietarioId" class="text-danger"></span>
@@ -80,4 +82,22 @@
         <button type="submit" class="btn btn-success">Guardar</button>
         <a asp-action="Index" class="btn btn-secondary">Volver</a>
     </div>
+
 </form>
+
+@section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $('#selectPropietario').select2({
+            placeholder: 'Busque por DNI o nombre',
+            width: '100%',
+            ajax: {
+                url: '@Url.Action("BuscarPropietarios", "Inmuebles")',
+                dataType: 'json',
+                data: params => ({ term: params.term }),
+                processResults: data => data
+            }
+        });
+    </script>
+}

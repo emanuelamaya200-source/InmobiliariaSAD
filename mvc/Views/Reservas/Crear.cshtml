@@ -3,8 +3,8 @@
 
 @{
     ViewData["Title"] = "Alta de Reserva";
-    IList<Inquilino>? inquilinos = (IList<Inquilino>?)ViewBag.Inquilinos ?? new List<Inquilino>();
-    IList<Inmueble>? inmuebles = (IList<Inmueble>?)ViewBag.Inmuebles ?? new List<Inmueble>();    
+    Inquilino? inquilinoSeleccionado = ViewBag.InquilinoSeleccionado as Inquilino;
+    Inmueble? inmuebleSeleccionado = ViewBag.InmuebleSeleccionado as Inmueble;
 }
 
 <h2>Alta de Reserva</h2>
@@ -17,11 +17,13 @@
     <div class="form-group mb-3">
         <label class="control-label">Seleccione el Inmueble</label>
         <select class="form-select" asp-for="IdInmueble" id="selectInmueble" required>
-            <option value="">-- Seleccione un Inmueble --</option>
-            @foreach (Inmueble t in inmuebles)
+            <option value=""></option>
+            @if (inmuebleSeleccionado != null)
             {
-                <option value="@t.Id" data-precio="@t.PrecioPorDia" data-porcentaje="@t.PorcentajeReserva">
-                    (@t.Id) , @t.Direccion , @t.Tipo?.Descripcion - ($@t.PrecioPorDia / día)
+                <option value="@inmuebleSeleccionado.Id" selected
+                        data-precio="@inmuebleSeleccionado.PrecioPorDia"
+                        data-porcentaje="@inmuebleSeleccionado.PorcentajeReserva">
+                    (@inmuebleSeleccionado.Id) @inmuebleSeleccionado.Direccion - @inmuebleSeleccionado.Tipo?.Descripcion
                 </option>
             }
         </select>
@@ -30,12 +32,12 @@
 
     <div class="form-group mb-3">
         <label class="control-label">Inquilino</label>
-        <select class="form-select" asp-for="IdInquilino" required>
-            <option value="">-- Seleccione un Inquilino --</option>
-            @foreach (Inquilino p in inquilinos)
+        <select class="form-select" asp-for="IdInquilino" id="selectInquilino" required>
+            <option value=""></option>
+            @if (inquilinoSeleccionado != null)
             {
-                <option value="@p.IdInquilino">
-                    (@p.Nombre @p.Apellido) (DNI: @p.Dni)
+                <option value="@inquilinoSeleccionado.IdInquilino" selected>
+                    @inquilinoSeleccionado.Nombre @inquilinoSeleccionado.Apellido (DNI: @inquilinoSeleccionado.Dni)
                 </option>
             }
         </select>
@@ -73,12 +75,32 @@
 </form>
 
 @section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        function activarBusqueda(selector, url) {
+            $(selector).select2({
+                placeholder: 'Escriba para buscar',
+                allowClear: true,
+                width: '100%',
+                ajax: {
+                    url: url,
+                    dataType: 'json',
+                    data: params => ({ term: params.term }),
+                    processResults: data => data
+                }
+            });
+        }
+
+        activarBusqueda('#selectInmueble', '@Url.Action("BuscarInmuebles", "Reservas")');
+        activarBusqueda('#selectInquilino', '@Url.Action("BuscarInquilinos", "Reservas")');
+
         function calcularTotales() {
             const select = document.getElementById('selectInmueble');
             const option = select.options[select.selectedIndex];
-            const precioDia = parseFloat(option.getAttribute('data-precio')) || 0;
-            const porcentaje = parseFloat(option.getAttribute('data-porcentaje')) || 0;
+            const seleccion = $('#selectInmueble').select2('data')[0] || {};
+            const precioDia = parseFloat(seleccion.precio ?? option.getAttribute('data-precio')) || 0;
+            const porcentaje = parseFloat(seleccion.porcentaje ?? option.getAttribute('data-porcentaje')) || 0;
 
             const fEntrada = new Date(document.getElementById('fechaEntrada').value);
             const fSalida = new Date(document.getElementById('fechaSalida').value);

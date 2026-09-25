@@ -72,7 +72,6 @@ namespace Inmobiliaria_.Net_Core.Controllers
         [HttpGet]
         public ActionResult Crear()
         {
-            ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
             ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
             return View(new Inmueble());
         }
@@ -99,7 +98,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 ViewBag.StackTrace = ex.StackTrace;
             }
 
-            ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
+            ViewBag.PropietarioSeleccionado = repoPropietario.ObtenerPorId(entidad.PropietarioId);
             ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
             return View(entidad);
         }
@@ -110,7 +109,6 @@ namespace Inmobiliaria_.Net_Core.Controllers
         [Authorize(Roles = "Administrador")]
         public ActionResult Editar(int id)
         {
-            ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
             ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
 
             if (TempData.ContainsKey("Mensaje"))
@@ -122,6 +120,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
             if (entidad == null)
                 return NotFound();
 
+            ViewBag.PropietarioSeleccionado = repoPropietario.ObtenerPorId(entidad.PropietarioId);
             return View(entidad);
         }
 
@@ -150,9 +149,26 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 ViewBag.StackTrace = ex.StackTrace;
             }
 
-            ViewBag.Propietarios = repoPropietario.ObtenerLista(1, 100);
+            ViewBag.PropietarioSeleccionado = repoPropietario.ObtenerPorId(entidad.PropietarioId);
             ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
             return View(entidad);
+        }
+
+        [HttpGet]
+        public IActionResult BuscarPropietarios(string term = "")
+        {
+            var propietarios = string.IsNullOrWhiteSpace(term)
+                ? repoPropietario.ObtenerLista(1, int.MaxValue)
+                : repoPropietario.BuscarPorNombre(term.Trim());
+
+            var resultados = propietarios
+                .Select(p => new
+                {
+                    id = p.IdPropietario,
+                    text = $"{p.Dni} - {p.Nombre} {p.Apellido}"
+                });
+
+            return Json(new { results = resultados });
         }
 
 
@@ -273,6 +289,12 @@ namespace Inmobiliaria_.Net_Core.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+        // esto retorna los datos en json, tiene que ser asi para que lo maneje el front en javascript
+        public IActionResult ListarJson()
+        {
+            var inmuebles = repositorio.ObtenerLista();
+            return Json(inmuebles);
         }
     }
 }
