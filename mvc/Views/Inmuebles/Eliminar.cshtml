@@ -6,6 +6,11 @@
 
 <h1>Eliminar</h1>
 
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
 <h3>¿Está seguro de que quiere eliminar este inmueble?</h3>
 <div>
     <h4>Inmueble</h4>
@@ -67,7 +72,7 @@
         </dd>
     </dl>
     
-    <form asp-action="Eliminar">
+    <form asp-action="Eliminar" asp-route-id="@Model.Id" method="post">
         <input type="submit" value="Eliminar" class="btn btn-danger" /> |
         <a asp-action="Index">Volver a la Lista</a>
     </form>
