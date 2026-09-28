@@ -30,6 +30,7 @@ namespace Inmobiliaria_.Net_Core.Models
 		public Propietario? Duenio { get; set; }
 		public tipoInmueble? Tipo { get; set;}
 		public string? Portada { get; set; }
+		public IFormFile? PortadaFile { get; set; }
 		public bool Habilitado { get; set; } = true;
 
 		public int CantidadReservas {get; set;}

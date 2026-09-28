@@ -18,13 +18,16 @@ namespace Inmobiliaria_.Net_Core.Controllers
         private readonly IRepositorioPropietario repoPropietario;
         private readonly IRepositorioTipoInmueble repoTipoInmueble;
         private readonly IRepositorioAuditoria auditoriaRepositorio;
+        private readonly IWebHostEnvironment environment;
 
-        public InmueblesController(IRepositorioInmueble repositorio, IRepositorioPropietario repoPropietrio, IRepositorioTipoInmueble repoTipoInmueble, IRepositorioAuditoria auditoriaRepositorio)
+        public InmueblesController(IRepositorioInmueble repositorio, IRepositorioPropietario repoPropietrio, IRepositorioTipoInmueble repoTipoInmueble, IRepositorioAuditoria auditoriaRepositorio, IWebHostEnvironment environment)
         {
             this.repositorio = repositorio;
             this.repoPropietario = repoPropietrio;
             this.repoTipoInmueble = repoTipoInmueble;
             this.auditoriaRepositorio = auditoriaRepositorio;
+            this.environment = environment;
+            
         }
 
                 // GET: Inmuebles
@@ -89,28 +92,48 @@ namespace Inmobiliaria_.Net_Core.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Crear(Inmueble entidad)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
+                return View(entidad);
+            }
             try
             {
-                if (ModelState.IsValid)
+                int res = repositorio.Alta(entidad); 
+
+                if (entidad.PortadaFile != null && entidad.Id > 0)
                 {
-                    repositorio.Alta(entidad);
-                    auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Alta", $"Dirección: {entidad.Direccion}");
-                    TempData["Id"] = entidad.Id;
-                    TempData["Mensaje"] = "Inmueble creado correctamente";
-                    return RedirectToAction(nameof(Index));
+                    string wwwPath = environment.WebRootPath;
+                    string path = Path.Combine(wwwPath, "Uploads");
+
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                    string fileName = "inmueble_" + entidad.Id + Path.GetExtension(entidad.PortadaFile.FileName);
+                    string pathCompleto = Path.Combine(path, fileName);
+                    entidad.Portada = Path.Combine("/Uploads", fileName).Replace("\\", "/");
+
+                    using (FileStream stream = new FileStream(pathCompleto, FileMode.Create))
+                    {
+                        entidad.PortadaFile.CopyTo(stream);
+                    }
+
+                    repositorio.Modificacion(entidad); 
                 }
+
+                auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Alta", $"Dirección: {entidad.Direccion}");
+                TempData["Mensaje"] = "Inmueble creado correctamente";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 ViewBag.Error = ex.Message;
-                ViewBag.StackTrace = ex.StackTrace;
+                ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
+                return View(entidad);
             }
-
-            ViewBag.PropietarioSeleccionado = repoPropietario.ObtenerPorId(entidad.PropietarioId);
-            ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
-            return View(entidad);
         }
-
 
         // GET: Inmuebles/Editar/5
         [HttpGet]
@@ -143,23 +166,53 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
             try
             {
-                if (ModelState.IsValid)
+                var actual = repositorio.ObtenerPorId(id);
+                if (actual == null)
+                    return NotFound();
+
+                actual.Direccion = entidad.Direccion;
+                actual.Cupo = entidad.Cupo;
+                actual.PrecioPorDia = entidad.PrecioPorDia;
+                actual.PorcentajeReserva = entidad.PorcentajeReserva;
+                actual.Latitud = entidad.Latitud;
+                actual.Longitud = entidad.Longitud;
+                actual.PropietarioId = entidad.PropietarioId;
+                actual.IdTipoInmueble = entidad.IdTipoInmueble;
+                actual.Habilitado = entidad.Habilitado;
+
+                if (entidad.PortadaFile != null)
                 {
-                    repositorio.Modificacion(entidad);
-                    auditoriaRepositorio.Registrar(User, "Inmueble", entidad.Id, "Modificacion", $"Dirección: {entidad.Direccion}");
-                    TempData["Mensaje"] = "Inmueble modificado correctamente";
-                    return RedirectToAction(nameof(Index));
+                    string wwwPath = environment.WebRootPath;
+                    string path = Path.Combine(wwwPath, "Uploads");
+
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                    string fileName = "inmueble_" + id + Path.GetExtension(entidad.PortadaFile.FileName);
+                    string pathCompleto = Path.Combine(path, fileName);
+
+                    using (var stream = new FileStream(pathCompleto, FileMode.Create))
+                    {
+                        entidad.PortadaFile.CopyTo(stream);
+                    }
+
+                    actual.Portada = Path.Combine("/Uploads", fileName).Replace("\\", "/");
                 }
+
+                repositorio.Modificacion(actual);
+                auditoriaRepositorio.Registrar(User, "Inmueble", actual.Id, "Modificacion", $"Dirección: {actual.Direccion}");
+                TempData["Mensaje"] = "Inmueble modificado correctamente";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 ViewBag.Error = ex.Message;
-                ViewBag.StackTrace = ex.StackTrace;
+                ViewBag.PropietarioSeleccionado = repoPropietario.ObtenerPorId(entidad.PropietarioId);
+                ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
+                return View(entidad);
             }
-
-            ViewBag.PropietarioSeleccionado = repoPropietario.ObtenerPorId(entidad.PropietarioId);
-            ViewBag.tipoInmueble = repoTipoInmueble.ObtenerLista();
-            return View(entidad);
         }
 
         [HttpGet]

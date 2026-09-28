@@ -30,9 +30,10 @@
     </div>
 </div>
 
-<table class="table table-bordered table-striped">
+<table class="table table-bordered table-striped align-middle">
     <thead>
         <tr>
+            <th>Portada</th>
             <th>ID</th>
             <th>Dirección</th>
             <th>Tipo de Inmueble</th>
@@ -47,42 +48,53 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>@item.Id</td>
-            <td>@item.Direccion</td>
-            <td>@item.Tipo?.Descripcion</td>
-            <td>@item.Cupo</td>
-            <td>@item.PrecioPorDia</td>
-            <td>@item.PorcentajeReserva</td>
-            <td>@item.Latitud</td>
-            <td>@item.Longitud</td>
-            <td>@item.Duenio</td>
-            <td>
-                @if (item.Habilitado) {
-                    <span class="badge bg-success">Sí</span>
-                } else {
-                    <span class="badge bg-secondary">No</span>
-                }
-            </td>
-            <td>
-                <a asp-action="Detalles" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Detalles">
-                    <i class="bi bi-info-circle"> </i> Detalles
-                </a>
-                @if (User.IsInRole("Administrador"))
-				{
-                <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
-                    <i class="bi bi-pencil-square"> </i> Modificar
-                </a>
-                <a asp-action="Eliminar" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
-                    <i class="bi bi-trash-fill"> </i> Borrar
-                </a>
-                }
-            </td>
-        </tr>
-}
+        @foreach (var item in Model) {
+            <tr>
+                <td class="text-center">
+                    @if (!string.IsNullOrEmpty(item.Portada))
+                    {
+                        <img src="@item.Portada" alt="Portada" class="rounded-circle shadow-sm" style="width: 45px; height: 45px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <span class="text-muted small">Sin foto</span>
+                    }
+                </td>
+                <td>@item.Id</td>
+                <td>@item.Direccion</td>
+                <td>@item.Tipo?.Descripcion</td>
+                <td>@item.Cupo</td>
+                <td>@item.PrecioPorDia.ToString("C")</td>
+                <td>@item.PorcentajeReserva %</td>
+                <td>@item.Latitud</td>
+                <td>@item.Longitud</td>
+                <td>@item.Duenio?.Nombre @item.Duenio?.Apellido</td>
+                <td>
+                    @if (item.Habilitado) {
+                        <span class="badge bg-success">Sí</span>
+                    } else {
+                        <span class="badge bg-secondary">No</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Detalles" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Detalles">
+                        <i class="bi bi-info-circle"></i> Detalles
+                    </a>
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil-square"></i> Modificar
+                        </a>
+                        <a asp-action="Eliminar" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash-fill"></i> Borrar
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
 <ul class="pagination">
     @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
     {

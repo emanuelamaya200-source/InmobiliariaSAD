@@ -3,6 +3,20 @@
 <h2>Detalle de Inmueble</h2>
 
 <div class="card p-3 col-md-6 shadow-sm mt-3">
+    <!-- Visualización de la Portada -->
+    @if (!string.IsNullOrEmpty(Model.Portada))
+    {
+        <div class="text-center mb-3">
+            <img src="@Model.Portada" alt="Foto de Portada" class="img-fluid rounded shadow-sm" style="max-height: 250px; object-fit: cover;" />
+        </div>
+    }
+    else
+    {
+        <div class="text-center mb-3 text-muted">
+            <p><em>Sin imagen de portada</em></p>
+        </div>
+    }
+
     <dl class="row mb-3">
         <dt class="col-sm-4 text-muted">Código:</dt>
         <dd class="col-sm-8 fw-bold">#@Model.Id</dd>
@@ -11,16 +25,16 @@
         <dd class="col-sm-8">@Model.Direccion</dd>
 
         <dt class="col-sm-4 text-muted">Tipo de Inmueble:</dt>
-        <dd class="col-sm-8">@Model.Tipo.Descripcion</dd>
+        <dd class="col-sm-8">@Model.Tipo?.Descripcion</dd>
 
         <dt class="col-sm-4 text-muted">Cupo:</dt>
         <dd class="col-sm-8">@Model.Cupo</dd>
 
-        <dt class="col-sm-4 text-muted">Precio por dia:</dt>
-        <dd class="col-sm-8">@Model.PrecioPorDia</dd>
+        <dt class="col-sm-4 text-muted">Precio por día:</dt>
+        <dd class="col-sm-8">@Model.PrecioPorDia.ToString("C")</dd>
 
         <dt class="col-sm-4 text-muted">Porcentaje de reserva:</dt>
-        <dd class="col-sm-8">@Model.PorcentajeReserva</dd>
+        <dd class="col-sm-8">@Model.PorcentajeReserva %</dd>
 
         <dt class="col-sm-4 text-muted">Latitud:</dt>
         <dd class="col-sm-8">@Model.Latitud</dd>
@@ -29,19 +43,18 @@
         <dd class="col-sm-8">@Model.Longitud</dd>
 
         <dt class="col-sm-4 text-muted">Nombre del propietario:</dt>
-        <dd class="col-sm-8">@Model.Duenio</dd>
+        <dd class="col-sm-8">@Model.Duenio?.Nombre @Model.Duenio?.Apellido</dd>
     </dl>
 
     <div>
-         @if (User.IsInRole("Administrador"))
-					{
-        <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">
-            <i class="bi bi-pencil-square"></i> Modificar
-        </a>
+        @if (User.IsInRole("Administrador"))
+        {
+            <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="bi bi-pencil-square"></i> Modificar
+            </a>
         }
         <a asp-action="Index" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Volver al listado
         </a>
     </div>
 </div>
-

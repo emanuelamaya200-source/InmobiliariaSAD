@@ -15,36 +15,36 @@ namespace Inmobiliaria_.Net_Core.Models
 		}
 
 		public int Alta(Inmueble entidad)
-        {
-            int res = -1;
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"INSERT INTO Inmueble
+		{
+			int res = -1;
+			using (var connection = new MySqlConnection(connectionString))
+			{
+				string sql = @"INSERT INTO Inmueble
                 (Direccion, Cupo, PrecioPorDia, PorcentajeReserva, Latitud, Longitud,
                 PropietarioId, IdTipoInmueble, Disponible)
                 VALUES (@direccion, @cupo, @precioPorDia, @porcentajeReserva,
                 @latitud, @longitud, @propietarioId, @IdTipoInmueble, @disponible);
                 SELECT LAST_INSERT_ID();";
 
-                using (var command = new MySqlCommand(sql, connection))
-                {
-                    command.CommandType = CommandType.Text;
-                    command.Parameters.AddWithValue("@direccion", entidad.Direccion == null ? DBNull.Value : entidad.Direccion);
-                    command.Parameters.AddWithValue("@cupo", entidad.Cupo);
-                    command.Parameters.AddWithValue("@precioPorDia", entidad.PrecioPorDia);
-                    command.Parameters.AddWithValue("@porcentajeReserva", entidad.PorcentajeReserva);
-                    command.Parameters.AddWithValue("@latitud", entidad.Latitud);
-                    command.Parameters.AddWithValue("@longitud", entidad.Longitud);
-                    command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
-                    command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
-                    command.Parameters.AddWithValue("@disponible", entidad.Habilitado); 
-                    
-                    connection.Open();
-                    res = Convert.ToInt32(command.ExecuteScalar());
-                }
-            }
-            return res;
-        }
+				using (var command = new MySqlCommand(sql, connection))
+				{
+					command.CommandType = CommandType.Text;
+					command.Parameters.AddWithValue("@direccion", entidad.Direccion == null ? DBNull.Value : entidad.Direccion);
+					command.Parameters.AddWithValue("@cupo", entidad.Cupo);
+					command.Parameters.AddWithValue("@precioPorDia", entidad.PrecioPorDia);
+					command.Parameters.AddWithValue("@porcentajeReserva", entidad.PorcentajeReserva);
+					command.Parameters.AddWithValue("@latitud", entidad.Latitud);
+					command.Parameters.AddWithValue("@longitud", entidad.Longitud);
+					command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
+					command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
+					command.Parameters.AddWithValue("@disponible", entidad.Habilitado);
+
+					connection.Open();
+					res = Convert.ToInt32(command.ExecuteScalar());
+				}
+			}
+			return res;
+		}
 		public int Baja(int id)
 		{
 			int res = -1;
@@ -63,39 +63,46 @@ namespace Inmobiliaria_.Net_Core.Models
 			return res;
 		}
 		public int Modificacion(Inmueble entidad)
-        {
-            int res = -1;
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                string sql = @"
-                UPDATE Inmueble SET
-                Direccion=@direccion, Cupo=@cupo, PrecioPorDia=@precioPorDia,
-                PorcentajeReserva=@porcentajeReserva,
-                Latitud=@latitud, Longitud=@longitud, PropietarioId=@propietarioId,
-                IdTipoInmueble=@IdTipoInmueble, Disponible=@disponible
-                WHERE IdInmueble = @id";
+		{
+			int res = -1;
+			using (var connection = new MySqlConnection(connectionString))
+			{
+				string sql = @"
+            UPDATE Inmueble SET
+            Direccion = @direccion, 
+            Cupo = @cupo, 
+            PrecioPorDia = @precioPorDia,
+            PorcentajeReserva = @porcentajeReserva,
+            Latitud = @latitud, 
+            Longitud = @longitud, 
+            PropietarioId = @propietarioId,
+            IdTipoInmueble = @IdTipoInmueble, 
+            Disponible = @disponible,
+            Portada = @portada
+            WHERE IdInmueble = @id";
 
-                using (MySqlCommand command = new MySqlCommand(sql, connection))
-                {
-                    command.CommandType = CommandType.Text;
-                    command.Parameters.AddWithValue("@direccion", entidad.Direccion ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@cupo", entidad.Cupo);
-                    command.Parameters.AddWithValue("@precioPorDia", entidad.PrecioPorDia);
-                    command.Parameters.AddWithValue("@porcentajeReserva", entidad.PorcentajeReserva);
-                    command.Parameters.AddWithValue("@latitud", entidad.Latitud);
-                    command.Parameters.AddWithValue("@longitud", entidad.Longitud);
-                    command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
-                    command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
-                    command.Parameters.AddWithValue("@disponible", entidad.Habilitado); 
-                    command.Parameters.AddWithValue("@id", entidad.Id);
+				using (MySqlCommand command = new MySqlCommand(sql, connection))
+				{
+					command.CommandType = CommandType.Text;
+					command.Parameters.AddWithValue("@direccion", entidad.Direccion ?? (object)DBNull.Value);
+					command.Parameters.AddWithValue("@cupo", entidad.Cupo);
+					command.Parameters.AddWithValue("@precioPorDia", entidad.PrecioPorDia);
+					command.Parameters.AddWithValue("@porcentajeReserva", entidad.PorcentajeReserva);
+					command.Parameters.AddWithValue("@latitud", entidad.Latitud);
+					command.Parameters.AddWithValue("@longitud", entidad.Longitud);
+					command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
+					command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
+					command.Parameters.AddWithValue("@disponible", entidad.Habilitado);
+					command.Parameters.AddWithValue("@portada", string.IsNullOrEmpty(entidad.Portada) ? (object)DBNull.Value : entidad.Portada);
+					command.Parameters.AddWithValue("@id", entidad.Id);
 
-                    connection.Open();
-                    res = command.ExecuteNonQuery();
-                }
-            }
-            return res;
-        }
-        public IList<Inmueble> ObtenerLista(int paginaNro = 1, int tamPagina = 10)
+					connection.Open();
+					res = command.ExecuteNonQuery();
+				}
+			}
+			return res;
+		}
+		public IList<Inmueble> ObtenerLista(int paginaNro = 1, int tamPagina = 10)
 		{
 			IList<Inmueble> res = new List<Inmueble>();
 			using (var connection = new MySqlConnection(connectionString))
@@ -335,7 +342,7 @@ public Inmueble? ObtenerPorId(int id)
 				string sql = @"
 					UPDATE Inmueble SET
 					Portada=@portada
-					WHERE Id = @id";
+					WHERE Idinmueble = @id";
 				using (MySqlCommand command = new MySqlCommand(sql, connection))
 				{
 					command.Parameters.AddWithValue("@portada", String.IsNullOrEmpty(url) ? DBNull.Value : url);
