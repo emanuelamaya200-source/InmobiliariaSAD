@@ -26,29 +26,20 @@ namespace Inmobiliaria_.Net_Core.Controllers
             this.auditoriaRepositorio = auditoriaRepositorio;
         }
 
-        // GET: Inmuebles
+                // GET: Inmuebles
         [HttpGet]
-        public ActionResult Index(int pagina = 1, string? nombre = null)
+        public ActionResult Index(int pagina = 1, string? nombre = null, int? disponibilidad = null)
         {
             const int tamPagina = 10;
             pagina = Math.Max(1, pagina);
-            IList<Inmueble> resultados;
 
-            if (!string.IsNullOrWhiteSpace(nombre))
-            {
-                resultados = repositorio.BuscarPorTipo(nombre);
-            }
-            else
-            {
-                resultados = repositorio.ObtenerLista(1, int.MaxValue);
-            }
-
-            var total = resultados.Count;
-            var lista = resultados.Skip((pagina - 1) * tamPagina).Take(tamPagina).ToList();
+            var total = repositorio.ObtenerCantidadFiltrada(nombre, disponibilidad);
+            var lista = repositorio.ObtenerListaFiltrada(nombre, disponibilidad, pagina, tamPagina);
 
             ViewBag.PaginaActual = pagina;
             ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
             ViewBag.Nombre = nombre;
+            ViewBag.Disponibilidad = disponibilidad;
 
             if (TempData.ContainsKey("Id"))
                 ViewBag.Id = TempData["Id"];

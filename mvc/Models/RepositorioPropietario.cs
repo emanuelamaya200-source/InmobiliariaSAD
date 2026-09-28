@@ -217,5 +217,64 @@ namespace Inmobiliaria_.Net_Core.Models
         {
             throw new NotImplementedException();
         }
+
+        public int ObtenerCantidadPorNombre(string? nombre)
+        {
+            int res = 0;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = "SELECT COUNT(*) FROM Propietario";
+                if (!string.IsNullOrWhiteSpace(nombre))
+                    sql += " WHERE Nombre LIKE @nombre OR Apellido LIKE @nombre OR Dni LIKE @nombre";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    if (!string.IsNullOrWhiteSpace(nombre))
+                        command.Parameters.AddWithValue("@nombre", $"%{nombre}%");
+                    connection.Open();
+                    res = Convert.ToInt32(command.ExecuteScalar());
+                    connection.Close();
+                }
+            }
+            return res;
+        }
+        public IList<Propietario> BuscarPorNombre(string nombre, int pagina, int tamPagina)
+        {
+            var lista = new List<Propietario>();
+            int offset = (pagina - 1) * tamPagina;
+            if (offset < 0) offset = 0;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"SELECT IdPropietario, Nombre, Apellido, Dni, Telefono, Email, Clave 
+                       FROM Propietario 
+                       WHERE Nombre LIKE @nombre OR Apellido LIKE @nombre OR Dni LIKE @nombre
+                       ORDER BY IdPropietario
+                       LIMIT @limit OFFSET @offset";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@nombre", $"%{nombre}%");
+                    command.Parameters.AddWithValue("@limit", tamPagina);
+                    command.Parameters.AddWithValue("@offset", offset);
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Propietario
+                            {
+                                IdPropietario = reader.GetInt32(nameof(Propietario.IdPropietario)),
+                                Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                                Apellido = reader.GetString(nameof(Propietario.Apellido)),
+                                Dni = reader.GetString(nameof(Propietario.Dni)),
+                                Telefono = reader.IsDBNull(reader.GetOrdinal(nameof(Propietario.Telefono))) ? "" : reader.GetString(nameof(Propietario.Telefono)),
+                                Email = reader.GetString(nameof(Propietario.Email)),
+                                Clave = reader.GetString(nameof(Propietario.Clave))
+                            });
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            return lista;
+        }
     }
 }

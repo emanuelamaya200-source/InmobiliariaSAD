@@ -355,5 +355,103 @@ public Inmueble? ObtenerPorId(int id)
 			return lista;
 		}
 
-	}
+        public IList<Inmueble> BuscarPorTipo(string tipo, int pagina, int tamPagina)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int ObtenerCantidadFiltrada(string? busqueda, int? disponibilidad)
+		{
+			int res = 0;
+			using (MySqlConnection connection = new MySqlConnection(connectionString))
+			{
+				string sql = @"SELECT COUNT(i.IdInmueble)
+					FROM Inmueble i 
+					INNER JOIN Propietario p ON i.PropietarioId = p.IdPropietario
+					INNER JOIN TipoInmueble t ON i.IdTipoInmueble = t.IdTipoInmueble
+					WHERE 1=1";
+				if (!string.IsNullOrWhiteSpace(busqueda))
+					sql += " AND (i.Direccion LIKE @busqueda OR t.Descripcion LIKE @busqueda)";
+				if (disponibilidad.HasValue)
+					sql += " AND i.Disponible = @disponibilidad";
+				using (MySqlCommand command = new MySqlCommand(sql, connection))
+				{
+					if (!string.IsNullOrWhiteSpace(busqueda))
+						command.Parameters.AddWithValue("@busqueda", $"%{busqueda}%");
+					if (disponibilidad.HasValue)
+						command.Parameters.AddWithValue("@disponibilidad", disponibilidad.Value);
+					connection.Open();
+					res = Convert.ToInt32(command.ExecuteScalar());
+					connection.Close();
+				}
+			}
+			return res;
+		}
+		public IList<Inmueble> ObtenerListaFiltrada(string? busqueda, int? disponibilidad, int pagina, int tamPagina)
+		{
+			var lista = new List<Inmueble>();
+			int offset = (pagina - 1) * tamPagina;
+			if (offset < 0) offset = 0;
+			using (MySqlConnection connection = new MySqlConnection(connectionString))
+			{
+				string sql = $@"SELECT i.IdInmueble AS {nameof(Inmueble.Id)}, i.{nameof(Inmueble.Direccion)}, i.{nameof(Inmueble.Cupo)},
+					i.{nameof(Inmueble.PrecioPorDia)}, i.{nameof(Inmueble.PorcentajeReserva)},
+					i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)}, i.{nameof(Inmueble.IdTipoInmueble)}, i.{nameof(Inmueble.Portada)},
+					i.Disponible AS Habilitado,
+					p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}, t.{nameof(tipoInmueble.Descripcion)} 
+					FROM Inmueble i 
+					INNER JOIN Propietario p ON i.{nameof(Inmueble.PropietarioId)} = p.{nameof(Propietario.IdPropietario)} 
+					INNER JOIN TipoInmueble t ON i.{nameof(Inmueble.IdTipoInmueble)} = t.IdTipoInmueble
+					WHERE 1=1";
+				if (!string.IsNullOrWhiteSpace(busqueda))
+					sql += " AND (i.Direccion LIKE @busqueda OR t.Descripcion LIKE @busqueda)";
+				if (disponibilidad.HasValue)
+					sql += " AND i.Disponible = @disponibilidad";
+				sql += " ORDER BY i.IdInmueble LIMIT @limit OFFSET @offset";
+				using (MySqlCommand command = new MySqlCommand(sql, connection))
+				{
+					if (!string.IsNullOrWhiteSpace(busqueda))
+						command.Parameters.AddWithValue("@busqueda", $"%{busqueda}%");
+					if (disponibilidad.HasValue)
+						command.Parameters.AddWithValue("@disponibilidad", disponibilidad.Value);
+					command.Parameters.AddWithValue("@limit", tamPagina);
+					command.Parameters.AddWithValue("@offset", offset);
+					connection.Open();
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							lista.Add(new Inmueble
+							{
+								Id = reader.GetInt32(nameof(Inmueble.Id)),
+								Direccion = reader[nameof(Inmueble.Direccion)] == DBNull.Value ? "" : reader.GetString(nameof(Inmueble.Direccion)),
+								Portada = reader[nameof(Inmueble.Portada)] == DBNull.Value ? null : reader.GetString(nameof(Inmueble.Portada)),
+								Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
+								PrecioPorDia = reader.GetDecimal(nameof(Inmueble.PrecioPorDia)),
+								PorcentajeReserva = reader.GetDecimal(nameof(Inmueble.PorcentajeReserva)),
+								Latitud = reader.GetDecimal(nameof(Inmueble.Latitud)),
+								Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
+								PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+								IdTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
+								Habilitado = reader.GetBoolean("Habilitado"),
+								Duenio = new Propietario
+								{
+									IdPropietario = reader.GetInt32(nameof(Inmueble.PropietarioId)),
+									Nombre = reader.GetString(nameof(Propietario.Nombre)),
+									Apellido = reader.GetString(nameof(Propietario.Apellido))
+								},
+								Tipo = new tipoInmueble
+								{
+									idTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
+									Descripcion = reader.GetString(nameof(tipoInmueble.Descripcion))
+								}
+							});
+						}
+					}
+					connection.Close();
+				}
+			}
+			return lista;
+		}
+}
 }

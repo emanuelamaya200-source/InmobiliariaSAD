@@ -16,25 +16,25 @@ namespace mvc.Controllers
             this.auditoriaRepositorio = auditoriaRepositorio;
         }
 
-        // GET: Propietarios
+                // GET: Propietarios
         [HttpGet]
         public IActionResult Index(string? nombre, int pagina = 1)
         {
             const int tamPagina = 10;
             pagina = Math.Max(1, pagina);
-            IList<Propietario> resultados;
+
+            var total = repositorio.ObtenerCantidadPorNombre(nombre);
+            IList<Propietario> lista;
 
             if (!string.IsNullOrWhiteSpace(nombre))
             {
-                resultados = repositorio.BuscarPorNombre(nombre);
+                lista = repositorio.BuscarPorNombre(nombre, pagina, tamPagina);
             }
             else
             {
-                resultados = repositorio.ObtenerLista(1, int.MaxValue);
+                lista = repositorio.ObtenerLista(pagina, tamPagina);
             }
 
-            var total = resultados.Count;
-            var lista = resultados.Skip((pagina - 1) * tamPagina).Take(tamPagina).ToList();
             ViewBag.PaginaActual = pagina;
             ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
             ViewBag.Nombre = nombre;

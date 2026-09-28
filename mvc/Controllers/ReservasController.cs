@@ -165,26 +165,27 @@ namespace mvc.Controllers
             return Json(new { results = resultados });
         }
 
-        // GET: Reservas
+                // GET: Reservas
         [HttpGet]
         public IActionResult Index(int? id, DateTime? inicio, DateTime? fin, int? cupo, int pagina = 1)
         {
             const int tamPagina = 10;
             pagina = Math.Max(1, pagina);
-            IList<Reserva> resultados;
+            IList<Reserva> lista;
+            int total;
 
             if (id.HasValue && id.Value > 0)
             {
                 var r = repositorio.ObtenerPorId(id.Value);
-                resultados = r is null ? new List<Reserva>() : new List<Reserva> { r };
+                lista = r is null ? new List<Reserva>() : new List<Reserva> { r };
+                total = lista.Count;
             }
             else
             {
-                resultados = repositorio.ObtenerPorRango(inicio, fin, cupo);
+                total = repositorio.ObtenerCantidadPorRango(inicio, fin, cupo);
+                lista = repositorio.ObtenerPorRango(inicio, fin, cupo, pagina, tamPagina);
             }
 
-            var total = resultados.Count;
-            var lista = resultados.Skip((pagina - 1) * tamPagina).Take(tamPagina).ToList();
             ViewBag.PaginaActual = pagina;
             ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
             ViewBag.Inicio = inicio?.ToString("yyyy-MM-dd");

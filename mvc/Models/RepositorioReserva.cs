@@ -281,5 +281,64 @@ namespace Inmobiliaria_.Net_Core.Models
             Alta(nueva); 
             return nueva;
         }
+
+                public int ObtenerCantidadPorRango(DateTime? inicio, DateTime? fin, int? cupo)
+        {
+            const string sql = @"SELECT COUNT(*)
+                FROM reserva r
+                INNER JOIN inmueble i ON r.IdInmueble = i.IdInmueble
+                WHERE (@inicio IS NULL OR r.FechaDeEntrada < @fin) 
+                  AND (@fin IS NULL OR COALESCE(r.FechaFinEfectiva, r.FechaDeSalida) > @inicio) 
+                  AND (@cupo IS NULL OR i.Cupo >= @cupo)";
+
+            using var c = new MySqlConnection(connectionString);
+            using var q = new MySqlCommand(sql, c);
+
+            q.Parameters.AddWithValue("@inicio", (object?)inicio ?? DBNull.Value);
+            q.Parameters.AddWithValue("@fin", (object?)fin ?? DBNull.Value);
+            q.Parameters.AddWithValue("@cupo", (object?)cupo ?? DBNull.Value);
+
+            c.Open();
+            return Convert.ToInt32(q.ExecuteScalar());
+        }
+
+        public IList<Reserva> ObtenerPorRango(DateTime? inicio, DateTime? fin, int? cupo, int pagina, int tamPagina)
+        {
+            var result = new List<Reserva>();
+            int offset = (pagina - 1) * tamPagina;
+            if (offset < 0) offset = 0;
+
+            const string sql = @"SELECT r.*,
+                                i.Direccion AS NombreInmueble,
+                                CONCAT(inqui.Nombre, ' ', inqui.Apellido) AS NombreInquilino
+                FROM reserva r
+                INNER JOIN inmueble i ON r.IdInmueble = i.IdInmueble
+                INNER JOIN inquilino inqui ON r.IdInquilino = inqui.IdInquilino
+                WHERE (@inicio IS NULL OR r.FechaDeEntrada < @fin) 
+                  AND (@fin IS NULL OR COALESCE(r.FechaFinEfectiva, r.FechaDeSalida) > @inicio) 
+                  AND (@cupo IS NULL OR i.Cupo >= @cupo) 
+                ORDER BY r.FechaDeEntrada
+                LIMIT @limit OFFSET @offset";
+
+            using var c = new MySqlConnection(connectionString);
+            using var q = new MySqlCommand(sql, c);
+
+            q.Parameters.AddWithValue("@inicio", (object?)inicio ?? DBNull.Value);
+            q.Parameters.AddWithValue("@fin", (object?)fin ?? DBNull.Value);
+            q.Parameters.AddWithValue("@cupo", (object?)cupo ?? DBNull.Value);
+            q.Parameters.AddWithValue("@limit", tamPagina);
+            q.Parameters.AddWithValue("@offset", offset);
+
+            c.Open();
+            using var reader = q.ExecuteReader();
+            while (reader.Read())
+            {
+                var reserva = Map(reader);
+                reserva.NombreInmueble = reader["NombreInmueble"] is DBNull ? string.Empty : reader.GetString("NombreInmueble");
+                reserva.NombreInquilino = reader["NombreInquilino"] is DBNull ? string.Empty : reader.GetString("NombreInquilino");
+                result.Add(reserva);
+            }
+            return result;
+        }
     }
 }

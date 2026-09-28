@@ -6,15 +6,26 @@
     <a asp-action="Crear" class="btn btn-primary">Alta Inmueble</a>
 </p>
 
-<div class="col-md-6">
-    <form asp-action="Index" method="get" class="d-flex">
-        <input type="text" name="nombre" class="form-control me-2" placeholder="Buscar por Tipo o Dirección..." value="@ViewBag.Nombre" />
-        <button type="submit" class="btn btn-outline-secondary">Buscar</button>
-        @if (!string.IsNullOrEmpty(ViewBag.Nombre))
-        {
-            <a asp-action="Index" class="btn btn-outline-danger ms-2" title="Limpiar búsqueda">Limpiar</a>
-        }
-    </form>
+<div class="row mb-3">
+    <div class="col-md-8">
+        <form asp-action="Index" method="get" class="d-flex align-items-end gap-2">
+            <div class="flex-grow-1">
+                <input type="text" name="nombre" class="form-control" placeholder="Buscar por Tipo o Dirección..." value="@ViewBag.Nombre" />
+            </div>
+            <div>
+                <select name="disponibilidad" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="1" selected="@(ViewBag.Disponibilidad != null && (int)ViewBag.Disponibilidad == 1 ? "selected" : null)">Disponibles</option>
+                    <option value="0" selected="@(ViewBag.Disponibilidad != null && (int)ViewBag.Disponibilidad == 0 ? "selected" : null)">No Disponibles</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-outline-secondary">Buscar</button>
+            @if (!string.IsNullOrEmpty(ViewBag.Nombre as string) || ViewBag.Disponibilidad != null)
+            {
+                <a asp-action="Index" class="btn btn-outline-danger" title="Limpiar búsqueda">Limpiar</a>
+            }
+        </form>
+    </div>
 </div>
 
 <table class="table table-bordered table-striped">
@@ -29,6 +40,7 @@
             <th>Latitud</th>
             <th>Longitud</th>
             <th>PropietarioId</th>
+            <th>Disponible</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -37,7 +49,7 @@
         <tr>
             <td>@item.Id</td>
             <td>@item.Direccion</td>
-            <td>@item.Tipo.Descripcion</td>
+            <td>@item.Tipo?.Descripcion</td>
             <td>@item.Cupo</td>
             <td>@item.PrecioPorDia</td>
             <td>@item.PorcentajeReserva</td>
@@ -45,11 +57,18 @@
             <td>@item.Longitud</td>
             <td>@item.Duenio</td>
             <td>
+                @if (item.Habilitado) {
+                    <span class="badge bg-success">Sí</span>
+                } else {
+                    <span class="badge bg-secondary">No</span>
+                }
+            </td>
+            <td>
                 <a asp-action="Detalles" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Detalles">
                     <i class="bi bi-info-circle"> </i> Detalles
                 </a>
                 @if (User.IsInRole("Administrador"))
-					{
+				{
                 <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
                     <i class="bi bi-pencil-square"> </i> Modificar
                 </a>
@@ -59,7 +78,6 @@
                 }
             </td>
         </tr>
-
 }
     </tbody>
 </table>
@@ -67,7 +85,7 @@
     @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
     {
         <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
-            <a class="page-link" asp-action="Index" asp-route-pagina="@i" asp-route-nombre="@ViewBag.Nombre">@i</a>
+            <a class="page-link" asp-action="Index" asp-route-pagina="@i" asp-route-nombre="@ViewBag.Nombre" asp-route-disponibilidad="@ViewBag.Disponibilidad">@i</a>
         </li>
     }
 </ul>

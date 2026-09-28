@@ -5,6 +5,8 @@ namespace Inmobiliaria_.Net_Core.Models
         Propietario? ObtenerPorEmail(string Email);
         IList<Propietario> BuscarPorNombre(string Nombre);
         
+        IList<Propietario> BuscarPorNombre(string nombre, int pagina, int tamPagina);
+        int ObtenerCantidadPorNombre(string? nombre);
     }
 
 }
