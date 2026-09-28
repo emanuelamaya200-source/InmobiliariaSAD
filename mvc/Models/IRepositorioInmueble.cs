@@ -10,5 +10,7 @@ namespace Inmobiliaria_.Net_Core.Models
 		IList<Inmueble> BuscarPorTipo(string tipo, int pagina, int tamPagina);
 		int ObtenerCantidadFiltrada(string? busqueda, int? disponibilidad);
 		IList<Inmueble> ObtenerListaFiltrada(string? busqueda, int? disponibilidad, int pagina, int tamPagina);
+
+		IList<Inmueble> ObtenerInformeReservas(bool sinReservas, int dias, int pagina, int tamPagina, out int total);
 	}
 }

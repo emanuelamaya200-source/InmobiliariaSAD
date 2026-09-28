@@ -1,0 +1,65 @@
+@model IEnumerable<Inmobiliaria_.Net_Core.Models.Reserva>
+
+<h2>Reservas próximas a vencer</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <label for="plazo" class="form-label">Período</label>
+        <select id="plazo" name="plazo" class="form-select">
+            <option value="30" selected="@(ViewBag.Plazo == 30)">30 días</option>
+            <option value="60" selected="@(ViewBag.Plazo == 60)">60 días</option>
+            <option value="90" selected="@(ViewBag.Plazo == 90)">90 días</option>
+            <option value="360" selected="@(ViewBag.Plazo == 360)">360 días</option>
+            <option value="0" selected="@(ViewBag.Plazo == 0)">Personalizado</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <label for="diasPersonalizados" class="form-label">Días personalizados</label>
+        <input id="diasPersonalizados" type="number" name="diasPersonalizados" value="@ViewBag.DiasPersonalizados" min="1" max="3650" class="form-control" />
+    </div>
+    <div class="col-auto align-self-end">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Reserva</th>
+            <th>Inmueble</th>
+            <th>Inquilino</th>
+            <th>Fecha de salida</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            foreach (var reserva in Model)
+            {
+                <tr>
+                    <td>@reserva.IdReserva</td>
+                    <td>@reserva.NombreInmueble</td>
+                    <td>@reserva.NombreInquilino</td>
+                    <td>@reserva.FechaDeSalida.ToString("dd/MM/yyyy")</td>
+                    <td><a asp-action="Detalles" asp-route-id="@reserva.IdReserva" class="btn btn-sm btn-info">Detalles</a></td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="5" class="text-center">No hay reservas próximas a vencer en ese período.</td></tr>
+        }
+    </tbody>
+</table>
+
+<ul class="pagination">
+    @for (int pagina = 1; pagina <= ViewBag.TotalPaginas; pagina++)
+    {
+        <li class="page-item @(pagina == ViewBag.PaginaActual ? "active" : "")">
+            <a class="page-link" asp-action="ProximasAVencer" asp-route-plazo="@ViewBag.Plazo" asp-route-diasPersonalizados="@ViewBag.DiasPersonalizados" asp-route-pagina="@pagina">@pagina</a>
+        </li>
+    }
+</ul>
+
+<a asp-action="Index" class="btn btn-outline-secondary">Volver a reservas</a>

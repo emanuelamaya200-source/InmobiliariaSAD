@@ -31,6 +31,8 @@ namespace Inmobiliaria_.Net_Core.Models
 		public tipoInmueble? Tipo { get; set;}
 		public string? Portada { get; set; }
 		public bool Habilitado { get; set; } = true;
+
+		public int CantidadReservas {get; set;}
 	}
 	
 }
