@@ -45,7 +45,7 @@ namespace Inmobiliaria_.Net_Core.Models
             return res;
         }
 
-        public int Baja(int id)
+             public int Baja(int id)
         {
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -55,6 +55,25 @@ namespace Inmobiliaria_.Net_Core.Models
                 {
                     command.CommandType = CommandType.Text;
                     command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    res = command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            return res;
+        }
+
+        public int Baja(int id, int usuarioAnulacionId)
+        {
+            int res = -1;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = "UPDATE Pago SET Estado = 'Inactivo', UsuarioAnulacionId = @usuario WHERE IdPago = @id AND Estado <> 'Inactivo'";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@usuario", usuarioAnulacionId);
                     connection.Open();
                     res = command.ExecuteNonQuery();
                     connection.Close();

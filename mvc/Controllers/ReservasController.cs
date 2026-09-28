@@ -414,7 +414,6 @@ namespace mvc.Controllers
                 return BadRequest(e.Message);
             }
         }
-
         // POST: Reservas/TerminarReservaAnticipada
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -446,15 +445,8 @@ namespace mvc.Controllers
 
                 decimal multa = repositorio.CalcularMulta(idReserva, nuevoFinFecha);
 
-                bool finalizada = repositorio.TerminarReservaAnticipada(
-                    idReserva,
-                    nuevoFinFecha,
-                    usuarioId
-                );
-
-                if (!finalizada)
-                    return BadRequest("No se pudo finalizar la reserva.");
-
+                // PRIMERO registrar el pago de la multa (si corresponde)
+                // Si el inquilino no paga, no se puede finalizar
                 if (multa > 0)
                 {
                     var pago = new Pago
@@ -469,6 +461,12 @@ namespace mvc.Controllers
 
                     repoPago.Alta(pago);
 
+                    // Verificar que el pago se registró correctamente
+                    if (pago.IdPago <= 0)
+                    {
+                        return BadRequest("No se pudo registrar el pago de la multa. La reserva no fue finalizada.");
+                    }
+
                     auditoriaRepositorio.Registrar(
                         User,
                         "Pago",
@@ -477,6 +475,16 @@ namespace mvc.Controllers
                         $"Multa por finalización anticipada de reserva {idReserva}: {multa:C}"
                     );
                 }
+
+                // DESPUÉS de confirmar el pago, finalizar la reserva
+                bool finalizada = repositorio.TerminarReservaAnticipada(
+                    idReserva,
+                    nuevoFinFecha,
+                    usuarioId
+                );
+
+                if (!finalizada)
+                    return BadRequest("No se pudo finalizar la reserva.");
 
                 auditoriaRepositorio.Registrar(
                     User,

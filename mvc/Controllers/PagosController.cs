@@ -209,9 +209,10 @@ namespace mvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
-        public IActionResult Borrar(int id)
+                public IActionResult Borrar(int id)
         {
-            repositorio.Baja(id);
+            int usuarioId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 0;
+            repositorio.Baja(id, usuarioId);
             auditoriaRepositorio.Registrar(User, "Pago", id, "Baja", "Pago dado de baja");
             return RedirectToAction(nameof(Index));
         }
