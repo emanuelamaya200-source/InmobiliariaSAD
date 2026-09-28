@@ -12,5 +12,7 @@ namespace Inmobiliaria_.Net_Core.Models
 		IList<Inmueble> ObtenerListaFiltrada(string? busqueda, int? disponibilidad, int pagina, int tamPagina);
 
 		IList<Inmueble> ObtenerInformeReservas(bool sinReservas, int dias, int pagina, int tamPagina, out int total);
+
+		IList<Inmueble> MasReservados(int dias);
 	}
 }

@@ -308,9 +308,10 @@ namespace Inmobiliaria_.Net_Core.Controllers
         
         [HttpGet]
         [Authorize(Roles ="Administrador,Empleado")]
-        public IActionResult MasReservados()
+        public IActionResult MasReservados(int dias = 365)
         {
-            return Ok();
+            var lista = repositorio.MasReservados(dias);
+            return Ok(lista); 
         }
     }
 }

@@ -15,33 +15,36 @@ namespace Inmobiliaria_.Net_Core.Models
 		}
 
 		public int Alta(Inmueble entidad)
-		{
-			int res = -1;
-			using (var connection = new MySqlConnection(connectionString))
-			{
-				string sql = @"INSERT INTO Inmueble
-					(Direccion, Cupo, PrecioPorDia, PorcentajeReserva, Latitud, Longitud, PropietarioId, IdTipoInmueble)
-					VALUES (@direccion, @cupo, @precioPorDia, @porcentajeReserva, @latitud, @longitud, @propietarioId, @IdTipoInmueble);
-					SELECT LAST_INSERT_ID();";//devuelve el id insertado (LAST_INSERT_ID para mysql)
-				using (var command = new MySqlCommand(sql, connection))
-				{
-					command.CommandType = CommandType.Text;
-					command.Parameters.AddWithValue("@direccion", entidad.Direccion == null? DBNull.Value : entidad.Direccion);
-					command.Parameters.AddWithValue("@cupo", entidad.Cupo);
-					command.Parameters.AddWithValue("@precioPorDia", entidad.PrecioPorDia);
-					command.Parameters.AddWithValue("@porcentajeReserva", entidad.PorcentajeReserva);
-					command.Parameters.AddWithValue("@latitud", entidad.Latitud);
-					command.Parameters.AddWithValue("@longitud", entidad.Longitud);
-					command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
-					command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
-					connection.Open();
-					res = Convert.ToInt32(command.ExecuteScalar());
-					entidad.Id = res;
-					connection.Close();
-				}
-			}
-			return res;
-		}
+        {
+            int res = -1;
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"INSERT INTO Inmueble
+                (Direccion, Cupo, PrecioPorDia, PorcentajeReserva, Latitud, Longitud,
+                PropietarioId, IdTipoInmueble, Disponible)
+                VALUES (@direccion, @cupo, @precioPorDia, @porcentajeReserva,
+                @latitud, @longitud, @propietarioId, @IdTipoInmueble, @disponible);
+                SELECT LAST_INSERT_ID();";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@direccion", entidad.Direccion == null ? DBNull.Value : entidad.Direccion);
+                    command.Parameters.AddWithValue("@cupo", entidad.Cupo);
+                    command.Parameters.AddWithValue("@precioPorDia", entidad.PrecioPorDia);
+                    command.Parameters.AddWithValue("@porcentajeReserva", entidad.PorcentajeReserva);
+                    command.Parameters.AddWithValue("@latitud", entidad.Latitud);
+                    command.Parameters.AddWithValue("@longitud", entidad.Longitud);
+                    command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
+                    command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
+                    command.Parameters.AddWithValue("@disponible", entidad.Habilitado); 
+                    
+                    connection.Open();
+                    res = Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+            return res;
+        }
 		public int Baja(int id)
 		{
 			int res = -1;
@@ -60,33 +63,37 @@ namespace Inmobiliaria_.Net_Core.Models
 			return res;
 		}
 		public int Modificacion(Inmueble entidad)
-		{
-			int res = -1;
-			using (var connection = new MySqlConnection(connectionString))
-			{
-				string sql = @"
-					UPDATE Inmueble SET
-						Direccion=@direccion, Cupo=@cupo, PrecioPorDia=@precioPorDia, PorcentajeReserva=@porcentajeReserva, 
-						Latitud=@latitud, Longitud=@longitud, PropietarioId=@propietarioId, IdTipoInmueble=@IdTipoInmueble
-					WHERE IdInmueble = @id";
-				using (MySqlCommand command = new MySqlCommand(sql, connection))
-				{
-					command.Parameters.AddWithValue("@direccion", entidad.Direccion);
-					command.Parameters.AddWithValue("@cupo", entidad.Cupo);
-					command.Parameters.AddWithValue("@precioPorDia", entidad.PrecioPorDia);
-					command.Parameters.AddWithValue("@porcentajeReserva", entidad.PorcentajeReserva);
-					command.Parameters.AddWithValue("@latitud", entidad.Latitud);
-					command.Parameters.AddWithValue("@longitud", entidad.Longitud);
-					command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
-					command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
-					command.Parameters.AddWithValue("@id", entidad.Id);
-					command.CommandType = CommandType.Text;
-					connection.Open();
-					res = command.ExecuteNonQuery();
-					connection.Close();
-				}
-			}
-			return res;
+        {
+            int res = -1;
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"
+                UPDATE Inmueble SET
+                Direccion=@direccion, Cupo=@cupo, PrecioPorDia=@precioPorDia,
+                PorcentajeReserva=@porcentajeReserva,
+                Latitud=@latitud, Longitud=@longitud, PropietarioId=@propietarioId,
+                IdTipoInmueble=@IdTipoInmueble, Disponible=@disponible
+                WHERE IdInmueble = @id";
+
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@direccion", entidad.Direccion ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@cupo", entidad.Cupo);
+                    command.Parameters.AddWithValue("@precioPorDia", entidad.PrecioPorDia);
+                    command.Parameters.AddWithValue("@porcentajeReserva", entidad.PorcentajeReserva);
+                    command.Parameters.AddWithValue("@latitud", entidad.Latitud);
+                    command.Parameters.AddWithValue("@longitud", entidad.Longitud);
+                    command.Parameters.AddWithValue("@propietarioId", entidad.PropietarioId);
+                    command.Parameters.AddWithValue("@IdTipoInmueble", entidad.IdTipoInmueble);
+                    command.Parameters.AddWithValue("@disponible", entidad.Habilitado); 
+                    command.Parameters.AddWithValue("@id", entidad.Id);
+
+                    connection.Open();
+                    res = command.ExecuteNonQuery();
+                }
+            }
+            return res;
         }
         public IList<Inmueble> ObtenerLista(int paginaNro = 1, int tamPagina = 10)
 		{
@@ -270,51 +277,55 @@ public Inmueble? ObtenerPorId(int id)
 		}
 
 		public IList<Inmueble> BuscarPorPropietario(int idPropietario)
-		{
-			List<Inmueble> res = new List<Inmueble>();
-			using (var connection = new MySqlConnection(connectionString))
-			{
-				string sql = @$"
-					SELECT i.IdInmueble AS {nameof(Inmueble.Id)}, i.{nameof(Inmueble.Direccion)}, i.{nameof(Inmueble.Cupo)},
-					i.{nameof(Inmueble.PrecioPorDia)}, i.{nameof(Inmueble.PorcentajeReserva)},
-					i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.PropietarioId)},i.{nameof(Inmueble.IdTipoInmueble)},
-					p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}
-					FROM Inmueble i JOIN Propietario p ON i.PropietarioId = p.IdPropietario
-					WHERE i.IdInmueble = @idPropietario";
-				using (MySqlCommand command = new MySqlCommand(sql, connection))
-				{
-					command.Parameters.Add("@idPropietario", MySqlDbType.Int32).Value = idPropietario;
-					command.CommandType = CommandType.Text;
-					connection.Open();
-					var reader = command.ExecuteReader();
-					while (reader.Read())
-					{
-						var entidad = new Inmueble
-						{
-							Id = reader.GetInt32(nameof(Inmueble.Id)),
-							Direccion = reader[nameof(Inmueble.Direccion)] == DBNull.Value? "" : reader.GetString(nameof(Inmueble.Direccion)),
-							Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
-							PrecioPorDia = reader.GetDecimal(nameof(Inmueble.PrecioPorDia)),
-							PorcentajeReserva = reader.GetDecimal(nameof(Inmueble.PorcentajeReserva)),
-							Latitud = reader.GetDecimal(nameof(Inmueble.Latitud)),
-							Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
-							PropietarioId = reader.GetInt32(nameof(Inmueble.PropietarioId)),
-							IdTipoInmueble = reader.GetInt32(nameof(Inmueble.IdTipoInmueble)),
-							Duenio = new Propietario
-							{
-								IdPropietario = reader.GetInt32(nameof(Inmueble.PropietarioId)),
-								Nombre = reader.GetString(nameof(Propietario.Nombre)),
-								Apellido = reader.GetString(nameof(Propietario.Apellido)),
-							}
-						};
-						res.Add(entidad);
-					}
-					connection.Close();
-				}
-			}
-			return res;
-	
-    	}
+        {
+            var res = new List<Inmueble>();
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                string sql = @"
+                SELECT i.IdInmueble AS Id,
+                i.Direccion, i.Cupo,
+                i.PrecioPorDia,
+                i.PorcentajeReserva,
+                i.Latitud, i.Longitud,
+                i.PropietarioId, i.IdTipoInmueble,
+                i.Disponible AS Habilitado,
+                p.Nombre, p.Apellido
+                FROM Inmueble i JOIN Propietario p ON i.PropietarioId = p.IdPropietario
+                WHERE i.PropietarioId = @idPropietario"; 
+
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.Add("@idPropietario", MySqlDbType.Int32).Value = idPropietario;
+                    command.CommandType = CommandType.Text;
+                    connection.Open();
+                    var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        var entidad = new Inmueble
+                        {
+                            Id = reader.GetInt32("Id"),
+                            Direccion = reader[nameof(Inmueble.Direccion)] == DBNull.Value ? "" : reader.GetString(nameof(Inmueble.Direccion)),
+                            Cupo = reader.GetInt32(nameof(Inmueble.Cupo)),
+                            PrecioPorDia = reader.GetDecimal(nameof(Inmueble.PrecioPorDia)),
+                            PorcentajeReserva = reader.GetDecimal("PorcentajeReserva"),
+                            Latitud = reader.GetDecimal(nameof(Inmueble.Latitud)),
+                            Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
+                            PropietarioId = reader.GetInt32("PropietarioId"),
+                            IdTipoInmueble = reader.GetInt32("IdTipoInmueble"),
+                            Habilitado = reader.GetBoolean("Habilitado"),
+                            Duenio = new Propietario
+                            {
+                                IdPropietario = reader.GetInt32("PropietarioId"),
+                                Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                                Apellido = reader.GetString(nameof(Propietario.Apellido))
+                            }
+                        };
+                        res.Add(entidad);
+                    }
+                }
+            }
+            return res;
+        }
 
     public int ModificarPortada(int id, string url)
 		{
@@ -510,28 +521,40 @@ public Inmueble? ObtenerPorId(int id)
 		}
 
 	public IList<Inmueble> MasReservados(int dias)
-		{
-		IList<Inmueble> model = new List<Inmueble>();
-		//     
-		using (var connection = new MySqlConnection(connectionString))
-		{
-			if(!(dias==0))
-				{
-				//@ permite saltos en linea
-				string sql = $@"SELECT i.IdInmueble AS {nameof(Inmueble.Id)} , i.Direccion, Count(*) AS CantidadReservas
-				From Inmueble i
-				JOIN reserva r ON r.IdInmueble = i.IdInmueble
-				Where r.FechaDeEntrada >= DATE_SUB()
-				";	
-				}
-				else
-				{
-					
-				}
-				// si la persona introduce una cantidad de dias se muestra esa cantidad
-		}
-		return model;                  
-              
-		}
+        {
+            var lista = new List<Inmueble>();
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                int intervaloDias = dias <= 0 ? 365 : dias;
+
+                string sql = @"SELECT i.IdInmueble AS Id, i.Direccion, COUNT(r.IdReserva) AS CantidadReservas
+                               FROM Inmueble i
+                               JOIN reserva r ON r.IdInmueble = i.IdInmueble
+                               WHERE r.Estado <> 'Cancelado' 
+                                 AND r.FechaDeEntrada >= DATE_SUB(CURDATE(), INTERVAL @dias DAY)
+                               GROUP BY i.IdInmueble, i.Direccion
+                               ORDER BY CantidadReservas DESC
+                               LIMIT 10";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@dias", intervaloDias);
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Inmueble
+                            {
+                                Id = reader.GetInt32("Id"),
+                                Direccion = reader.GetString("Direccion"),
+                                CantidadReservas = reader.GetInt32("CantidadReservas")
+                            });
+                        }
+                    }
+                }
+            }
+            return lista;
+        }
 	}
 }
