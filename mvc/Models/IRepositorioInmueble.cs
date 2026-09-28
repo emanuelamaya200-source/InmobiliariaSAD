@@ -6,5 +6,6 @@ namespace Inmobiliaria_.Net_Core.Models
 		IList<Inmueble> BuscarPorPropietario(int idPropietario);
 
 		IList<Inmueble> BuscarPorTipo(string tipo);
+		IList<Inmueble> ObtenerInformeReservas(bool sinReservas, int dias, int pagina, int tamPagina, out int total);
 	}
 }

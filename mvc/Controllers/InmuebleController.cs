@@ -7,6 +7,7 @@ using Inmobiliaria_.Net_Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 
 namespace Inmobiliaria_.Net_Core.Controllers
 {
@@ -56,6 +57,22 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 ViewBag.Mensaje = TempData["Mensaje"];
 
             return View(lista);
+        }
+
+        [HttpGet]
+        public ActionResult InformeReservas(bool sinReservas = false, int plazo = 30, int? diasPersonalizados = null, int pagina = 1)
+        {
+            const int tamPagina = 10;
+            int dias = sinReservas ? Math.Clamp(plazo == 0 ? diasPersonalizados ?? 30 : plazo, 1, 3650) : 365;
+            pagina = Math.Max(1, pagina);
+            var inmuebles = repositorio.ObtenerInformeReservas(sinReservas, dias, pagina, tamPagina, out int total);
+            ViewBag.SinReservas = sinReservas;
+            ViewBag.Dias = dias;
+            ViewBag.Plazo = sinReservas ? plazo : 365;
+            ViewBag.DiasPersonalizados = diasPersonalizados;
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
+            return View(inmuebles);
         }
 
         public IActionResult Detalles(int id)
@@ -295,6 +312,14 @@ namespace Inmobiliaria_.Net_Core.Controllers
         {
             var inmuebles = repositorio.ObtenerLista();
             return Json(inmuebles);
+        }
+
+        
+        [HttpGet]
+        [Authorize(Roles ="Administrador,Empleado")]
+        public IActionResult MasReservados()
+        {
+            return Ok();
         }
     }
 }

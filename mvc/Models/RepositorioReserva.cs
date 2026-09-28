@@ -131,6 +131,52 @@ namespace Inmobiliaria_.Net_Core.Models
             return Convert.ToInt32(q.ExecuteScalar()); 
         }
 
+        public IList<Reserva> ObtenerProximasAVencer(int dias, int pagina, int tamPagina, out int total)
+        {
+            var lista = new List<Reserva>();
+            int offset = Math.Max(0, pagina - 1) * tamPagina;
+            const string filtro = @"r.Estado = @estado
+                  AND r.FechaFinEfectiva IS NULL
+                  AND r.FechaDeSalida >= CURDATE()
+                  AND r.FechaDeSalida < DATE_ADD(DATE_ADD(CURDATE(), INTERVAL @dias DAY), INTERVAL 1 DAY)";
+            const string sqlTotal = $@"SELECT COUNT(*) FROM reserva r WHERE {filtro}";
+            const string sql = $@"SELECT r.*,
+                    i.Direccion AS NombreInmueble,
+                    CONCAT(inqui.Nombre, ' ', inqui.Apellido) AS NombreInquilino
+                FROM reserva r
+                INNER JOIN inmueble i ON r.IdInmueble = i.IdInmueble
+                INNER JOIN inquilino inqui ON r.IdInquilino = inqui.IdInquilino
+                WHERE {filtro}
+                ORDER BY r.FechaDeSalida, r.IdReserva
+                LIMIT @limit OFFSET @offset";
+
+            using var connection = new MySqlConnection(connectionString);
+            connection.Open();
+
+            using (var totalCommand = new MySqlCommand(sqlTotal, connection))
+            {
+                totalCommand.Parameters.Add("@estado", MySqlDbType.VarChar).Value = "Activo";
+                totalCommand.Parameters.Add("@dias", MySqlDbType.Int32).Value = dias;
+                total = Convert.ToInt32(totalCommand.ExecuteScalar());
+            }
+
+            using var command = new MySqlCommand(sql, connection);
+            command.Parameters.Add("@estado", MySqlDbType.VarChar).Value = "Activo";
+            command.Parameters.Add("@dias", MySqlDbType.Int32).Value = dias;
+            command.Parameters.Add("@limit", MySqlDbType.Int32).Value = tamPagina;
+            command.Parameters.Add("@offset", MySqlDbType.Int32).Value = offset;
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var reserva = Map(reader);
+                reserva.NombreInmueble = reader["NombreInmueble"] is DBNull ? string.Empty : reader.GetString("NombreInmueble");
+                reserva.NombreInquilino = reader["NombreInquilino"] is DBNull ? string.Empty : reader.GetString("NombreInquilino");
+                lista.Add(reserva);
+            }
+            return lista;
+        }
+
         public Reserva? ObtenerPorId(int id)
         {
             const string sql = @"SELECT r.*,

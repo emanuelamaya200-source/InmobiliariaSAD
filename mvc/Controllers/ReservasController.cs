@@ -194,6 +194,21 @@ namespace mvc.Controllers
             return View(lista);
         }
 
+        [HttpGet]
+        public IActionResult ProximasAVencer(int plazo = 30, int? diasPersonalizados = null, int pagina = 1)
+        {
+            const int tamPagina = 10;
+            int dias = Math.Clamp(plazo == 0 ? diasPersonalizados ?? 30 : plazo, 1, 3650);
+            pagina = Math.Max(1, pagina);
+            var reservas = repositorio.ObtenerProximasAVencer(dias, pagina, tamPagina, out int total);
+            ViewBag.Dias = dias;
+            ViewBag.Plazo = plazo;
+            ViewBag.DiasPersonalizados = diasPersonalizados;
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = (total + tamPagina - 1) / tamPagina;
+            return View(reservas);
+        }
+
         // GET: Reservas/Detalles/5
         [HttpGet]
         public IActionResult Detalles(int id)

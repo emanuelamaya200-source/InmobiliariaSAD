@@ -12,5 +12,6 @@ namespace Inmobiliaria_.Net_Core.Models
         IList<Reserva> ObtenerPorRango(DateTime? inicio, DateTime? fin, int? cupo);
         int Cancelar(int id, int usuarioId);
         bool ExisteSolapamiento(int idInmueble, DateTime entrada, DateTime salida, int? idReservaExcluir = null);
+        IList<Reserva> ObtenerProximasAVencer(int dias, int pagina, int tamPagina, out int total);
     }
 }

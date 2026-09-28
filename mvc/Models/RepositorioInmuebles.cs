@@ -161,6 +161,61 @@ namespace Inmobiliaria_.Net_Core.Models
 			}
 			return res;
 		}
+
+		public IList<Inmueble> ObtenerInformeReservas(bool sinReservas, int dias, int pagina, int tamPagina, out int total)
+		{
+			var lista = new List<Inmueble>();
+			int offset = Math.Max(0, pagina - 1) * tamPagina;
+			string filtroFecha = sinReservas
+				? "r.FechaDeEntrada < DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND COALESCE(r.FechaFinEfectiva, r.FechaDeSalida) > DATE_SUB(CURDATE(), INTERVAL @dias DAY)"
+				: "r.FechaDeEntrada >= DATE_SUB(CURDATE(), INTERVAL @dias DAY) AND r.FechaDeEntrada < DATE_ADD(CURDATE(), INTERVAL 1 DAY)";
+			string having = sinReservas ? "COUNT(r.IdReserva) = 0" : "COUNT(r.IdReserva) > 0";
+			string desde = $@"FROM Inmueble i
+				LEFT JOIN reserva r ON r.IdInmueble = i.IdInmueble
+					AND r.Estado <> @cancelado AND ({filtroFecha})";
+
+			using var connection = new MySqlConnection(connectionString);
+			connection.Open();
+
+			string sqlTotal = $@"SELECT COUNT(*) FROM (
+				SELECT i.IdInmueble {desde}
+				GROUP BY i.IdInmueble, i.Direccion
+				HAVING {having}
+			) informe";
+			using (var totalCommand = new MySqlCommand(sqlTotal, connection))
+			{
+				totalCommand.Parameters.Add("@cancelado", MySqlDbType.VarChar).Value = "Cancelado";
+				totalCommand.Parameters.Add("@dias", MySqlDbType.Int32).Value = dias;
+				total = Convert.ToInt32(totalCommand.ExecuteScalar());
+			}
+
+			string orden = sinReservas ? "i.IdInmueble" : "CantidadReservas DESC, i.IdInmueble";
+			string sql = $@"SELECT i.IdInmueble AS {nameof(Inmueble.Id)},
+					i.Direccion AS {nameof(Inmueble.Direccion)},
+					COUNT(r.IdReserva) AS {nameof(Inmueble.CantidadReservas)}
+				{desde}
+				GROUP BY i.IdInmueble, i.Direccion
+				HAVING {having}
+				ORDER BY {orden}
+				LIMIT @limit OFFSET @offset";
+			using var command = new MySqlCommand(sql, connection);
+			command.Parameters.Add("@cancelado", MySqlDbType.VarChar).Value = "Cancelado";
+			command.Parameters.Add("@dias", MySqlDbType.Int32).Value = dias;
+			command.Parameters.Add("@limit", MySqlDbType.Int32).Value = tamPagina;
+			command.Parameters.Add("@offset", MySqlDbType.Int32).Value = offset;
+			using var reader = command.ExecuteReader();
+			while (reader.Read())
+			{
+				lista.Add(new Inmueble
+				{
+					Id = reader.GetInt32(nameof(Inmueble.Id)),
+					Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+					CantidadReservas = Convert.ToInt32(reader[nameof(Inmueble.CantidadReservas)])
+				});
+			}
+			return lista;
+		}
+
 public Inmueble? ObtenerPorId(int id)
 		{
 			Inmueble? entidad = null;
@@ -355,5 +410,29 @@ public Inmueble? ObtenerPorId(int id)
 			return lista;
 		}
 
+	public IList<Inmueble> MasReservados(int dias)
+		{
+		IList<Inmueble> model = new List<Inmueble>();
+		//     
+		using (var connection = new MySqlConnection(connectionString))
+		{
+			if(!(dias==0))
+				{
+				//@ permite saltos en linea
+				string sql = $@"SELECT i.IdInmueble AS {nameof(Inmueble.Id)} , i.Direccion, Count(*) AS CantidadReservas
+				From Inmueble i
+				JOIN reserva r ON r.IdInmueble = i.IdInmueble
+				Where r.FechaDeEntrada >= DATE_SUB()
+				";	
+				}
+				else
+				{
+					
+				}
+				// si la persona introduce una cantidad de dias se muestra esa cantidad
+		}
+		return model;                  
+              
+		}
 	}
 }
