@@ -34,7 +34,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
         // GET: Usuarios
         [HttpGet]
-        [Authorize(Roles = "Administrador,Empleado")]
+        [Authorize(Roles = "Administrador")]
         public ActionResult Index(int pagina = 1)
         {
             const int tamPagina = 10;
