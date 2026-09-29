@@ -40,7 +40,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "DELETE FROM tipoInmueble WHERE IdTipoInmueble = @id";
+                string sql = "DELETE FROM tipoInmueble WHERE IdTipoInmueble = @id AND NOT EXISTS (SELECT 1 FROM Inmueble WHERE IdTipoInmueble = @id)";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;

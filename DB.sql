@@ -46,8 +46,6 @@ CREATE TABLE IF NOT EXISTS `inmueble` (
     CONSTRAINT `FK_Inmueble_tipoInmueble`
         FOREIGN KEY (`IdTipoInmueble`)
         REFERENCES `tipoInmueble` (`IdTipoInmueble`)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `reserva` (
@@ -136,7 +134,17 @@ VALUES
     (2, 2, '2026-10-12 14:00:00', '2026-10-18 10:00:00', 'Activo'),
     (3, 3, '2026-11-01 14:00:00', '2026-11-08 10:00:00', 'Activo'),
     (4, 4, '2026-11-15 14:00:00', '2026-11-17 10:00:00', 'Activo'),
-    (5, 5, '2026-12-20 14:00:00', '2026-12-27 10:00:00', 'Activo');
+    (5, 5, '2026-12-20 14:00:00', '2026-12-27 10:00:00', 'Activo'),
+    (1, 6, '2026-01-12 14:00:00', '2026-01-15 10:00:00', 'Finalizada'),
+    (1, 7, '2026-03-05 14:00:00', '2026-03-09 10:00:00', 'Finalizada'),
+    (1, 8, '2026-07-02 14:00:00', '2026-07-07 10:00:00', 'Finalizada'),
+    (1, 9, '2026-09-01 14:00:00', '2026-09-04 10:00:00', 'Finalizada'),
+    (2, 1, '2026-02-10 14:00:00', '2026-02-14 10:00:00', 'Finalizada'),
+    (2, 2, '2026-04-12 14:00:00', '2026-04-18 10:00:00', 'Finalizada'),
+    (2, 3, '2026-08-10 14:00:00', '2026-08-15 10:00:00', 'Finalizada'),
+    (3, 4, '2026-01-20 14:00:00', '2026-01-25 10:00:00', 'Finalizada'),
+    (3, 5, '2026-06-15 14:00:00', '2026-06-20 10:00:00', 'Finalizada'),
+    (4, 6, '2026-08-20 14:00:00', '2026-08-23 10:00:00', 'Finalizada');
 
 INSERT INTO `pago`
     (`IdReserva`, `Monto`, `Concepto`, `Estado`, `Fecha`)

@@ -46,13 +46,13 @@ namespace Inmobiliaria_.Net_Core.Models
             return p.IdReserva;
         }
 
-        public int Baja(int id) 
-        { 
-            using var c = new MySqlConnection(connectionString); 
-            using var q = new MySqlCommand("UPDATE reserva SET Estado='Cancelado' WHERE IdReserva=@id", c); 
-            q.Parameters.AddWithValue("@id", id); 
-            c.Open(); 
-            return q.ExecuteNonQuery(); 
+        public int Baja(int id)
+        {
+            using var c = new MySqlConnection(connectionString);
+            using var q = new MySqlCommand("DELETE FROM reserva WHERE IdReserva=@id", c);
+            q.Parameters.AddWithValue("@id", id);
+            c.Open();
+            return q.ExecuteNonQuery();
         }
 
         public int Cancelar(int id, int usuarioId) 

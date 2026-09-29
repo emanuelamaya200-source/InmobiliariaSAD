@@ -360,13 +360,13 @@ namespace mvc.Controllers
         {
             try
             {
-                repositorio.Cancelar(id, UsuarioActualId());
-                auditoriaRepositorio.Registrar(User, "Reserva", id, "Baja", "Reserva cancelada");
+                repositorio.Baja(id);
+                auditoriaRepositorio.Registrar(User, "Reserva", id, "Baja", "Reserva eliminada");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "No se pudo eliminar la reserva: " + ex.Message;
+                TempData["Error"] = "No se puede eliminar la reserva porque tiene pagos asociados.";
                 return RedirectToAction(nameof(Index));
             }
         }

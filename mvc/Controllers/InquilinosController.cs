@@ -120,8 +120,15 @@ namespace mvc.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Borrar(int id)
         {
-            repositorio.Baja(id);
-            auditoriaRepositorio.Registrar(User, "Inquilino", id, "Baja", "Inquilino eliminado");
+            try
+            {
+                repositorio.Baja(id);
+                auditoriaRepositorio.Registrar(User, "Inquilino", id, "Baja", "Inquilino eliminado");
+            }
+            catch (MySql.Data.MySqlClient.MySqlException)
+            {
+                TempData["Error"] = "No se puede eliminar este inquilino porque tiene reservas asociadas.";
+            }
             return RedirectToAction(nameof(Index));
         }
     }

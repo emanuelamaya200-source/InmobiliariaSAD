@@ -119,8 +119,10 @@ namespace mvc.Controllers
         {
             try
             {
-                repositorio.Baja(id);
-                auditoriaRepositorio.Registrar(User, "TipoInmueble", id, "Baja", "Tipo de inmueble eliminado");
+                if (repositorio.Baja(id) == 0)
+                    TempData["Error"] = "No se puede eliminar este tipo porque tiene inmuebles asociados.";
+                else
+                    auditoriaRepositorio.Registrar(User, "TipoInmueble", id, "Baja", "Tipo de inmueble eliminado");
             }
             catch (MySql.Data.MySqlClient.MySqlException)
             {

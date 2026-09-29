@@ -3,7 +3,6 @@ using Inmobiliaria_.Net_Core.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Inmobiliaria_.Net_Core.Controllers
@@ -74,13 +73,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 return View();
             try
             {
-                string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                            password: u.Clave,
-                            salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"] ?? ""),
-                            prf: KeyDerivationPrf.HMACSHA1,
-                            iterationCount: 1000,
-                            numBytesRequested: 256 / 8));
-                u.Clave = hashed;
+                u.Clave = PasswordHash.Hash(u.Clave);
                 var nbreRnd = Guid.NewGuid();
                 int res = repositorio.Alta(u);
                 if (u.AvatarFile != null && u.Id > 0)
@@ -175,15 +168,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
 
                 if (!string.IsNullOrWhiteSpace(u.Clave))
                 {
-                    actual.Clave = Convert.ToBase64String(
-                        KeyDerivation.Pbkdf2(
-                            password: u.Clave,
-                            salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"] ?? ""),
-                            prf: KeyDerivationPrf.HMACSHA1,
-                            iterationCount: 1000,
-                            numBytesRequested: 256 / 8
-                        )
-                    );
+                    actual.Clave = PasswordHash.Hash(u.Clave);
                 }
 
                 if (u.AvatarFile != null)
@@ -263,7 +248,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 actual.Rol = User.IsInRole("Administrador") ? u.Rol : actual.Rol;
                 if (!string.IsNullOrWhiteSpace(u.Clave))
                 {
-                    actual.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(password: u.Clave, salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"] ?? ""), prf: KeyDerivationPrf.HMACSHA1, iterationCount: 1000, numBytesRequested: 256 / 8));
+                    actual.Clave = PasswordHash.Hash(u.Clave);
                 }
                 if (u.AvatarFile != null)
                 {
@@ -306,16 +291,21 @@ namespace Inmobiliaria_.Net_Core.Controllers
         {
             try
             {
-                var ruta = Path.Combine(environment.WebRootPath, "Uploads", $"avatar_{id}" + Path.GetExtension(usuario.Avatar));
+                var actual = repositorio.ObtenerPorId(id);
+                if (actual == null)
+                    return NotFound();
+
+                repositorio.Baja(id);
+                var ruta = Path.Combine(environment.WebRootPath, "Uploads", $"avatar_{id}" + Path.GetExtension(actual.Avatar));
                 if (System.IO.File.Exists(ruta))
                     System.IO.File.Delete(ruta);
-                repositorio.Baja(id);
                 auditoriaRepositorio.Registrar(User, "Usuario", id, "Baja", "Usuario eliminado");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error al eliminar el usuario");
+                TempData["Error"] = "No se puede eliminar este usuario porque tiene reservas o pagos asociados.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -441,19 +431,18 @@ namespace Inmobiliaria_.Net_Core.Controllers
                 var returnUrl = String.IsNullOrEmpty(TempData["returnUrl"] as string) ? "/Home" : (TempData["returnUrl"] ?? "").ToString();
                 if (ModelState.IsValid)
                 {
-                    string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                                password: login.Clave,
-                                salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"] ?? ""),
-                                prf: KeyDerivationPrf.HMACSHA1,
-                                iterationCount: 1000,
-                                numBytesRequested: 256 / 8));
-
                     var e = repositorio.ObtenerPorEmail(login.Email);
-                    if (e == null || e.Clave != hashed)
+                    if (e == null || !PasswordHash.Verify(e.Clave, login.Clave, configuration["Salt"] ?? ""))
                     {
                         ModelState.AddModelError("", "El email o la clave no son correctos");
                         TempData["returnUrl"] = returnUrl;
                         return View();
+                    }
+
+                    if (PasswordHash.NeedsUpgrade(e.Clave))
+                    {
+                        e.Clave = PasswordHash.Hash(login.Clave);
+                        repositorio.Modificacion(e);
                     }
 
                     var claims = new List<Claim>

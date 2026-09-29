@@ -36,20 +36,20 @@
                     </a>
                 @if (User.IsInRole("Administrador"))
                 {
-                    @if (item.Estado == "Inactivo")
+                    @if (item.Estado == "Anulado")
                     {
                         <form asp-action="Alta" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@item.IdPago" />
                             <button type="submit" class="btn btn-sm btn-success" title="Dar Alta">
-                                <i class="bi bi-check-circle-fill"></i> Alta
+                                <i class="bi bi-check-circle-fill"></i> Reactivar
                             </button>
                         </form>
                     }
                     else
                     {
-                        <a asp-action="Eliminar" asp-route-id="@item.IdPago" class="btn btn-sm btn-danger" title="Dar Baja">
-                            <i class="bi bi-trash-fill"></i> Baja
+                            <a asp-action="Eliminar" asp-route-id="@item.IdPago" class="btn btn-sm btn-danger" title="Anular pago">
+                            <i class="bi bi-ban"></i> Anular
                         </a>
                     }
                 }

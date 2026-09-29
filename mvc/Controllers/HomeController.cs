@@ -13,10 +13,12 @@ namespace Inmobiliaria_.Net_Core.Controllers;
 public class HomeController : Controller
 {
     private readonly IRepositorioUsuario repositorio;
+    private readonly IConfiguration configuration;
 
-    public HomeController(IRepositorioUsuario repositorio)
+    public HomeController(IRepositorioUsuario repositorio, IConfiguration configuration)
     {
             this.repositorio = repositorio;
+            this.configuration = configuration;
     }
     public IActionResult Index()
     {
@@ -54,10 +56,16 @@ public class HomeController : Controller
             return View(modelo);
         }
 
-        if (usuario.Clave != modelo.Clave)
+        if (!PasswordHash.Verify(usuario.Clave, modelo.Clave, configuration["Salt"] ?? ""))
         {
             ViewBag.Error = "La clave es incorrecta";
             return View(modelo);
+        }
+
+        if (PasswordHash.NeedsUpgrade(usuario.Clave))
+        {
+            usuario.Clave = PasswordHash.Hash(modelo.Clave);
+            repositorio.Modificacion(usuario);
         }
 
         var claims = new List<Claim>

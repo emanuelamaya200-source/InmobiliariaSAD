@@ -2,6 +2,7 @@
 
 <h2>Eliminar usuario</h2>
 <p>¿Desea eliminar a <strong>@Model.Nombre @Model.Apellido</strong>?</p>
+<p>No se podrá eliminar si tiene reservas o pagos registrados a su nombre.</p>
 
 <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
     @Html.AntiForgeryToken()

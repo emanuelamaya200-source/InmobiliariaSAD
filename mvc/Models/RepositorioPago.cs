@@ -18,6 +18,8 @@ namespace Inmobiliaria_.Net_Core.Models
 
         }
 
+        private static string NormalizarEstado(string estado) => estado == "Inactivo" ? "Anulado" : estado;
+
         public int Alta(Pago p)
         {
             int res = -1;
@@ -50,7 +52,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "UPDATE Pago SET Estado = 'Inactivo' WHERE IdPago = @id AND Estado <> 'Inactivo'";
+                string sql = "UPDATE Pago SET Estado = 'Anulado' WHERE IdPago = @id AND Estado NOT IN ('Anulado', 'Inactivo')";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
@@ -68,7 +70,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "UPDATE Pago SET Estado = 'Inactivo', UsuarioAnulacionId = @usuario WHERE IdPago = @id AND Estado <> 'Inactivo'";
+                string sql = "UPDATE Pago SET Estado = 'Anulado', UsuarioAnulacionId = @usuario WHERE IdPago = @id AND Estado NOT IN ('Anulado', 'Inactivo')";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
@@ -87,7 +89,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = -1;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = "UPDATE Pago SET Estado = 'Activo' WHERE IdPago = @id AND Estado = 'Inactivo'";
+                string sql = "UPDATE Pago SET Estado = 'Activo' WHERE IdPago = @id AND Estado IN ('Anulado', 'Inactivo')";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = CommandType.Text;
@@ -149,7 +151,7 @@ namespace Inmobiliaria_.Net_Core.Models
                                 IdReserva = reader.GetInt32(nameof(Pago.IdReserva)),
                                 Monto = reader.GetDecimal(nameof(Pago.Monto)),
                                 Concepto = reader.GetString(nameof(Pago.Concepto)),
-                                Estado = reader.GetString(nameof(Pago.Estado)),
+                                Estado = NormalizarEstado(reader.GetString(nameof(Pago.Estado))),
                                 Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha))),
                                 IdInmueble = reader.GetInt32(nameof(Pago.IdInmueble)),
                                 Direccion = reader.GetString(nameof(Pago.Direccion)),
@@ -188,7 +190,7 @@ namespace Inmobiliaria_.Net_Core.Models
                                 IdReserva = reader.GetInt32(nameof(Pago.IdReserva)),
                                 Monto = reader.GetDecimal(nameof(Pago.Monto)),
                                 Concepto = reader.GetString(nameof(Pago.Concepto)),
-                                Estado = reader.GetString(nameof(Pago.Estado)),
+                                Estado = NormalizarEstado(reader.GetString(nameof(Pago.Estado))),
                                 Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha)))
                             };
                         }
@@ -204,7 +206,7 @@ namespace Inmobiliaria_.Net_Core.Models
             using var connection = new MySqlConnection(connectionString);
             using var command = new MySqlCommand("SELECT IdPago, IdReserva, Monto, Concepto, Estado, Fecha, UsuarioCreacionId, UsuarioAnulacionId FROM Pago WHERE IdReserva=@id ORDER BY Fecha DESC, IdPago DESC", connection);
             command.Parameters.AddWithValue("@id", idReserva); connection.Open(); using var reader = command.ExecuteReader();
-            while (reader.Read()) result.Add(new Pago { IdPago = reader.GetInt32("IdPago"), IdReserva = reader.GetInt32("IdReserva"), Monto = reader.GetDecimal("Monto"), Concepto = reader.GetString("Concepto"), Estado = reader.GetString("Estado"), Fecha = DateOnly.FromDateTime(reader.GetDateTime("Fecha")), UsuarioCreacionId = reader["UsuarioCreacionId"] is DBNull ? null : reader.GetInt32("UsuarioCreacionId"), UsuarioAnulacionId = reader["UsuarioAnulacionId"] is DBNull ? null : reader.GetInt32("UsuarioAnulacionId") });
+            while (reader.Read()) result.Add(new Pago { IdPago = reader.GetInt32("IdPago"), IdReserva = reader.GetInt32("IdReserva"), Monto = reader.GetDecimal("Monto"), Concepto = reader.GetString("Concepto"), Estado = NormalizarEstado(reader.GetString("Estado")), Fecha = DateOnly.FromDateTime(reader.GetDateTime("Fecha")), UsuarioCreacionId = reader["UsuarioCreacionId"] is DBNull ? null : reader.GetInt32("UsuarioCreacionId"), UsuarioAnulacionId = reader["UsuarioAnulacionId"] is DBNull ? null : reader.GetInt32("UsuarioAnulacionId") });
             return result;
         }
 
@@ -218,7 +220,7 @@ namespace Inmobiliaria_.Net_Core.Models
             int res = 0;
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string sql = incluirInactivos ? "SELECT COUNT(*) FROM Pago" : "SELECT COUNT(*) FROM Pago WHERE Estado <> 'Inactivo'";
+                string sql = incluirInactivos ? "SELECT COUNT(*) FROM Pago" : "SELECT COUNT(*) FROM Pago WHERE Estado NOT IN ('Anulado', 'Inactivo')";
                 using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     connection.Open();
@@ -243,7 +245,7 @@ namespace Inmobiliaria_.Net_Core.Models
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string filtroEstado = incluirInactivos ? "" : "WHERE p.Estado <> 'Inactivo'";
+                string filtroEstado = incluirInactivos ? "" : "WHERE p.Estado NOT IN ('Anulado', 'Inactivo')";
                 string sql = $@"SELECT p.IdPago, p.IdReserva, p.Monto, p.Concepto, p.Estado, p.Fecha,
                 CONCAT(io.Apellido, ', ', io.Nombre) AS NombreInquilino,
                 io.Dni AS DniInquilino, ie.Direccion, ie.IdInmueble
@@ -269,7 +271,7 @@ namespace Inmobiliaria_.Net_Core.Models
                                 IdReserva = reader.GetInt32(nameof(Pago.IdReserva)),
                                 Monto = reader.GetDecimal(nameof(Pago.Monto)),
                                 Concepto = reader.GetString(nameof(Pago.Concepto)),
-                                Estado = reader.GetString(nameof(Pago.Estado)),
+                                Estado = NormalizarEstado(reader.GetString(nameof(Pago.Estado))),
                                 Fecha = DateOnly.FromDateTime(reader.GetDateTime(nameof(Pago.Fecha))),
                                 IdInmueble = reader.GetInt32(nameof(Pago.IdInmueble)),
                                 Direccion = reader.GetString(nameof(Pago.Direccion)),
