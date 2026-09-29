@@ -145,5 +145,37 @@ namespace Inmobiliaria_.Net_Core.Models
             return t;
         }
 
+        public IList<tipoInmueble> Buscar(string term)
+        {
+            var lista = new List<tipoInmueble>();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string sql = 
+                @"SELECT IdTipoInmueble, Descripcion 
+                FROM tipoInmueble
+                WHERE Descripcion 
+                LIKE @term 
+                ORDER BY Descripcion 
+                LIMIT 20";
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@term", $"%{term}%");
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new tipoInmueble
+                            {
+                                idTipoInmueble = reader.GetInt32(nameof(tipoInmueble.idTipoInmueble)),
+                                Descripcion = reader.GetString(nameof(tipoInmueble.Descripcion)),
+                            });
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            return lista;
+        }
     }
 }

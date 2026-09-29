@@ -4,47 +4,6 @@
 
 <form asp-action="Guardar" method="post">
     @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="IdPago" />
-    <input type="hidden" asp-for="IdReserva" />
-    <input type="hidden" asp-for="Estado" />
-
-    <div class="form-group mb-2">
-        <label asp-for="IdReserva" class="control-label"></label>
-        <input asp-for="IdReserva" class="form-control" readonly />
-    </div>
-
-    <div class="form-group mb-2">
-        <label class="control-label">DNI del inquilino</label>
-        <input asp-for="DniInquilino" class="form-control" readonly />
-    </div>
-
-    <div class="form-group mb-2">
-        <label class="control-label">Inquilino</label>
-        <input asp-for="NombreInquilino" class="form-control" readonly />
-    </div>
-
-    <div class="form-group mb-2">
-        <label class="control-label">Dirección</label>
-        <input asp-for="Direccion" class="form-control" readonly />
-    </div>
-
-    <div class="form-group mb-2">
-        <label class="control-label">Inmueble</label>
-        <input asp-for="IdInmueble" class="form-control" readonly />
-    </div>
-
-    <div class="form-group mb-2">
-        <label asp-for="Monto" class="control-label"></label>
-        <input asp-for="Monto" class="form-control" readonly />
-        <span class="text-muted small">El monto no se puede modificar.</span>
-    </div>
-
-    <div class="form-group mb-2">
-        <label asp-for="Fecha" class="control-label"></label>
-        <input asp-for="Fecha" class="form-control" readonly />
-        <span class="text-muted small">La fecha no se puede modificar.</span>
-    </div>
-    
     <div class="form-group mb-2">
         <label asp-for="Concepto" class="control-label"></label>
         <input asp-for="Concepto" class="form-control" required />

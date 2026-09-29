@@ -130,5 +130,21 @@ namespace mvc.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+public IActionResult BuscarTipos(string term = "")
+{
+    var tipos = string.IsNullOrWhiteSpace(term)
+        ? repositorio.Buscar("")
+        : repositorio.Buscar(term.Trim());
+
+    var resultados = tipos.Select(t => new
+    {
+        id = t.idTipoInmueble,
+        text = t.Descripcion
+    });
+
+    return Json(new { results = resultados });
+}
     }
 }

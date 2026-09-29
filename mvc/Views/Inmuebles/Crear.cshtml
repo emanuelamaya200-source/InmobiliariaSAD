@@ -3,7 +3,8 @@
 @{
     ViewData["Title"] = "Alta de Inmueble";
     var propietarioSeleccionado = ViewBag.PropietarioSeleccionado as Inmobiliaria_.Net_Core.Models.Propietario;
-    var tiposInmueble = ViewBag.tipoInmueble as IList<Inmobiliaria_.Net_Core.Models.tipoInmueble> ?? new List<Inmobiliaria_.Net_Core.Models.tipoInmueble>();
+    var tiposInmueble = ViewBag.tipoInmueble as IList<Inmobiliaria_.Net_Core.Models.tipoInmueble> ?? new
+List<Inmobiliaria_.Net_Core.Models.tipoInmueble>();
 }
 
 <h2>Alta de Inmueble</h2>
@@ -22,14 +23,10 @@
         <span asp-validation-for="Direccion" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-2">
+    <div>
         <label asp-for="IdTipoInmueble" class="control-label">Tipo de Inmueble</label>
-        <select asp-for="IdTipoInmueble" class="form-control" required>
-            <option value="">-- Seleccione un tipo --</option>
-            @foreach (var tipo in tiposInmueble)
-            {
-                <option value="@tipo.idTipoInmueble">@tipo.Descripcion</option>
-            }
+        <select asp-for="IdTipoInmueble" class="form-control" id="selectTipoInmueble" required>
+            <option value=""></option>
         </select>
         <span asp-validation-for="IdTipoInmueble" class="text-danger"></span>
     </div>
@@ -102,7 +99,17 @@
             ajax: {
                 url: '@Url.Action("BuscarPropietarios", "Inmuebles")',
                 dataType: 'json',
-                data: params => ({ term: params.term }),
+                data: params => ({ term: params.term || '' }),
+                processResults: data => data
+            }
+        });
+        $('#selectTipoInmueble').select2({
+            placeholder: 'Seleccione un tipo de inmueble',
+            width: '100%',
+            ajax: {
+                url: '@Url.Action("BuscarTipos", "TipoInmueble")',
+                dataType: 'json',
+                data: params => ({ term: params.term || '' }),
                 processResults: data => data
             }
         });
