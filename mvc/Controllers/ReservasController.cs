@@ -242,7 +242,7 @@ namespace mvc.Controllers
             return View(new Reserva());
         }
 
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador, Empleado")]
         public IActionResult Renovar(int id)
         {
             var original = repositorio.ObtenerPorId(id);

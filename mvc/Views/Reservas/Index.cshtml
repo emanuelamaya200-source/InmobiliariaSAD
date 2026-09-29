@@ -14,6 +14,7 @@
 
 <p>
     <a asp-action="Crear" class="btn btn-primary">Alta Reserva</a>
+    <a asp-action="Index" asp-route-inicio="@DateTime.Today.ToString("yyyy-MM-dd")" asp-route-fin="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" class="btn btn-outline-success">Reservas Vigentes</a>
     <a asp-controller="Inmuebles" asp-action="InformeReservas" class="btn btn-outline-primary">Inmuebles más reservados</a>
     <a asp-controller="Inmuebles" asp-action="InformeReservas" asp-route-sinReservas="true" class="btn btn-outline-secondary">Inmuebles sin reservas</a>
     <a asp-action="ProximasAVencer" class="btn btn-outline-secondary">Reservas próximas a vencer</a>
@@ -68,10 +69,11 @@
                                     <i class="bi bi-calendar-x"></i> Finalizar
                                 </a>
                             }
+                            <a asp-action="Renovar" asp-route-id="@item.IdReserva"
+                                   class="btn btn-sm btn-outline-success">Renovar</a>
                             @if (User.IsInRole("Administrador"))
                             {
-                                <a asp-action="Renovar" asp-route-id="@item.IdReserva"
-                                   class="btn btn-sm btn-outline-success">Renovar</a>
+                                
                                 <a asp-action="Editar" asp-route-id="@item.IdReserva" class="btn btn-sm btn-warning" title="Modificar">
                                     <i class="bi bi-pencil-square"> </i> Modificar
                                 </a>

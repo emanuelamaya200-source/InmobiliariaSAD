@@ -156,45 +156,22 @@ namespace mvc.Controllers
         public IActionResult Guardar(Pago pago)
         {
             var pagoOriginal = repositorio.ObtenerPorId(pago.IdPago);
-
             if (pagoOriginal == null)
                 return NotFound();
-
-            if (User.IsInRole("Empleado"))
-            {
-                pagoOriginal.Concepto = pago.Concepto;
-
-                repositorio.Modificacion(pagoOriginal);
-
-                auditoriaRepositorio.Registrar(
-                    User,
-                    "Pago",
-                    pagoOriginal.IdPago,
-                    "Modificacion",
-                    $"Concepto del pago modificado: {pagoOriginal.Concepto}"
-                );
-
-                return RedirectToAction(nameof(Index));
-            }
-            if (ModelState.IsValid)
-            {
-                repositorio.Modificacion(pago);
-
-                auditoriaRepositorio.Registrar(
-                    User,
-                    "Pago",
-                    pago.IdPago,
-                    "Modificacion",
-                    $"Reserva {pago.IdReserva}: {pago.Concepto}"
-                );
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View("Editar", pago);
+            pagoOriginal.Concepto = pago.Concepto;
+            repositorio.Modificacion(pagoOriginal);
+            auditoriaRepositorio.Registrar(
+                User,
+                "Pago",
+                pagoOriginal.IdPago,
+                "Modificacion",
+                $"Concepto del pago modificado: {pagoOriginal.Concepto}"
+            );
+            return RedirectToAction(nameof(Index));
         }
+
         // GET: Pagos/Eliminar/5
-        [HttpGet] 
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(int id)
         {
@@ -209,7 +186,7 @@ namespace mvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
-                public IActionResult Borrar(int id)
+        public IActionResult Borrar(int id)
         {
             int usuarioId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 0;
             repositorio.Baja(id, usuarioId);
