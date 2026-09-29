@@ -219,7 +219,7 @@ namespace Inmobiliaria_.Net_Core.Controllers
         public IActionResult BuscarPropietarios(string term = "")
         {
             var propietarios = string.IsNullOrWhiteSpace(term)
-                ? new List<Propietario>()
+                ? repoPropietario.ObtenerLista(1, int.MaxValue)
                 : repoPropietario.BuscarPorNombre(term.Trim());
 
             var resultados = propietarios
