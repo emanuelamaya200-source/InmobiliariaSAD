@@ -133,7 +133,7 @@ namespace mvc.Controllers
         public IActionResult BuscarInmuebles(string term = "")
         {
             var inmuebles = string.IsNullOrWhiteSpace(term)
-                ? repoInmueble.ObtenerLista(1, int.MaxValue)
+                ? new List<Inmueble>()
                 : repoInmueble.BuscarPorTipo(term.Trim());
 
             var resultados = inmuebles
@@ -152,7 +152,7 @@ namespace mvc.Controllers
         public IActionResult BuscarInquilinos(string term = "")
         {
             var inquilinos = string.IsNullOrWhiteSpace(term)
-                ? repoInquilino.ObtenerLista(1, int.MaxValue)
+                ? new List<Inquilino>()
                 : repoInquilino.BuscarPorNombre(term.Trim());
 
             var resultados = inquilinos

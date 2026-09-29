@@ -86,8 +86,7 @@ namespace Inmobiliaria_.Net_Core.Models
 
         public IList<Reserva> ObtenerLista(int paginaNro = 1, int tamPagina = 10)
         {
-            var reservas = ObtenerPorRango(null, null, null);
-            return reservas.Skip(Math.Max(0, paginaNro - 1) * tamPagina).Take(tamPagina).ToList();
+            return ObtenerPorRango(null, null, null, paginaNro, tamPagina);
         }
 
         public IList<Reserva> ObtenerPorRango(DateTime? inicio, DateTime? fin, int? cupo)
